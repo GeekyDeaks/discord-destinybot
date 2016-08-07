@@ -1,0 +1,31 @@
+{
+  "name": "discord-destinybot",
+  "version": "0.1.0",
+  "description": "Discord Destiny Bot",
+  "main": "destinybot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GeekyDeaks/discord-destinybot.git"
+  },
+  "keywords": [
+    "Destiny",
+    "Discord",
+    "Bot"
+  ],
+  "author": "sdeaks@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/GeekyDeaks/discord-destinybot/issues"
+  },
+  "homepage": "https://github.com/GeekyDeaks/discord-destinybot#readme",
+  "dependencies": {
+    "co": "^4.6.0",
+    "discord.js": "^8.1.0",
+    "request": "^2.74.0",
+    "thunkify": "^2.1.2",
+    "winston": "^2.2.0"
+  }
+}
