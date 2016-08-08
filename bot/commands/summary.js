@@ -39,7 +39,7 @@ function exec(cmd) {
             var toSend = [];
 
             r.Response.data.characters.forEach(function (c) {
-                logger.debug("summary for character ",c);
+                logger.debug("summary for character ",util.inspect(c, {depth: 1}));
                 // bot.sendFile(msg, "http://www.bungie.net"+c.backgroundPath);
                 toSend.push(
                     util.format("%s %s | Level: **%s** | Light: **%s**",

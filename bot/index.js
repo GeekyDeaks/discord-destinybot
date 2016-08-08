@@ -159,7 +159,7 @@ bot.on("message", function (msg) {
         yield commands[cmdName].exec(cmd);
 
     }).catch(function (err) {
-        logger.error(err);
+        logger.error("Error when executing command in msg '"+msg+"':"+err);
     });
 
 

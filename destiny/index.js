@@ -37,7 +37,7 @@ function destinyAPI(op) {
                 r.ErrorCode, r.ThrottleSeconds, r.ErrorStatus, r.Message);
 
             if(r.ErrorStatus !== 'Success') {
-                throw new Error(r.ErrorStatus);
+                throw new Error("destiny API Failure: "+r.ErrorStatus);
             }
             return (r);
         }
