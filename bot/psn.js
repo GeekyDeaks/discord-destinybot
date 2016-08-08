@@ -52,11 +52,13 @@ function parse(text) {
 
 }
 
-// scrape the topic for PSN ID's 
+// parse the msg for PSN ID's 
 
 function update(msg) {
     var m = msg.content.match(/\-.+\|.*\|.+/g);
     var gamer;
+
+    if(!m) return;
 
     for (var i = 0; i < m.length; i++) {
         gamer = parse(m[i]);
@@ -67,13 +69,16 @@ function update(msg) {
 
 }
 
+// scrape the topic for PSN ID's 
 function scrape(bot) {
     return co(function* () {
         for(var c = 0; c < bot.channels.length; c++) {
             if(bot.channels[c].name === config.discord.psnChannel) {
                 // found a PSN channel
                 var logs = yield bot.getChannelLogs(bot.channels[c]);
-                for(var l = 0; l < logs.length; l++) {
+                // the logs appear in reverse order, so we need to 
+                // process them in reverse to get them chronologically
+                for(var l = logs.length - 1; l >= 0; l--) {
                     update(logs[l]);
                 } 
             }

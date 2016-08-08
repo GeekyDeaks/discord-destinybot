@@ -33,7 +33,7 @@ function exec(cmd) {
 module.exports = {
     desc: 'bot information',
     name: 'botinfo',
-    usage: '',
-    alias: ['info'],
+    usage: undefined,
+    alias: ['i', 'info'],
     exec: exec
 };

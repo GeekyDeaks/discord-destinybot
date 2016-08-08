@@ -15,7 +15,7 @@ function exec(cmd) {
 module.exports = {
     desc: 'Report approximate response time',
     name: 'ping',
-    usage: '',
+    usage: undefined,
     alias: ['p'],
     exec: exec
 };

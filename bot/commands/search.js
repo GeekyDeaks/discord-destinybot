@@ -29,5 +29,6 @@ module.exports = {
     name: 'search',
     usage: 'search [xbl|psn] <id>',
     alias: [],
-    exec: exec
+    exec: exec,
+    disabled: true
 };

@@ -1,6 +1,8 @@
 'use strict';
 
 var co = require('co');
+var psn = require('../psn');
+var md = require('../markdown');
 
 function exec(cmd) {
 
@@ -8,23 +10,32 @@ function exec(cmd) {
         var bot = cmd.bot;
         var msg = cmd.msg;
         var config = cmd.config;
-        var channel = msg.channel;
-
-
+        var name;
+        var busyMsg;
 
         try {
-            // this does not work if multiple requests are outstanding...
-            // need to think about caching the status
-            bot.startTyping(msg);
+            // figure out the username
+            if(msg.mentions.length > 0) {
+                var gamer = psn.lookup(msg.mentions[0].username);
+                if(gamer) {
+                    name = gamer.psn;
+                }
+            } else {
+                name = cmd.args[0];
+            }
 
-            //var busyMsg = yield bot.sendMessage(msg, "looking up stats for " + cmd.args[0] + "....");
+            if(!name) {
+                return bot.sendMessage(msg, "did you forget something?");
+            }
 
-            var stats = yield cmd.destiny.stats(config.destiny.defaultType, cmd.args[0]);
+            busyMsg = yield bot.sendMessage(msg, "Looking up **"+md.escape(name)+"** :mag:");
+
+            var stats = yield cmd.destiny.stats(config.destiny.defaultType, name);
             var pve = stats.Response.mergedAllCharacters.results.allPvE.allTime;
             var pvp = stats.Response.mergedAllCharacters.results.allPvP.allTime;
 
             var toSend = [];
-            toSend.push("**"+cmd.args[0]+"**");
+            toSend.push("**"+md.escape(name)+"**");
             if (pve) {
                 toSend.push("-------------------------------");
                 toSend.push('**PvE Stats**');
@@ -34,7 +45,6 @@ function exec(cmd) {
                 toSend.push('Precision Kills: **' + pve.precisionKills.basic.displayValue + '**');
                 toSend.push('Best Weapon: **' + pve.weaponBestType.basic.displayValue + '**');
                 
-
             }
             if (pvp) {
                 toSend.push("-------------------------------");
@@ -48,21 +58,23 @@ function exec(cmd) {
                 toSend.push('Longest Spree: **' + pvp.longestKillSpree.basic.displayValue + '**');
             }
 
-
-            bot.stopTyping(msg);
-            return bot.sendMessage(msg, toSend.join("\n"));
+            return bot.updateMessage(busyMsg, toSend.join("\n"));
         } catch (err) {
-            bot.sendMessage(msg, err);
-            bot.stopTyping(msg);
+            var errmsg = "sorry, something went wrong: _"+err+"_";
+            if(busyMsg) {
+                bot.updateMessage(busyMsg, errmsg);
+            } else {
+                bot.sendMessage(msg, errmsg);
+            }
         }
     });
 
 }
 
 module.exports = {
-    desc: 'Get player stats',
+    desc: 'Get Destiny player stats',
     name: 'stats',
-    usage: 'stats [xbl|psn] <id>',
+    usage: 'stats <psn-id>|<@discord-id>',
     alias: ['s'],
     exec: exec
 };

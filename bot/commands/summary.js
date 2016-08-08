@@ -3,6 +3,8 @@
 var co = require('co');
 var util = require('util');
 var logger = require('winston');
+var psn = require('../psn');
+var md = require('../markdown');
 
 var genderType = ['Male', 'Female'];
 var classType = ['Titan', 'Hunter', 'Warlock'];
@@ -13,31 +15,51 @@ function exec(cmd) {
         var bot = cmd.bot;
         var msg = cmd.msg;
         var config = cmd.config;
-
-
+        var name;
+        var busyMsg;
 
         try {
-            bot.startTyping(msg);
-            var r = yield cmd.destiny.summary(config.destiny.defaultType, cmd.args[0]);
+            // figure out the username
+            if(msg.mentions.length > 0) {
+                var gamer = psn.lookup(msg.mentions[0].username);
+                if(gamer) {
+                    name = gamer.psn;
+                }
+            } else {
+                name = cmd.args[0];
+            }
+
+            if(!name) {
+                return bot.sendMessage(msg, "did you forget something?");
+            }
+
+            busyMsg = yield bot.sendMessage(msg, "Looking up **"+md.escape(name)+"** :mag:");
+            var r = yield cmd.destiny.summary(config.destiny.defaultType, name);
 
             var toSend = [];
 
             r.Response.data.characters.forEach(function (c) {
                 logger.debug("summary for character ",c);
                 // bot.sendFile(msg, "http://www.bungie.net"+c.backgroundPath);
-                bot.sendMessage(msg, util.format("%s %s | Level: **%s** | Light: **%s**",
-                    genderType[c.characterBase.genderType],
-                    classType[c.characterBase.classType],
-                    c.characterLevel,
-                    c.characterBase.powerLevel)
+                toSend.push(
+                    util.format("%s %s | Level: **%s** | Light: **%s**",
+                        genderType[c.characterBase.genderType],
+                        classType[c.characterBase.classType],
+                        c.characterLevel,
+                        c.characterBase.powerLevel
+                    )
                 );
             })
 
-            return bot.stopTyping(msg);
-            //return bot.sendMessage(msg, toSend.join("\n"));
+            return bot.updateMessage(busyMsg, toSend.join("\n"));
+
         } catch (err) {
-            bot.sendMessage(msg, err);
-            bot.stopTyping(msg);
+            var errmsg = "sorry, something went wrong: _"+err+"_";
+            if(busyMsg) {
+                bot.updateMessage(busyMsg, errmsg);
+            } else {
+                bot.sendMessage(msg, errmsg);
+            }
 
         }
     });
@@ -45,9 +67,9 @@ function exec(cmd) {
 }
 
 module.exports = {
-    desc: 'Get player summary',
+    desc: 'Get Destiny player summary',
     name: 'summary',
-    usage: 'summary [xbl|psn] <id>',
+    usage: 'summary <psn-id>|<@discord-id>',
     alias: ['sum'],
     exec: exec
 };

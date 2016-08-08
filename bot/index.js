@@ -26,6 +26,8 @@ fs
       if(!cmd) {
           return logger.error('failed to load command file: %s', file)
       }
+
+      if(cmd.disabled) return;
       
       if(cmd.name) {
           logger.verbose('loading command %s', cmd.name);
@@ -56,8 +58,17 @@ function help(cmd) {
 
         var toSend = [];
         Object.keys(commands).forEach(function (name) {
-            if(name === commands[name].name)
-                toSend.push("**"+name+"** - "+commands[name].desc);
+            if (name === commands[name].name) {
+                toSend.push("**" + name + "** - " + commands[name].desc);
+                if(commands[name].usage) {
+                    toSend.push("  _usage: " + commands[name].usage + "_");
+                }
+                if (commands[name].alias.length > 0) {
+                    toSend.push("  _aliases: " + commands[name].alias.join(" | ") + "_");
+                }
+
+            }
+
         });
 
         return bot.sendMessage(msg, toSend.join("\n"));
@@ -114,7 +125,13 @@ bot.on("message", function (msg) {
     co(function* () {
 
         if (msg.author.id == bot.user.id) return;
-        logger.debug("got message: ",msg.content);
+        logger.debug("got message in channel %s: ",msg.channel.name, msg.content);
+
+        if(msg.channel.name === config.discord.psnChannel) {
+            // this means we are not accepting commands on the 
+            // PSN channel...
+            return psn.update(msg);
+        }
 
         var args = msg.content.trim().split(" ");
         var firstArg = args.shift().toLowerCase();

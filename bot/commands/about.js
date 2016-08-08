@@ -19,7 +19,7 @@ function* exec(cmd) {
 module.exports = {
     desc: 'It\'s all me, me, me...',
     name: 'about',
-    usage: '',
+    usage: undefined,
     alias: ['a'],
     exec: exec
 };

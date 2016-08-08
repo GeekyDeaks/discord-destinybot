@@ -2,6 +2,7 @@
 
 var co = require('co');
 var psn = require('../psn');
+var md = require('../markdown');
 
 function exec(cmd) {
 
@@ -21,8 +22,8 @@ function exec(cmd) {
     var toSend = [];
     p.forEach(
         function (g) {
-            toSend.push("@"+g.discord.replace("_", "\\_")+" | PSN: **"+
-                g.psn.replace("_", "\\_")+"** | TZ: **"+g.tz+"**");
+            toSend.push("@"+md.escape(g.discord)+" | PSN: **"+
+                md.escape(g.psn)+"** | TZ: **"+g.tz+"**");
         }
     );
 
@@ -33,7 +34,7 @@ function exec(cmd) {
 module.exports = {
     desc: 'lookup players for a game',
     name: 'players',
-    usage: 'players <gameid>',
-    alias: [''],
+    usage: 'players <game-id>',
+    alias: [],
     exec: exec
 };
