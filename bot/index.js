@@ -6,6 +6,7 @@ var logger = require('winston');
 var fs = require('fs');
 var path = require('path');
 var co = require('co');
+var psn = require('./psn');
 
 var Discord = require("discord.js");
 var bot = new Discord.Client({maxCachedMessages: 1000, forceFetchUsers: true});
@@ -91,6 +92,8 @@ bot.on("ready", function () {
     bot.setPlayingGame("with fire");
     logger.info("%s is ready!", bot.internal.user.username);
     logger.verbose("Listening to %s channels on %s servers", bot.channels.length, bot.servers.length);
+    psn.scrape(bot);
+    // scrape 
 });
 
 bot.on("disconnected", function () {

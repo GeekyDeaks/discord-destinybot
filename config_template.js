@@ -7,7 +7,8 @@ module.exports = {
         defaultType: 2
     },
     discord: {
-        token: "DISCORD_TOKEN"
+        token: "DISCORD_TOKEN",
+        psnChannel: "psn"
     },
     commandPrefix: "d!"
 };
