@@ -10,14 +10,10 @@ function exec(cmd) {
     var bot = cmd.bot;
     var name = cmd.args[0];
 
+    // mentions take precedent
     if (msg.mentions.length > 0) {
-        var gamer = psn.lookup(msg.mentions[0].username);
-        if (gamer) {
-            name = gamer.psn;
-        }
-    } else {
-        name = cmd.args[0];
-    }
+        name = msg.mentions[0].username;
+    } 
 
     if (!name) {
         return bot.sendMessage(msg, "did you forget something?");
@@ -28,7 +24,7 @@ function exec(cmd) {
         return bot.sendMessage(msg, "Sorry, could not find **"+md.escape(name)+"**");
     }
 
-    return bot.sendMessage(msg, "Discord: **@"+md.escape(name)+"**, PSN: **"+md.escape(gamer.psn)+"**");
+    return bot.sendMessage(msg, "Discord: **@"+md.escape(gamer.discord)+"**, PSN: **"+md.escape(gamer.psn)+"**");
 
 }
 

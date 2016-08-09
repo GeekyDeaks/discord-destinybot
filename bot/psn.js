@@ -6,6 +6,7 @@ var config = require('../config');
 
 
 var gamers = {};
+var errors = [];
 
 function lookup(discord) {
     return gamers[discord];
@@ -55,7 +56,9 @@ function parse(text) {
 // parse the msg for PSN ID's 
 
 function update(msg) {
-    var m = msg.content.match(/\-.+\|.*\|.+/g);
+    // relax the match so that we can try and catch more 
+    // parsing errors without erroring on general text
+    var m = msg.content.match(/\-.+\|.+/g);
     var gamer;
 
     if(!m) return;
@@ -64,13 +67,22 @@ function update(msg) {
         gamer = parse(m[i]);
         if(gamer) {
             gamers[gamer.discord] = gamer;
-        } 
+        } else {
+            errors.push(m[i]);
+        }
     }
 
 }
 
 // scrape the topic for PSN ID's 
 function scrape(bot) {
+
+    // clear down the errors
+    errors.length = 0;
+
+    // clear down the gamers
+    for (var g in gamers) delete gamers[g];
+
     return co(function* () {
         for(var c = 0; c < bot.channels.length; c++) {
             if(bot.channels[c].name === config.discord.psnChannel) {
@@ -92,3 +104,5 @@ module.exports.lookup = lookup;
 module.exports.players = players;
 module.exports.scrape = scrape;
 module.exports.update = update;
+module.exports.errors = errors;
+module.exports.gamers = gamers;

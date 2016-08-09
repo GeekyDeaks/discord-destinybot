@@ -120,7 +120,13 @@ bot.on("disconnected", function () {
     /* */
 });
 
-bot.on("message", function (msg) {
+bot.on("messageUpdated", function(msg0, msg1) {
+    parseMessage(msg1);
+})
+
+bot.on("message", parseMessage);
+
+function parseMessage(msg) {
     
     co(function* () {
 
@@ -163,7 +169,7 @@ bot.on("message", function (msg) {
     });
 
 
-});
+}
 
 function login() {
 

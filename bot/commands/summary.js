@@ -37,7 +37,7 @@ function exec(cmd) {
             var r = yield cmd.destiny.summary(config.destiny.defaultType, name);
 
             var toSend = [];
-
+            toSend.push("**"+md.escape(name)+"**");
             r.Response.data.characters.forEach(function (c) {
                 logger.debug("summary for character ",util.inspect(c, {depth: 1}));
                 // bot.sendFile(msg, "http://www.bungie.net"+c.backgroundPath);
