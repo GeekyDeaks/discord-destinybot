@@ -24,7 +24,7 @@ function players(game) {
 }
 
 
-function parse(text) {
+function parse(bot, text) {
 
     var gamer = {}; 
     logger.debug("parsing %s", text);
@@ -42,6 +42,22 @@ function parse(text) {
 
     if(id.length === 0 || id.length > 2) return;
     gamer.discord = id[0];
+    var discord;
+    var found = false;
+    if(gamer.discord.match(/^\<\d+\>$/)) {
+        discord = gamer.discord.replace(/[\<\>]/g, "");
+        // looks like a discord id
+        for(var u = 0; u < bot.users.length; u++) {
+            if(bot.users[u].id === discord ) {
+                gamer.discord = bot.users[u].username;
+                found = true;
+                break;
+            }
+        }
+        if(!found) return;
+    }
+
+
     gamer.psn = (id.length === 2) ? id[1] : id[0];
 
     gamer.games = tokens[1].split(",").map(function (s) { return s.trim() }); 
@@ -55,7 +71,7 @@ function parse(text) {
 
 // parse the msg for PSN ID's 
 
-function update(msg) {
+function update(bot, msg) {
     // relax the match so that we can try and catch more 
     // parsing errors without erroring on general text
     var m = msg.content.match(/\-.+\|.+/g);
@@ -64,7 +80,7 @@ function update(msg) {
     if(!m) return;
 
     for (var i = 0; i < m.length; i++) {
-        gamer = parse(m[i]);
+        gamer = parse(bot, m[i]);
         if(gamer) {
             gamers[gamer.discord] = gamer;
         } else {
@@ -91,7 +107,7 @@ function scrape(bot) {
                 // the logs appear in reverse order, so we need to 
                 // process them in reverse to get them chronologically
                 for(var l = logs.length - 1; l >= 0; l--) {
-                    update(logs[l]);
+                    update(bot, logs[l]);
                 } 
             }
         }
