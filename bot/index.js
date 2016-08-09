@@ -136,7 +136,7 @@ function parseMessage(msg) {
         if(msg.channel.name === config.discord.psnChannel) {
             // this means we are not accepting commands on the 
             // PSN channel...
-            return psn.update(msg);
+            return psn.update(bot, msg);
         }
 
         var args = msg.content.trim().split(" ");
@@ -165,7 +165,7 @@ function parseMessage(msg) {
         yield commands[cmdName].exec(cmd);
 
     }).catch(function (err) {
-        logger.error("Error when executing command in msg '"+msg+"':"+err);
+        logger.error("Error when parsing msg '"+msg+"':"+err);
     });
 
 

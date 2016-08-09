@@ -20,22 +20,27 @@ function exec(cmd) {
         toSend.push("Parsed #"+ config.discord.psnChannel);
         toSend.push("Users: **"+Object.keys(psn.gamers).length+"** | Errors: **"+psn.errors.length+"**");
         if(psn.errors.length) {
-            toSend.push("---- Parsing Errors ------------------");
+            toSend.push("---- **"+psn.errors.length+"** Parsing Error(s) ------------------");
             psn.errors.forEach(function (e) {
                 toSend.push(md.escape(e));
             })
         }
+
         // scan through the list of Users
-        toSend.push("---- Missing discord tags ----------");
+        var missing = [];
         bot.users.forEach(function (u) {
             if(u.bot) return; // skip the bots
-
             if(!psn.gamers[u.username]) {
-                toSend.push(md.escape(u.username));
+                missing.push(u.username);
             } 
-
         });
 
+        if (missing.length) {
+            toSend.push("---- **" + missing.length + "** Missing discord tag(s) ------------------");
+            missing.sort().forEach(function (u) {
+                toSend.push(md.escape(u));
+            })
+        }
 
         return bot.updateMessage(busyMsg, toSend.join("\n"));
 

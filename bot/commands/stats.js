@@ -59,8 +59,14 @@ function exec(cmd) {
             }
 
             return bot.updateMessage(busyMsg, toSend.join("\n"));
-        } catch (err) {
-            var errmsg = "sorry, something went wrong: _"+err+"_";
+        } catch (err) { 
+            var errmsg;
+            if(err.message.match(/UserCannotResolveCentralAccount/)) {
+                errmsg = "Sorry, bungie does not seem to know anything about **"+md.escape(name)+"**";
+            } else {
+                errmsg = "sorry, something unexpected happened: _"+err+"_";
+            }
+    
             if(busyMsg) {
                 bot.updateMessage(busyMsg, errmsg);
             } else {
