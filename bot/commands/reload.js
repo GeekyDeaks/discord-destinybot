@@ -26,6 +26,13 @@ function exec(cmd) {
             })
         }
 
+        if(psn.warnings.length) {
+            toSend.push("---- **"+psn.warnings.length+"** Parsing Warnings(s) ------------------");
+            psn.warnings.forEach(function (w) {
+                toSend.push(md.escape(w));
+            })
+        }
+
         // scan through the list of Users
         var missing = [];
         bot.users.forEach(function (u) {

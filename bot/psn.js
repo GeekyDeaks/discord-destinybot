@@ -3,10 +3,11 @@
 var co = require('co');
 var logger = require('winston');
 var config = require('../config');
-
+var moment = require('moment-timezone');
 
 var gamers = {};
 var errors = [];
+var warnings = [];
 
 function lookup(discord) {
     return gamers[discord];
@@ -36,7 +37,10 @@ function parse(bot, text) {
     if(tokens.length != 3) return;
 
     // parse the gamertag
-    var id = tokens[0].substring(1).trim().replace(/[@\\()]/g,"").split(" ");
+    var id = tokens[0].substring(1).trim().
+            replace(/[@\\()]/g,"").
+            replace(/ +/, " ").
+            split(" ");
 
     logger.debug("id count: %d", id.length);
 
@@ -57,11 +61,16 @@ function parse(bot, text) {
         if(!found) return;
     }
 
-
-    gamer.psn = (id.length === 2) ? id[1] : id[0];
+    gamer.psn = (id.length === 2) ? id[1] : gamer.discord;
 
     gamer.games = tokens[1].split(",").map(function (s) { return s.trim() }); 
+    if(gamer.games.length === 1 && gamer.games[0].length === 0) {
+        warnings.push("@"+gamer.discord+": no games listed");
+    }
     gamer.tz = tokens[2].trim();
+    if(!moment.tz.zone(gamer.tz)) {
+        warnings.push("@"+gamer.discord+": unknown timezone: "+gamer.tz);
+    }
 
     logger.debug("gamer: ", gamer);
 
@@ -95,6 +104,7 @@ function scrape(bot) {
 
     // clear down the errors
     errors.length = 0;
+    warnings.length = 0;
 
     // clear down the gamers
     for (var g in gamers) delete gamers[g];
@@ -122,3 +132,4 @@ module.exports.scrape = scrape;
 module.exports.update = update;
 module.exports.errors = errors;
 module.exports.gamers = gamers;
+module.exports.warnings = warnings;
