@@ -15,24 +15,6 @@ function exec(cmd) {
 
         yield psn.scrape(bot);
 
-        var toSend = [];
-
-        toSend.push("Parsed #"+ config.discord.psnChannel);
-        toSend.push("Users: **"+Object.keys(psn.gamers).length+"** | Errors: **"+psn.errors.length+"**");
-        if(psn.errors.length) {
-            toSend.push("---- **"+psn.errors.length+"** Parsing Error(s) ------------------");
-            psn.errors.forEach(function (e) {
-                toSend.push(md.escape(e));
-            })
-        }
-
-        if(psn.warnings.length) {
-            toSend.push("---- **"+psn.warnings.length+"** Parsing Warnings(s) ------------------");
-            psn.warnings.forEach(function (w) {
-                toSend.push(md.escape(w));
-            })
-        }
-
         // scan through the list of Users
         var missing = [];
         bot.users.forEach(function (u) {
@@ -41,6 +23,28 @@ function exec(cmd) {
                 missing.push(u.username);
             } 
         });
+
+        var toSend = [];
+
+        toSend.push("Parsed #"+ config.discord.psnChannel);
+        toSend.push("Users: **"+Object.keys(psn.gamers).length+
+                "** | Errors: **"+psn.errors.length+
+                "** | Warnings: **"+psn.warnings.length+
+                "** | Missing: **"+missing.length+"**");
+
+        if(psn.errors.length) {
+            toSend.push("---- **"+psn.errors.length+"** Parsing Error(s) ------------------");
+            psn.errors.forEach(function (e) {
+                toSend.push(md.escape(e));
+            })
+        }
+
+        if(psn.warnings.length) {
+            toSend.push("---- **"+psn.warnings.length+"** Parsing Warning(s) ------------------");
+            psn.warnings.forEach(function (w) {
+                toSend.push(md.escape(w));
+            })
+        }
 
         if (missing.length) {
             toSend.push("---- **" + missing.length + "** Missing discord tag(s) ------------------");

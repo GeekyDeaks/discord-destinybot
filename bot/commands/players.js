@@ -22,6 +22,8 @@ function exec(cmd) {
     }
 
     var toSend = [];
+    var line;
+    var length = 0;
     p.forEach(
         function (g) {
             var localtime;
@@ -31,8 +33,19 @@ function exec(cmd) {
             } else {
                 localtime = "TZ: **"+g.tz+"**";
             }
-            toSend.push("@"+md.escape(g.discord)+" | PSN: **"+
-                md.escape(g.psn)+"** | "+localtime);
+            line = "@"+md.escape(g.discord)+" | PSN: **"+
+                md.escape(g.psn)+"** | "+localtime;
+
+            if(length + line.length > 1930) {
+                // push the current message
+                bot.sendMessage(msg, toSend.join("\n"));
+                length = 0;
+                toSend.length = 0;
+            } 
+
+            toSend.push(line);
+            length += line.length;
+            
         }
     );
 
