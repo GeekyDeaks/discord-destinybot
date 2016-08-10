@@ -49,7 +49,12 @@ function exec(cmd) {
             })
         }
 
-        return bot.updateMessage(busyMsg, toSend.join("\n"));
+        var report = toSend.join("\n");
+        if(report.length > 1930) {
+            bot.sendMessage(msg, "too many problems to report fully :warning:")
+        }
+
+        yield bot.updateMessage(busyMsg, report.substr(0, 1930));
 
     });
 
