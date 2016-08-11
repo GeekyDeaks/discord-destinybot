@@ -29,13 +29,16 @@ function exec(cmd) {
     var localtime;
     // figure out the Localtime
     if (gamer.tz && moment.tz.zone(gamer.tz)) {
-        localtime = "Localtime: **" + now.tz(gamer.tz).format("HH:mm (Z z)") + "**";
+        localtime = " Localtime: " + now.tz(gamer.tz).format("HH:mm (Z z)");
     } else {
-        localtime = "TZ: **" + gamer.tz + "**";
+        localtime = "  Timezone: " + gamer.tz;
     }
 
-    return bot.sendMessage(msg, "@" + md.escape(gamer.discord) + " | PSN: **" +
-        md.escape(gamer.psn) + "** | " + localtime);
+    return bot.sendMessage(msg, "```"+
+        "Discord ID: @" + gamer.discord + "\n"+
+        "       PSN: " + gamer.psn + "\n"+
+        "     Games: " +  gamer.games.join(", ") + "\n" +
+        localtime + "```");
 
 }
 

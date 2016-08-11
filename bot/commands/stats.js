@@ -37,25 +37,26 @@ function exec(cmd) {
             var toSend = [];
             toSend.push("**"+md.escape(name)+"**");
             if (pve) {
-                toSend.push("-------------------------------");
-                toSend.push('**PvE Stats**');
-                toSend.push('Days Played: **' + pve.secondsPlayed.basic.displayValue + '**');
-                toSend.push('Highest Light Lvl: **' + pve.highestLightLevel.basic.displayValue + '**');
-                toSend.push('KPD: **' + pve.killsDeathsRatio.basic.displayValue + '**');
-                toSend.push('Precision Kills: **' + pve.precisionKills.basic.displayValue + '**');
-                toSend.push('Best Weapon: **' + pve.weaponBestType.basic.displayValue + '**');
-                
+                toSend.push("```"+
+                "-- PvE ---------------------------\n" +
+                "         Time Played: " + pve.secondsPlayed.basic.displayValue + "\n" +
+                " Highest Light Level: " + pve.highestLightLevel.basic.displayValue + "\n" +
+                "                 KPD: " + pve.killsDeathsRatio.basic.displayValue + "\n" +
+                "     Precision Kills: " + pve.precisionKills.basic.displayValue + "\n" +
+                "         Best Weapon: " + pve.weaponBestType.basic.displayValue + "\n" +
+                "```");                
             }
             if (pvp) {
-                toSend.push("-------------------------------");
-                toSend.push('**PvP Stats**');
-                toSend.push('Days Played: **' + pvp.secondsPlayed.basic.displayValue + '**');
-                toSend.push('Highest Light Lvl: **' + pvp.highestLightLevel.basic.displayValue + '**');
-                toSend.push('KPD: **' + pvp.killsDeathsRatio.basic.displayValue + '**');
-                toSend.push('Precision Kills: **' + pvp.precisionKills.basic.displayValue + '**');
-                toSend.push('Best Weapon: **' + pvp.weaponBestType.basic.displayValue + '**');
-                toSend.push('Win Loss Ratio: **' + pvp.winLossRatio.basic.displayValue + '**');
-                toSend.push('Longest Spree: **' + pvp.longestKillSpree.basic.displayValue + '**');
+                toSend.push("```"+
+                "-- PvP ---------------------------\n" +
+                "         Time Played: " + pvp.secondsPlayed.basic.displayValue + "\n" +
+                " Highest Light Level: " + pvp.highestLightLevel.basic.displayValue + "\n" +
+                "                 KPD: " + pvp.killsDeathsRatio.basic.displayValue + "\n" +
+                "     Precision Kills: " + pvp.precisionKills.basic.displayValue + "\n" +
+                "         Best Weapon: " + pvp.weaponBestType.basic.displayValue + "\n" +
+                "      Win Loss Ratio: " + pvp.winLossRatio.basic.displayValue + "\n" +
+                "       Longest Spree: " + pvp.longestKillSpree.basic.displayValue + "\n" +
+                "```");     
             }
 
             return bot.updateMessage(busyMsg, toSend.join("\n"));

@@ -29,12 +29,16 @@ function exec(cmd) {
             var localtime;
             // figure out the Localtime
             if(g.tz && moment.tz.zone(g.tz)) {
-                localtime = "Localtime: **"+now.tz(g.tz).format("HH:mm (Z z)")+"**";
+                localtime = " Localtime: "+now.tz(g.tz).format("HH:mm (Z z)");
             } else {
-                localtime = "TZ: **"+g.tz+"**";
+                localtime = "  Timezone: "+g.tz;
             }
-            line = "@"+md.escape(g.discord)+" | PSN: **"+
-                md.escape(g.psn)+"** | "+localtime;
+
+            line = "```"+
+                "Discord ID: @" + g.discord + "\n"+
+                "       PSN: " + g.psn + "\n"+
+                localtime + "```";
+ 
 
             if(length + line.length > 1930) {
                 // push the current message

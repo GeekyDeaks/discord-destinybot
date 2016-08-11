@@ -41,13 +41,13 @@ function exec(cmd) {
             r.Response.data.characters.forEach(function (c) {
                 logger.debug("summary for character ",util.inspect(c, {depth: 1}));
                 // bot.sendFile(msg, "http://www.bungie.net"+c.backgroundPath);
-                toSend.push(
-                    util.format("%s %s | Level: **%s** | Light: **%s**",
-                        genderType[c.characterBase.genderType],
-                        classType[c.characterBase.classType],
-                        c.characterLevel,
-                        c.characterBase.powerLevel
-                    )
+                toSend.push("```" +
+                    "    Guardian: "+ genderType[c.characterBase.genderType] + " " +
+                        classType[c.characterBase.classType] + "\n" +
+                    "       Level: " + c.characterLevel + "\n" +
+                    "       Light: " + c.characterBase.powerLevel + "\n" +
+                    "Hours Played: " + Math.round( c.characterBase.minutesPlayedTotal / 6) / 10 +
+                    "```"
                 );
             })
 
