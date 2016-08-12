@@ -34,7 +34,7 @@ function exec(cmd) {
                 localtime = "  Timezone: "+g.tz;
             }
 
-            line = "```"+
+            line = "```ruby\n"+
                 "Discord ID: @" + g.discord + "\n"+
                 "       PSN: " + g.psn + "\n"+
                 localtime + "```";

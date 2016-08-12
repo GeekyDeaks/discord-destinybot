@@ -27,7 +27,7 @@ Discord Destiny Bot
 7. Create a user for the app and copy the token to `config.discord.token`
 
 8. Using the Client ID found in App Details, 
-   create in invite link in the following format 
+   create an invite link in the following format 
    
         https://discordapp.com/oauth2/authorize?scope=bot&client_id=CLIENT_ID
 

@@ -34,7 +34,7 @@ function exec(cmd) {
         localtime = "  Timezone: " + gamer.tz;
     }
 
-    return bot.sendMessage(msg, "```"+
+    return bot.sendMessage(msg, "```ruby\n"+
         "Discord ID: @" + gamer.discord + "\n"+
         "       PSN: " + gamer.psn + "\n"+
         "     Games: " +  gamer.games.join(", ") + "\n" +

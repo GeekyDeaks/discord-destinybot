@@ -37,11 +37,15 @@ function exec(cmd) {
             var r = yield cmd.destiny.summary(config.destiny.defaultType, name);
 
             var toSend = [];
-            toSend.push("**"+md.escape(name)+"**");
+            var firstline;
+            var charnum = 1;
+            //toSend.push("**"+md.escape(name)+"**");
             r.Response.data.characters.forEach(function (c) {
                 logger.debug("summary for character ",util.inspect(c, {depth: 1}));
+                firstline = "━━ "+name+" / "+ (charnum++) + " ";
+                firstline += "━".repeat(40 - firstline.length);
                 // bot.sendFile(msg, "http://www.bungie.net"+c.backgroundPath);
-                toSend.push("```" +
+                toSend.push("```ruby\n" + firstline + "\n" +
                     "    Guardian: "+ genderType[c.characterBase.genderType] + " " +
                         classType[c.characterBase.classType] + "\n" +
                     "       Level: " + c.characterLevel + "\n" +
@@ -58,7 +62,7 @@ function exec(cmd) {
             if(err.message.match(/UserCannotResolveCentralAccount/)) {
                 errmsg = "Sorry, bungie does not seem to know anything about **"+md.escape(name)+"**";
             } else {
-                errmsg = "sorry, something unexpected happened: _"+err+"_";
+                errmsg = "sorry, something unexpected happened: ```"+err+"```";
             }
 
             if(busyMsg) {
