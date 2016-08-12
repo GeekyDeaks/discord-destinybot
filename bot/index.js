@@ -152,6 +152,12 @@ function parseMessage(msg) {
         // yep, ok then see if we have that command loaded
         if(!commands[cmdName] || !commands[cmdName].exec) return;
 
+        // check if it's an admin command
+        if(commands[cmdName].admin && !isAdmin(msg)) {
+            // see if we have the admin role
+            return bot.sendMessage(msg, "Not authorised");
+        }
+
         var cmd = {
             bot: bot,
             msg: msg,
@@ -166,9 +172,22 @@ function parseMessage(msg) {
 
     }).catch(function (err) {
         logger.error("Error when parsing msg '"+msg+"':"+err);
+        bot.sendMessage(msg, "Oops, something went unexpectedly wrong\n```"+err+"```");
     });
 
 
+}
+
+function isAdmin(msg) {
+
+    var roles = msg.channel.server.roles;
+
+    for (var r = 0; r < roles.length; r++) {
+        if (roles[r].name !== config.discord.adminRole) continue;
+        // found the admin role
+        return msg.author.hasRole(roles[r]);
+    }
+    return false;
 }
 
 function login() {

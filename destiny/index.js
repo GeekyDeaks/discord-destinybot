@@ -31,6 +31,7 @@ function destinyAPI(op) {
 
         if (res.statusCode !== 200) {
             logger.error("destiny API error: %s\n", res.statusCode, res.body);
+            throw new Error("Destiny API Failure: "+res.statusMessage);
         } else {
             var r = JSON.parse(res.body);
             logger.debug("ErrorCode: %s, ThrottleSeconds: %s, ErrorStatus: %s, Message: %s",

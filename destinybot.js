@@ -20,6 +20,13 @@ var  destiny = require('./destiny');
 // setup the config so everyone can get the destiny client
 config.destiny.client = destiny;
 
+var storage = require('node-persist');
+config.storage = storage;
+storage.initSync();
+// load up the roles
+config.roles = storage.getItemSync("roles") || {};
+logger.debug("loaded roles: ", config.roles);
+
 var bot = require('./bot');
 
 // start the bot

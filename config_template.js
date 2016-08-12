@@ -8,7 +8,8 @@ module.exports = {
     },
     discord: {
         token: "DISCORD_TOKEN",
-        psnChannel: "psn"
+        psnChannel: "psn",
+        adminRole: "Modteam"
     },
     commandPrefix: "d!"
 };
