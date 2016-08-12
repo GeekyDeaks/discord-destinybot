@@ -76,7 +76,10 @@ function exec(cmd) {
 module.exports = {
     desc: 'Administor SAR',
     name: 'sar',
-    usage: undefined,
+    usage: `
+\t\t\`sar\` - lists the currently defined SARs
+\t\t\`sar add <role>;<alias>[;<description>]\` - update/add alias to a role
+\t\t\`sar del <alias>\` - delete SAR`,
     alias: [],
     exec: exec,
     admin: true

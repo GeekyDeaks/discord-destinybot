@@ -69,5 +69,6 @@ module.exports = {
     name: 'reload',
     usage: undefined,
     alias: [],
-    exec: exec
+    exec: exec,
+    admin: true
 };

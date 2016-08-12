@@ -60,7 +60,7 @@ function exec(cmd) {
 module.exports = {
     desc: 'lookup players for a game',
     name: 'players',
-    usage: 'players <game-id>',
+    usage: '`players <game-id>`',
     alias: [],
     exec: exec
 };

@@ -45,7 +45,7 @@ function exec(cmd) {
 module.exports = {
     desc: 'Lookup PSN name for a discord account',
     name: 'psn',
-    usage: 'psn <@discord-id>',
+    usage: '`psn <@discord-id>`',
     alias: [],
     exec: exec
 };

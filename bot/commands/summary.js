@@ -79,7 +79,7 @@ function exec(cmd) {
 module.exports = {
     desc: 'Get Destiny player summary',
     name: 'summary',
-    usage: 'summary <psn-id>|<@discord-id>',
+    usage: '`summary <psn-id>|<@discord-id>`',
     alias: ['sum'],
     exec: exec
 };

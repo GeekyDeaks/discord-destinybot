@@ -48,7 +48,7 @@ function exec(cmd) {
 module.exports = {
     desc: 'Set / Unset role',
     name: 'role',
-    usage: undefined,
+    usage: '`role <role>`',
     alias: ['r', 'roles', 'channels'],
     exec: exec
 };
