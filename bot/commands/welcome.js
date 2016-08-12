@@ -35,7 +35,7 @@ function exec(cmd) {
                 var channel = args[0];
 
                 // check if the channel exists
-                if (!msg.channel.server.channels.get("name", channelName)) {
+                if (!msg.channel.server.channels.get("name", channel)) {
                     return bot.sendMessage(msg, "channel `" + channel + "` not found on the server");
                 }
 
