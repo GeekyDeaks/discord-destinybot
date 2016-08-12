@@ -140,7 +140,9 @@ function parseMessage(msg) {
     
     co(function* () {
 
-        if (msg.author.id == bot.user.id) return;
+        if (msg.author.id === bot.user.id) return;
+        if (msg.author.bot) return;
+
         logger.debug("got message in channel %s: ",msg.channel.name, msg.content);
 
         if(msg.channel.name === config.discord.psnChannel) {
@@ -192,6 +194,18 @@ bot.on("serverNewMember", function(server, user) {
     logger.info("New User: %s", user.name);
 
     if(!config.welcome.enabled) return;
+
+
+    if(config.welcome.auto) {
+        var role = server.roles.get("name", config.welcome.auto);
+        if(role) {
+            logger.verbose("adding user: %s to role: %s", user.name, role.name);
+            user.addTo(role);
+        } else {
+            logger.error("AutoUpgrade role %s does not appear to exist!", config.welcome.auto);
+        }
+
+    }
 
     var channel = server.channels.get("name", config.welcome.channel);
     if(!channel) {

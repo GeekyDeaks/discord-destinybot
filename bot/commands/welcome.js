@@ -12,9 +12,10 @@ function exec(cmd) {
         if(args.length === 0) {
             return bot.sendMessage(msg, 
                 "```ruby\n"+
-                "Channel: "+config.welcome.channel+"\n"+
-                "Enabled: "+config.welcome.enabled+"\n"+
-                "Message:\n"+config.welcome.msg+"```"
+                "     Channel: "+config.welcome.channel+"\n"+
+                "Auto-Upgrade: "+config.welcome.auto+"\n"+
+                "     Enabled: "+config.welcome.enabled+"\n"+
+                "     Message:\n"+config.welcome.msg+"```"
             );
         }
 
@@ -55,7 +56,21 @@ function exec(cmd) {
                 config.welcome.msg = args.join(" ");
                 yield config.storage.setItem('welcome', config.welcome);
                 return bot.sendMessage(msg, "changed welcome message to:\n```\n"+config.welcome.msg+"```");
+            case 'auto-upgrade':
+                if (args.length === 0) {
+                    // send a list of roles:
+                    return bot.sendMessage(msg, "no role specified");
+                }
 
+                var role = args[0];
+
+                if (!msg.channel.server.roles.get("name", role)) {
+                    return bot.sendMessage(msg, "role `" + role + "` not found on the server");
+                }
+
+                config.welcome.auto = role;
+                yield config.storage.setItem('welcome', config.welcome);
+                return bot.sendMessage(msg, "changed auto-upgrade role to: `"+role+"`");
         }
 
     });
@@ -71,6 +86,7 @@ module.exports = {
 \t\t\`welcome disable\` - disables the welcome message
 \t\t\`welcome channel\` - sets the channel the welcome message will be sent to
 \t\t\`welcome msg\` - sets the msg to send
+\t\t\`welcome auto-upgrade\` - sets the role to automatically upgrade new users to
 
 \t\tuse \`:USER:\` in the msg to mention the new recruit`,
     alias: [],

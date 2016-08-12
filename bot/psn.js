@@ -110,17 +110,28 @@ function scrape(bot) {
     for (var g in gamers) delete gamers[g];
 
     return co(function* () {
-        for(var c = 0; c < bot.channels.length; c++) {
-            if(bot.channels[c].name === config.discord.psnChannel) {
-                // found a PSN channel
-                var logs = yield bot.getChannelLogs(bot.channels[c]);
-                // the logs appear in reverse order, so we need to 
-                // process them in reverse to get them chronologically
-                for(var l = logs.length - 1; l >= 0; l--) {
-                    update(bot, logs[l]);
-                } 
+
+        var channel;
+
+        for(var s = 0; s < bot.servers.length; s++) {
+        
+            logger.debug("checking for PSN channels on server: %s", bot.servers[s].name);
+            var channel = bot.servers[s].channels.get("name", config.discord.psnChannel);
+            if (!channel) {
+                logger.warn("unable to parse PSN tags: channel %s not found on server: %s", 
+                    config.discord.psnChannel, bot.servers[s].name);
+                continue;
             }
+            logger.info("scraping PSN tags from %s/%s", bot.servers[s].name, config.discord.psnChannel);
+            var logs = yield channel.getLogs(100);
+            // the logs appear in reverse order, so we need to 
+            // process them in reverse to get them chronologically
+            for (var l = logs.length - 1; l >= 0; l--) {
+                update(bot, logs[l]);
+            }
+
         }
+
     });
 
     
