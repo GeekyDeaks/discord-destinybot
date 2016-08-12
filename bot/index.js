@@ -55,24 +55,34 @@ function help(cmd) {
 
         var msg = cmd.msg;
         var bot = cmd.bot;
+        var args = cmd.args;
+
+        if(args.length > 0) {
+            var c = args[0];
+            if(!commands[c]) {
+                return bot.sendMessage(msg, "command `"+c+"` not recognised");
+            }
+            if(commands[c].usage) {
+                return bot.sendMessage(msg, "\tusage: " + commands[c].usage);
+            } else {
+                return bot.sendMessage(msg, "no usage defined for command `"+c+"`");
+            }
+        }
 
         var toSend = [];
         Object.keys(commands).forEach(function (name) {
             if (name === commands[name].name) {
                 toSend.push("**" + name + "** - " + commands[name].desc);
-                if(commands[name].usage) {
-                    toSend.push("  _usage: " + commands[name].usage + "_");
-                }
                 if (commands[name].alias.length > 0) {
-                    toSend.push("  _aliases: " + commands[name].alias.join(" | ") + "_");
+                    toSend.push("\t_aliases: " + commands[name].alias.join(" | ") + "_");
                 }
-
+                if(commands[name].usage) {
+                    toSend.push("\tusage: " + commands[name].usage);
+                }
             }
-
         });
 
         return bot.sendMessage(msg, toSend.join("\n"));
-
 
     });
 }
@@ -177,6 +187,22 @@ function parseMessage(msg) {
 
 
 }
+
+bot.on("serverNewMember", function(server, user) {
+    logger.info("New User: %s", user.name);
+
+    if(!config.welcome.enabled) return;
+
+    var channel = server.channels.get("name", config.welcome.channel);
+    if(!channel) {
+        return logger.error("unable to welcome %s: channel %s not found", user.name, config.welcome.channel);
+    }
+    bot.sendMessage(channel, config.welcome.msg.replace(/:USER:/g, "<@"+user.id+">"));
+});
+
+bot.on("serverMemberRemoved", function(server, user) {
+    logger.info("User: %s has left", user.name);
+});
 
 function isAdmin(msg) {
 

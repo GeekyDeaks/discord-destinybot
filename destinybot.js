@@ -27,6 +27,9 @@ storage.initSync();
 config.roles = storage.getItemSync("roles") || {};
 logger.debug("loaded roles: ", config.roles);
 
+config.welcome = storage.getItemSync("welcome") || { enabled: false};
+logger.debug("loaded welcome settings:", config.welcome);
+
 var bot = require('./bot');
 
 // start the bot

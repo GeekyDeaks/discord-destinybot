@@ -14,7 +14,7 @@ function exec(cmd) {
             var toSend = ["Current SARs:\n"];
 
             Object.keys(config.roles).forEach( function(r) {
-                toSend.push("```" +
+                toSend.push("```ruby\n" +
                     "Alias: " + r + "\n" +
                     " Role: " + config.roles[r].name + "\n" +
                     " Desc: " + (config.roles[r].desc || "") + "```"
