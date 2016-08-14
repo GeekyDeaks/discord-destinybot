@@ -11,6 +11,7 @@ function exec(cmd) {
     var bot = cmd.bot;
     var name = cmd.args[0];
     var now = moment();
+    var joinedAt = 'Unknown';
 
     // mentions take precedent
     if (msg.mentions.length > 0) {
@@ -34,10 +35,18 @@ function exec(cmd) {
         localtime = "  Timezone: " + gamer.tz;
     }
 
+    // get joined at timestamp
+    var user = bot.users.get("username", gamer.discord);
+    if(user) {
+        var detailsOf = msg.channel.server.detailsOfUser(user);
+        joinedAt = new Date(detailsOf.joinedAt).toUTCString();
+    }
+
     return bot.sendMessage(msg, "```ruby\n"+
         "Discord ID: @" + gamer.discord + "\n"+
         "       PSN: " + gamer.psn + "\n"+
         "     Games: " +  gamer.games.join(", ") + "\n" +
+        " Joined At: " + joinedAt + "\n" +
         localtime + "```");
 
 }
