@@ -151,13 +151,12 @@ function parseMessage(msg) {
             return psn.update(bot, msg);
         }
 
-        var args = msg.content.trim().split(" ");
-        var firstArg = args.shift().toLowerCase();
+        // look for the command prefix
+        if(!msg.content.startsWith(config.commandPrefix)) return;
 
-        // does it look like a command?
-        logger.debug("looking for command in '%s'", firstArg);
-        if(!firstArg.startsWith(config.commandPrefix)) return;
-        var cmdName = firstArg.substring(config.commandPrefix.length);
+        //strip off the prefix and split into args
+        var args = msg.content.substring(config.commandPrefix.length).trim().split(" ");
+        var cmdName = args.shift().toLowerCase();
 
         logger.debug("found command '%s'", cmdName);
 
