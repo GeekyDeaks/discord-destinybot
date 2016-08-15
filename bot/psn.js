@@ -137,6 +137,22 @@ function scrape(bot) {
     
 }
 
+// Determine MembershipType by checking user input of console
+function membershipType(cmd) {
+    var tag = cmd.args.shift();
+    switch (tag) {
+        case 'xbl':
+        case 'xbox':
+            return '1';
+        case 'psn':
+        case 'playstation':
+            return '2';
+        default:
+            cmd.args.unshift(tag);
+            return config.destiny.defaultType;
+    }
+}
+
 module.exports.lookup = lookup;
 module.exports.players = players;
 module.exports.scrape = scrape;
@@ -144,3 +160,4 @@ module.exports.update = update;
 module.exports.errors = errors;
 module.exports.gamers = gamers;
 module.exports.warnings = warnings;
+module.exports.membershipType = membershipType;

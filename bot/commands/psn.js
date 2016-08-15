@@ -16,9 +16,12 @@ function exec(cmd) {
     // mentions take precedent
     if (msg.mentions.length > 0) {
         name = msg.mentions[0].username;
-    } 
+    } else {
+        name = cmd.msg.author.username;
+    }
 
     if (!name) {
+        // should not get here..
         return bot.sendMessage(msg, "did you forget something?");
     }
 

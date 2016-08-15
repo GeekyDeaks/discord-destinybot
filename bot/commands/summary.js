@@ -15,6 +15,7 @@ function exec(cmd) {
         var bot = cmd.bot;
         var msg = cmd.msg;
         var config = cmd.config;
+        var memType = psn.membershipType(cmd);
         var name;
         var busyMsg;
 
@@ -37,12 +38,12 @@ function exec(cmd) {
             }
 
             busyMsg = yield bot.sendMessage(msg, "Looking up **"+md.escape(name)+"** :mag:");
-            var c = yield cmd.destiny.search(config.destiny.defaultType, name);
+            var c = yield cmd.destiny.search(memType, name);
             if(!c.length) {
                 return bot.updateMessage(busyMsg, 
                     "Sorry, bungie does not seem to know anything about **"+md.escape(name)+"**");
             }
-            var r = yield cmd.destiny.summary(config.destiny.defaultType, c[0].membershipId);
+            var r = yield cmd.destiny.summary(memType, c[0].membershipId);
             name = c[0].displayName;
 
             var toSend = [];
