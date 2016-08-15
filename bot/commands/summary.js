@@ -21,26 +21,35 @@ function exec(cmd) {
         try {
             // figure out the username
             if(msg.mentions.length > 0) {
-                var gamer = psn.lookup(msg.mentions[0].username);
-                if(gamer) {
-                    name = gamer.psn;
-                }
+                name = msg.mentions[0].username;
             } else {
-                name = cmd.args[0];
+                name = cmd.args[0] || cmd.msg.author.username;
+            }
+
+            var gamer = psn.lookup(name);
+            if (gamer) {
+                name = gamer.psn;
             }
 
             if(!name) {
+                // should not really get here...
                 return bot.sendMessage(msg, "did you forget something?");
             }
 
             busyMsg = yield bot.sendMessage(msg, "Looking up **"+md.escape(name)+"** :mag:");
-            var r = yield cmd.destiny.summary(config.destiny.defaultType, name);
+            var c = yield cmd.destiny.search(config.destiny.defaultType, name);
+            if(!c.length) {
+                return bot.updateMessage(busyMsg, 
+                    "Sorry, bungie does not seem to know anything about **"+md.escape(name)+"**");
+            }
+            var r = yield cmd.destiny.summary(config.destiny.defaultType, c[0].membershipId);
+            name = c[0].displayName;
 
             var toSend = [];
             var firstline;
             var charnum = 1;
             //toSend.push("**"+md.escape(name)+"**");
-            r.Response.data.characters.forEach(function (c) {
+            r.data.characters.forEach(function (c) {
                 logger.debug("summary for character ",util.inspect(c, {depth: 1}));
                 firstline = "━━ "+name+" / "+ (charnum++) + " ";
                 firstline += "━".repeat(40 - firstline.length);
@@ -58,12 +67,7 @@ function exec(cmd) {
             return bot.updateMessage(busyMsg, toSend.join("\n"));
 
         } catch (err) {
-            var errmsg;
-            if(err.message.match(/UserCannotResolveCentralAccount/)) {
-                errmsg = "Sorry, bungie does not seem to know anything about **"+md.escape(name)+"**";
-            } else {
-                errmsg = "sorry, something unexpected happened: ```"+err+"```";
-            }
+            var errmsg = "sorry, something unexpected happened: ```"+err+"```";
 
             if(busyMsg) {
                 bot.updateMessage(busyMsg, errmsg);

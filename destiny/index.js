@@ -40,7 +40,10 @@ function destinyAPI(op) {
             if(r.ErrorStatus !== 'Success') {
                 throw new Error("destiny API Failure: "+r.ErrorStatus);
             }
-            return (r);
+            if(!r.Response) {
+                throw new Error("destiny API failure: no Response");
+            }
+            return (r.Response);
         }
 
     });
@@ -49,15 +52,9 @@ function destinyAPI(op) {
 
 function stats(type, id) {
     // /Stats/Account/{membershipType}/{destinyMembershipId}/
+    var op = util.format('/Stats/Account/%d/%s/', type, id);
+    return destinyAPI(op);
 
-    return co(function *() {
-
-        var r = yield membership(type, id);
-
-        var op = util.format('/Stats/Account/%d/%s/', type, r.Response);
-        return yield destinyAPI(op);
-
-    });
 }
 
 function search(type, id) {
@@ -76,14 +73,9 @@ function membership(type, id) {
 
 function summary(type, id) {
     // /{membershipType}/Account/{destinyMembershipId}/Summary/	
-    return co(function *() {
 
-        var r = yield membership(type, id);
-
-        var op = util.format('/%d/Account/%s/Summary/', type, r.Response);
-        return yield destinyAPI(op);
-
-    });
+    var op = util.format('/%d/Account/%s/Summary/', type, id);
+    return destinyAPI(op);
 }
 
 module.exports.stats = stats;
