@@ -17,7 +17,7 @@ function exec(cmd) {
     if (msg.mentions.length > 0) {
         name = msg.mentions[0].username;
     } else {
-        name = cmd.msg.author.username;
+        name = cmd.args[0] || cmd.msg.author.username;
     }
 
     if (!name) {
