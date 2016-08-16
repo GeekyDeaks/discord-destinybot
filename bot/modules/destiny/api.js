@@ -3,23 +3,31 @@
 var request = require('request');
 var co = require('co');
 var thunkify = require('thunkify'); 
-var config = require('../config');
+// require config from app scope
+
+
+
 var util = require('util');
 var logger = require('winston');
 
 var get = thunkify(request.get);
 
+var app = require.main.exports;
+var config = app.config;
+
 // API details here:
 // https://www.bungie.net/platform/destiny/help/
+// and here:
+// http://destinydevs.github.io/BungieNetPlatform/
 
 function destinyAPI(op) {
 
     return co(function* () {
 
         var args = {
-            url: config.destiny.url + op,
+            url: config.modules.destiny.url + op,
             headers: {
-                'X-API-Key': config.destiny.apikey
+                'X-API-Key': config.modules.destiny.apikey
             }
         };
         logger.debug("issuing destiny API cmd: %s", args.url);

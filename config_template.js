@@ -1,15 +1,23 @@
 'use strict';
 
 module.exports = {
-    destiny: {
-        apikey: "BUNGIE_APIKEY",
-        url: "https://www.bungie.net/Platform/Destiny",
-        defaultType: 2
-    },
+
     discord: {
         token: "DISCORD_TOKEN",
-        psnChannel: "psn",
         adminRole: "Modteam"
+    },
+    modules: {
+        destiny: {
+            apikey: "BUNGIE_TOKEN",
+            url: "https://www.bungie.net/Platform/Destiny",
+            defaultType: 2
+        },
+        voc: {
+            psnChannel: "psn"
+        },
+        welcome: {
+            
+        }
     },
     commandPrefix: "d!"
 };

@@ -3,8 +3,13 @@
 var co = require('co');
 var util = require('util');
 var logger = require('winston');
-var psn = require('../psn');
-var md = require('../markdown');
+var md = require('../../../markdown');
+var api = require('../api');
+var membership = require('../membership');
+
+var app = require.main.exports;
+var bot = app.bot;
+var config = app.config;
 
 var genderType = ['Male', 'Female'];
 var classType = ['Titan', 'Hunter', 'Warlock'];
@@ -12,10 +17,10 @@ var classType = ['Titan', 'Hunter', 'Warlock'];
 function exec(cmd) {
 
     return co(function* () {
-        var bot = cmd.bot;
+
         var msg = cmd.msg;
-        var config = cmd.config;
-        var memType = psn.membershipType(cmd);
+
+        var memType = membership.type(cmd);
         var name;
         var busyMsg;
 
@@ -26,24 +31,24 @@ function exec(cmd) {
             } else {
                 name = cmd.args[0] || cmd.msg.author.username;
             }
-
+            /*
             var gamer = psn.lookup(name);
             if (gamer) {
                 name = gamer.psn;
             }
-
+            /* */
             if(!name) {
                 // should not really get here...
                 return bot.sendMessage(msg, "did you forget something?");
             }
 
             busyMsg = yield bot.sendMessage(msg, "Looking up **"+md.escape(name)+"** :mag:");
-            var c = yield cmd.destiny.search(memType, name);
+            var c = yield api.search(memType, name);
             if(!c.length) {
                 return bot.updateMessage(busyMsg, 
                     "Sorry, bungie does not seem to know anything about **"+md.escape(name)+"**");
             }
-            var r = yield cmd.destiny.summary(memType, c[0].membershipId);
+            var r = yield api.summary(memType, c[0].membershipId);
             name = c[0].displayName;
 
             var toSend = [];

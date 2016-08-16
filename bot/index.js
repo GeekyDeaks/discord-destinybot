@@ -1,99 +1,19 @@
 'use strict';
 
-
-var config = require('../config');
 var logger = require('winston');
 var fs = require('fs');
 var path = require('path');
 var co = require('co');
-var psn = require('./psn');
 
-var Discord = require("discord.js");
-var bot = new Discord.Client({maxCachedMessages: 1000, forceFetchUsers: true});
+var app = require.main.exports;
+var config = app.config;
 
-var commands = {};
-var commandPath = path.join(__dirname, 'commands');
-
-// load up the commands
-fs
-  .readdirSync(commandPath)
-  .filter(function(file) {
-    return (file.indexOf('.') !== 0) && (file !== 'index.js');
-  })  
-  .forEach(function(file) {
-      logger.debug('checking command file: %s', file);
-      var cmd = require(path.join(commandPath, file));
-      if(!cmd) {
-          return logger.error('failed to load command file: %s', file)
-      }
-
-      if(cmd.disabled) return;
-      
-      if(cmd.name) {
-          logger.verbose('loading command %s', cmd.name);
-          commands[cmd.name] = cmd;
-      }
-      // sort out the aliases
-      if(cmd.alias) {
-          cmd.alias.forEach(function(alias) {
-              logger.debug("adding alias '%s' for command '%s'", alias, cmd.name);
-              commands[alias] = cmd;
-          })
-      }
-  }); 
-
-Object.keys(commands).forEach(function(name) {
-  if ('description' in commands[name]) {
-    logger.debug('command %s, %s', name, commands[name].description)
-  }
-});
-
-// add the help command
-
-function help(cmd) {
-    return co(function* () {
-
-        var msg = cmd.msg;
-        var bot = cmd.bot;
-        var args = cmd.args;
-
-        if(args.length > 0) {
-            var c = args[0];
-            if(!commands[c]) {
-                return bot.sendMessage(msg, "command `"+c+"` not recognised");
-            }
-            if(commands[c].usage) {
-                return bot.sendMessage(msg, "\tusage: " + commands[c].usage);
-            } else {
-                return bot.sendMessage(msg, "no usage defined for command `"+c+"`");
-            }
-        }
-
-        var toSend = [];
-        Object.keys(commands).forEach(function (name) {
-            if (name === commands[name].name) {
-                toSend.push("**" + name + "** - " + commands[name].desc);
-                if (commands[name].alias.length > 0) {
-                    toSend.push("\t_aliases: " + commands[name].alias.join(" | ") + "_");
-                }
-                if(commands[name].usage) {
-                    toSend.push("\tusage: " + commands[name].usage);
-                }
-            }
-        });
-
-        return bot.sendMessage(msg, toSend.join("\n"));
-
-    });
-}
-
-commands.help = {
-    desc: 'List commands',
-    name: 'help',
-    usage: 'help [command]',
-    alias: ['h'],
-    exec: help
-};
+// we need to do this before anything else
+// as other modules may create a reference to app.bot
+var Discord = require('discord.js');
+var bot = new Discord.Client({ maxCachedMessages: 1000, forceFetchUsers: true });
+app.bot = bot;
+app.commands = require('./commands');
 
 // event listeners
 bot.on("error", function (msg) {
@@ -110,128 +30,31 @@ bot.on("debug", function (msg) {
 });
 
 bot.on("ready", function () {
-    bot.setPlayingGame("with fire");
+    bot.setPlayingGame("Global Thermonuclear War with WOPR");
     logger.info("%s is ready!", bot.internal.user.username);
     logger.verbose("Listening to %s channels on %s servers", bot.channels.length, bot.servers.length);
-    psn.scrape(bot);
-    // scrape 
 });
 
 bot.on("disconnected", function () {
     logger.info("Disconnected from discord");
-    /*
-    setTimeout(() => {
-        console.log("Attempting to log in...");
-        bot.loginWithToken(config.token, (err, token) => {
-            if (err) { console.log(err); setTimeout(() => { process.exit(1); }, 2000); }
-            if (!token) { console.log(cWarn(" WARN ") + " failed to connect"); setTimeout(() => { process.exit(0); }, 2000); }
-        });
-    });
-    /* */
 });
 
-bot.on("messageUpdated", function(msg0, msg1) {
-    parseMessage(msg1);
-})
-
-bot.on("message", parseMessage);
-
-function parseMessage(msg) {
-    
-    co(function* () {
-
-        if (msg.author.id === bot.user.id) return;
-        if (msg.author.bot) return;
-
-        logger.debug("got message in channel %s: ",msg.channel.name, msg.content);
-
-        if(msg.channel.name === config.discord.psnChannel) {
-            // this means we are not accepting commands on the 
-            // PSN channel...
-            return psn.update(bot, msg);
-        }
-
-        // look for the command prefix
-        if(!msg.content.startsWith(config.commandPrefix)) return;
-
-        //strip off the prefix and split into args
-        var args = msg.content.substring(config.commandPrefix.length).trim().split(" ");
-        var cmdName = args.shift().toLowerCase();
-
-        logger.debug("found command '%s'", cmdName);
-
-        // yep, ok then see if we have that command loaded
-        if(!commands[cmdName] || !commands[cmdName].exec) return;
-
-        // check if it's an admin command
-        if(commands[cmdName].admin && !isAdmin(msg)) {
-            // see if we have the admin role
-            return bot.sendMessage(msg, "Not authorised");
-        }
-
-        var cmd = {
-            bot: bot,
-            msg: msg,
-            args: args,
-            destiny: config.destiny.client,
-            config: config
-        };
-
-        logger.debug("executing command '%s'", cmdName);
-        // all looks good, so let's run the command
-        yield commands[cmdName].exec(cmd);
-
-    }).catch(function (err) {
-        logger.error("Error when parsing msg '"+msg+"':"+err);
-        bot.sendMessage(msg, "Oops, something went unexpectedly wrong\n```"+err+"```");
-    });
-
-
-}
-
-bot.on("serverNewMember", function(server, user) {
-    logger.info("New User: %s", user.name);
-
-    if(!config.welcome.enabled) return;
-
-
-    if(config.welcome.auto) {
-        var role = server.roles.get("name", config.welcome.auto);
-        if(role) {
-            logger.verbose("adding user: %s to role: %s", user.name, role.name);
-            user.addTo(role);
-        } else {
-            logger.error("AutoUpgrade role %s does not appear to exist!", config.welcome.auto);
-        }
-
+Object.keys(config.modules).forEach(function (m) {
+    logger.debug("loading module: %s", m);
+    var module;
+    try {
+        module = require(path.join(__dirname, 'modules', m));
+        module.init();
+    } catch (err) {
+        logger.error("Failed to load '%s':", m, err);
+        // do we abort the entire load?
     }
-
-    var channel = server.channels.get("name", config.welcome.channel);
-    if(!channel) {
-        return logger.error("unable to welcome %s: channel %s not found", user.name, config.welcome.channel);
-    }
-    bot.sendMessage(channel, config.welcome.msg.replace(/:USER:/g, "<@"+user.id+">"));
 });
-
-bot.on("serverMemberRemoved", function(server, user) {
-    logger.info("User: %s has left", user.name);
-});
-
-function isAdmin(msg) {
-
-    var roles = msg.channel.server.roles;
-
-    for (var r = 0; r < roles.length; r++) {
-        if (roles[r].name !== config.discord.adminRole) continue;
-        // found the admin role
-        return msg.author.hasRole(roles[r]);
-    }
-    return false;
-}
 
 function login() {
 
     return co(function* () {
+
         var token = yield bot.loginWithToken(config.discord.token);
         if (!token) {
             throw new Error("Failed to acquire token");

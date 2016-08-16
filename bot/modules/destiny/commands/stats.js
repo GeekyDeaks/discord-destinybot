@@ -1,16 +1,22 @@
 'use strict';
 
 var co = require('co');
-var psn = require('../psn');
-var md = require('../markdown');
+//var psn = require('../psn');
+var md = require('../../../markdown');
+var api = require('../api');
+var membership = require('../membership');
+
+var app = require.main.exports;
+var bot = app.bot;
+var config = app.config;
+
 
 function exec(cmd) {
 
     return co(function* () {
-        var bot = cmd.bot;
+
         var msg = cmd.msg;
-        var config = cmd.config;
-        var memType = psn.membershipType(cmd);
+        var memType = membership.type(cmd);
         var name;
         var busyMsg;
 
@@ -23,10 +29,10 @@ function exec(cmd) {
                 name = cmd.args[0] || cmd.msg.author.username;
             }
 
-            var gamer = psn.lookup(name);
-            if (gamer) {
-                name = gamer.psn;
-            }
+            //var gamer = psn.lookup(name);
+            //if (gamer) {
+            //    name = gamer.psn;
+            //}
 
             if(!name) {
                 // should not really get here...
@@ -34,12 +40,12 @@ function exec(cmd) {
             }
 
             busyMsg = yield bot.sendMessage(msg, "Looking up **"+md.escape(name)+"** :mag:");
-            var c = yield cmd.destiny.search(memType, name);
+            var c = yield api.search(memType, name);
             if(!c.length) {
                 return bot.updateMessage(busyMsg, 
                     "Sorry, bungie does not seem to know anything about **"+md.escape(name)+"**");
             }
-            var stats = yield cmd.destiny.stats(memType, c[0].membershipId);
+            var stats = yield api.stats(memType, c[0].membershipId);
             name = c[0].displayName;
 
             var pve = stats.mergedAllCharacters.results.allPvE.allTime;
