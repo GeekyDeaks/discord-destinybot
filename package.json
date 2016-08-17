@@ -1,6 +1,6 @@
 {
   "name": "discord-destinybot",
-  "version": "0.1.8",
+  "version": "0.2.1",
   "description": "Discord Destiny Bot",
   "main": "destinybot.js",
   "scripts": {
@@ -15,7 +15,7 @@
     "Discord",
     "Bot"
   ],
-  "author": "sdeaks@gmail.com",
+  "author": [ "sdeaks@gmail.com", "unisys12@gmail.com" ], 
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/GeekyDeaks/discord-destinybot/issues"
@@ -24,6 +24,7 @@
   "dependencies": {
     "co": "^4.6.0",
     "discord.js": "^8.1.0",
+    "jszip": "^3.1.1",
     "moment-timezone": "^0.5.5",
     "node-persist": "0.0.12",
     "request": "^2.74.0",

@@ -86,6 +86,13 @@ function summary(type, id) {
     return destinyAPI(op);
 }
 
+function manifest() {
+    // /Manifest/
+    var op = util.format('/Manifest/');
+    return destinyAPI(op);
+}
+
 module.exports.stats = stats;
 module.exports.search = search;
 module.exports.summary = summary;
+module.exports.manifest = manifest;
