@@ -19,5 +19,6 @@ module.exports = {
             
         }
     },
-    commandPrefix: "d!"
+    commandPrefix: "d!",
+    appDir: ""
 };
