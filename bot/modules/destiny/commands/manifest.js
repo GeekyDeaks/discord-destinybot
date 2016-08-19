@@ -24,16 +24,9 @@ function exec(cmd) {
 
         var busyMsg = yield bot.sendMessage(msg, "Pulling latest Destiny Manifest"+"** :mag:");
         var manifest = yield api.manifest();
-
-        // manifest already contains what we want...
-        //var worldContents = JSON.stringify(manifest);
-        //var mobileWorldContents = JSON.parse(worldContents);
         var mwcUrl = 'http://www.bungie.net'+manifest.mobileWorldContentPaths.en;
+        
         logger.debug("Retrieving Mobile World Contents from %s", mwcUrl);
-
-        // request defaults to UTF-8 encoding
-        // http://stackoverflow.com/questions/14855015/getting-binary-content-in-node-js-using-request
-        // make sure encoding: null
 
         var res = (yield get({ url: mwcUrl, encoding: null}))[0];
 
@@ -53,12 +46,16 @@ function exec(cmd) {
             for(var f = 0; f < files.length; f++) {
                 dbfile = path.join(config.appDir, 'persist', 'destiny', files[f].name);
                 logger.debug("extracting file: %s, to: %s", files[f].name, dbfile);
-                // TODO: make sure the directory exists - might want to think about
-                // using this: https://github.com/jrajav/mkpath
+                
+                files[f].nodeStream().pipe(fs.createWriteStream(dbfile, {"flags": "w+"}));
 
-                // wow, the docs for jszip are really terse...
-                // https://stuk.github.io/jszip/documentation/api_zipobject/node_stream.html
-                files[f].nodeStream().pipe(fs.createWriteStream(dbfile));
+                fs.stat(dbfile, function(err, stats) {
+                    if (err) {
+                        logger.error("There is a problem with the manifest file: " + err);
+                    }
+
+                    return bot.updateMessage(busyMsg, "New Destiny Manifest file has been successfully downloaded!"+"** :thumbsup:");
+                });
             }
 
         }
