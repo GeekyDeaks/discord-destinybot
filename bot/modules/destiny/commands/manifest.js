@@ -21,11 +21,27 @@ function exec(cmd) {
 
     return co(function *() {
         var msg = cmd.msg;
-
+        var lang;
+        var langOptions = ['en',"fr",'es','de','it','ja','pt-br']
+        var langFlag = cmd.args[0];
         var busyMsg = yield bot.sendMessage(msg, "Pulling latest Destiny Manifest"+"** :mag:");
         var manifest = yield api.manifest();
-        var mwcUrl = 'http://www.bungie.net'+manifest.mobileWorldContentPaths.en;
         
+        /*if (langFlag == undefined) {
+            logger.debug("No Language Flag entered. Defaulting to config option: " + config.language);
+            lang = config.language;
+        }*/
+
+        if (langOptions.indexOf(langFlag) > -1) {
+            lang = langFlag;
+            logger.debug("Valid Language flag detected as option: " + langFlag);
+        } else {
+            logger.debug("No Language Flag entered or invaild language option specifed.");
+            logger.debug("Defaulting to config option: " + config.language);
+            lang = config.language;
+        }
+        
+        var mwcUrl = 'http://www.bungie.net'+manifest.mobileWorldContentPaths[lang];        
         logger.debug("Retrieving Mobile World Contents from %s", mwcUrl);
 
         var res = (yield get({ url: mwcUrl, encoding: null}))[0];
