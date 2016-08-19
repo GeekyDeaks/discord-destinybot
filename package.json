@@ -15,7 +15,10 @@
     "Discord",
     "Bot"
   ],
-  "author": [ "sdeaks@gmail.com", "unisys12@gmail.com" ], 
+  "author": [
+    "sdeaks@gmail.com",
+    "unisys12@gmail.com"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/GeekyDeaks/discord-destinybot/issues"
@@ -27,7 +30,9 @@
     "jszip": "^3.1.1",
     "moment-timezone": "^0.5.5",
     "node-persist": "0.0.12",
+    "promise-streams": "^1.0.1",
     "request": "^2.74.0",
+    "sqlite3": "^3.1.4",
     "thunkify": "^2.1.2",
     "winston": "^2.2.0"
   }

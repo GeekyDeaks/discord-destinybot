@@ -3,3 +3,4 @@ node_modules
 logs
 .vscode
 persist
+tmp
