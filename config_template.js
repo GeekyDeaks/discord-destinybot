@@ -20,5 +20,6 @@ module.exports = {
         }
     },
     commandPrefix: "d!",
-    appDir: ""
+    appDir: "",
+    language: "en"
 };
