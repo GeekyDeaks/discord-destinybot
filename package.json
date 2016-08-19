@@ -28,6 +28,7 @@
     "co": "^4.6.0",
     "discord.js": "^8.1.0",
     "jszip": "^3.1.1",
+    "mkdirp": "^0.5.1",
     "moment-timezone": "^0.5.5",
     "mongodb": "^2.2.6",
     "node-persist": "0.0.12",
