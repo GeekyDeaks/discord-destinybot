@@ -26,11 +26,6 @@ function exec(cmd) {
         var langFlag = cmd.args[0];
         var busyMsg = yield bot.sendMessage(msg, "Pulling latest Destiny Manifest"+"** :mag:");
         var manifest = yield api.manifest();
-        
-        /*if (langFlag == undefined) {
-            logger.debug("No Language Flag entered. Defaulting to config option: " + config.language);
-            lang = config.language;
-        }*/
 
         if (langOptions.indexOf(langFlag) > -1) {
             lang = langFlag;
