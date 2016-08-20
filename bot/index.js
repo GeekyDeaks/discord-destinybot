@@ -39,17 +39,23 @@ bot.on("disconnected", function () {
     logger.info("Disconnected from discord");
 });
 
-Object.keys(config.modules).forEach(function (m) {
-    logger.debug("loading module: %s", m);
-    var module;
-    try {
-        module = require(path.join(__dirname, 'modules', m));
-        module.init();
-    } catch (err) {
-        logger.error("Failed to load '%s':", m, err);
-        // do we abort the entire load?
-    }
-});
+function init() {
+    return co(function* () {
+        var mods = Object.keys(config.modules);
+        for(var m = 0; m < mods.length; m++) {
+            logger.debug("loading module: %s", mods[m]);
+            var module;
+            try {
+                module = require(path.join(__dirname, 'modules', mods[m]));
+                yield module.init();
+            } catch (err) {
+                logger.error("Failed to load '%s':", mods[m], err);
+                // do we throw and abort the entire load?
+            }
+        }
+
+    });
+}
 
 function login() {
 
@@ -65,3 +71,4 @@ function login() {
 }
 
 module.exports.login = login;
+module.exports.init = init;

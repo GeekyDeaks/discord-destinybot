@@ -7,6 +7,7 @@ var bot = app.bot;
 
 function init(bot) {
     logger.debug("init welcome module");
+    return Promise.resolve();
 }
 
 /*

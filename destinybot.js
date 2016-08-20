@@ -9,12 +9,13 @@ logger.add(logger.transports.Console, { prettyPrint: true, 'timestamp':true });
 var config = require('./config');
 config.pkg = require("./package.json");
 module.exports.config = config;
+var co = require('co');
 
 
 var bot = require('./bot');
 
 // start the bot
-bot.login()
+bot.init().then(bot.login)
 .then(function () {
   logger.info("bot started");
 })

@@ -7,10 +7,14 @@ module.exports = {
         adminRole: "Modteam"
     },
     modules: {
+        db : {
+            url: "mongodb://localhost:27017/des"
+        },
         destiny: {
             apikey: "BUNGIE_TOKEN",
             url: "https://www.bungie.net/Platform/Destiny",
-            defaultType: 2
+            defaultType: 2,
+            collection: "destiny.manifest"
         },
         voc: {
             psnChannel: "psn"

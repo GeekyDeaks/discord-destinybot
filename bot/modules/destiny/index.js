@@ -14,7 +14,7 @@ function init() {
     } catch (err) {
         logger.error("failed whilst loading destiny commands: ", err);
     }
-   
+    return Promise.resolve();
 
 }
 

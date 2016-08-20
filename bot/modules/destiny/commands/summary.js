@@ -6,6 +6,7 @@ var logger = require('winston');
 var md = require('../../../markdown');
 var api = require('../api');
 var membership = require('../membership');
+var manifest = require('../manifest');
 
 var app = require.main.exports;
 var bot = app.bot;
@@ -34,7 +35,7 @@ function exec(cmd) {
 
             // sometimes we get the @ come through..
             name = name.replace(/^@/, '');
-            
+
             /*
             var gamer = psn.lookup(name);
             if (gamer) {
@@ -47,32 +48,38 @@ function exec(cmd) {
             }
 
             busyMsg = yield bot.sendMessage(msg, "Looking up **"+md.escape(name)+"** :mag:");
-            var c = yield api.search(memType, name);
-            if(!c.length) {
+            var m = yield api.search(memType, name);
+            if(!m.length) {
                 return bot.updateMessage(busyMsg, 
                     "Sorry, bungie does not seem to know anything about **"+md.escape(name)+"**");
             }
-            var r = yield api.summary(memType, c[0].membershipId);
-            name = c[0].displayName;
+            var r = yield api.summary(memType, m[0].membershipId);
+            name = m[0].displayName;
 
             var toSend = [];
             var firstline;
-            var charnum = 1;
-            //toSend.push("**"+md.escape(name)+"**");
-            r.data.characters.forEach(function (c) {
-                logger.debug("summary for character ",util.inspect(c, {depth: 1}));
-                firstline = "━━ "+name+" / "+ (charnum++) + " ";
+
+            for(var c = 0; c < r.data.characters.length; c++) {
+                var guardian = r.data.characters[c];
+
+                logger.debug("summary for character ",util.inspect(guardian, {depth: 1}));
+
+                var currentActivity = yield manifest.getDestinyActivityDefinition(guardian.characterBase.currentActivityHash);
+                firstline = "━━ "+name+" / "+ c + " ";
                 firstline += "━".repeat(40 - firstline.length);
                 // bot.sendFile(msg, "http://www.bungie.net"+c.backgroundPath);
                 toSend.push("```ruby\n" + firstline + "\n" +
-                    "    Guardian: "+ genderType[c.characterBase.genderType] + " " +
-                        classType[c.characterBase.classType] + "\n" +
-                    "       Level: " + c.characterLevel + "\n" +
-                    "       Light: " + c.characterBase.powerLevel + "\n" +
-                    "Hours Played: " + Math.round( c.characterBase.minutesPlayedTotal / 6) / 10 +
+                    "    Guardian: "+ genderType[guardian.characterBase.genderType] + " " +
+                        classType[guardian.characterBase.classType] + "\n" +
+                    "       Level: " + guardian.characterLevel + "\n" +
+                    "       Light: " + guardian.characterBase.powerLevel + "\n" +
+                    "Hours Played: " + Math.round( guardian.characterBase.minutesPlayedTotal / 6) / 10 +
+                    (currentActivity ? ( "\n" +
+                    "    Activity: " + currentActivity.activityName
+                    ) : "" ) +
                     "```"
                 );
-            })
+            }
 
             return bot.updateMessage(busyMsg, toSend.join("\n"));
 

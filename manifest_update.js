@@ -26,8 +26,6 @@ var sdb;  // sqlite3 handle
 var mdb;  // mongodb handle
 var lang;  // global lang 
 
-var mongoUrl = 'mongodb://localhost:27017/destiny';
-
 function processTable(table) {
 
     return co(function* () {
@@ -56,7 +54,7 @@ function processTable(table) {
             }
 
             yield new Promise(function (resolve, reject) {
-                mdb.collection('destiny.manifest.' + lang + '.' + table.name).replaceOne(
+                mdb.collection(config.modules.destiny.collection+'.' + lang + '.' + table.name).replaceOne(
                     { "_id": json._id }, json, { upsert: true },
                     function (err) {
                         if (err) return reject(err)
@@ -126,7 +124,7 @@ function update() {
         logger.debug("SQLite DB opened successfully");
 
         mdb = yield new Promise(function (resolve, reject) {
-            MongoClient.connect(mongoUrl, function (err, res) {
+            MongoClient.connect(config.modules.db.url, function (err, res) {
                 if(err) return reject(err);
                 resolve(res);
             });
