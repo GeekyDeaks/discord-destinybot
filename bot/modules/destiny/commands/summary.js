@@ -31,6 +31,10 @@ function exec(cmd) {
             } else {
                 name = cmd.args[0] || cmd.msg.author.username;
             }
+
+            // sometimes we get the @ come through..
+            name = name.replace(/^@/, '');
+            
             /*
             var gamer = psn.lookup(name);
             if (gamer) {

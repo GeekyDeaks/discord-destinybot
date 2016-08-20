@@ -107,10 +107,10 @@ function parseMessage(msg) {
         if (msg.author.id === bot.user.id) return;
         if (msg.author.bot) return;
 
-        logger.debug("got message in channel %s: ",msg.channel.name, msg.content);
-
         // look for the command prefix
         if(!msg.content.startsWith(config.commandPrefix)) return;
+
+        logger.debug("got message from [%s] in channel [%s]: ", msg.author.username, msg.channel.name, msg.content);
 
         //strip off the prefix and split into args
         var args = msg.content.substring(config.commandPrefix.length).trim().split(" ");
@@ -133,7 +133,7 @@ function parseMessage(msg) {
             name: cmdName
         };
 
-        logger.debug("executing command '%s'", cmdName);
+        logger.debug("executing command [%s] with args [%s]", cmdName, args.join(","));
         // all looks good, so let's run the command
         yield commands[cmdName].exec(cmd);
 
