@@ -11,13 +11,13 @@ module.exports = {
             // Update url with actual mongo connection string. 
             url: "mongodb://localhost:27017/des",
             // all options are optional
-            options: { 
+            /*options: { 
                 uri_decode_auth: ""
                 db: "",
                 server: "",
                 replSet: "",
                 promiseLibrary: ""
-            }
+            }*/
         },
         destiny: {
             apikey: "BUNGIE_TOKEN",
