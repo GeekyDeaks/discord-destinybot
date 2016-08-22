@@ -65,7 +65,7 @@ function exec(cmd) {
                 logger.debug("summary for character ",util.inspect(guardian, {depth: 1}));
 
                 var currentActivity = yield manifest.getDestinyActivityDefinition(guardian.characterBase.currentActivityHash);
-                firstline = "━━ "+name+" / "+ c + " ";
+                firstline = "━━ "+name+" / "+ (c + 1) + " ";
                 firstline += "━".repeat(40 - firstline.length);
                 // bot.sendFile(msg, "http://www.bungie.net"+c.backgroundPath);
                 toSend.push("```ruby\n" + firstline + "\n" +
@@ -100,7 +100,7 @@ function exec(cmd) {
 module.exports = {
     desc: 'Get Destiny player summary',
     name: 'summary',
-    usage: '`summary <psn-id>|<@discord-id>`',
+    usage: '`summary [xbl|psn] <xbl-id>|<psn-id>|<@discord-id>`',
     alias: ['sum'],
     exec: exec
 };

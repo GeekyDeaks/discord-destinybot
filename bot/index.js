@@ -29,7 +29,7 @@ bot.on("debug", function (msg) {
     logger.debug(msg);
 });
 
-bot.on("ready", function () {
+bot.once("ready", function () {
     bot.setPlayingGame("Global Thermonuclear War with WOPR");
     logger.info("%s is ready!", bot.internal.user.username);
     logger.verbose("Listening to %s channels on %s servers", bot.channels.length, bot.servers.length);

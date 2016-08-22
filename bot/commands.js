@@ -108,12 +108,12 @@ function parseMessage(msg) {
         if (msg.author.bot) return;
 
         // look for the command prefix
-        if(!msg.content.startsWith(config.commandPrefix)) return;
+        if(!msg.content.toLowerCase().startsWith(config.commandPrefix)) return;
 
         logger.debug("got message from [%s] in channel [%s]: ", msg.author.username, msg.channel.name, msg.content);
 
         //strip off the prefix and split into args
-        var args = msg.content.substring(config.commandPrefix.length).trim().split(" ");
+        var args = msg.content.substring(config.commandPrefix.length).trim().match(/\w+|"(?:\\"|[^"])+"/g);
         var cmdName = args.shift().toLowerCase();
 
         logger.debug("found command '%s'", cmdName);
@@ -143,6 +143,13 @@ function parseMessage(msg) {
     });
 
 
+}
+
+function isAdmin(msg) {
+    var role = msg.channel.server.roles.get("name", config.discord.adminRole);
+    if(!role) return false;
+
+    return msg.author.hasRole(role);
 }
 
 module.exports.load = load;

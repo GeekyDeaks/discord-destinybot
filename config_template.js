@@ -19,8 +19,10 @@ module.exports = {
         voc: {
             psnChannel: "psn"
         },
-        welcome: {
-            
+        welcome: {},
+        util : {},
+        gamer: {
+            collection: "gamers"
         }
     },
     commandPrefix: "d!",
