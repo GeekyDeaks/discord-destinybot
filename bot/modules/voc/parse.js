@@ -20,11 +20,11 @@ function parse(text) {
   
     // skip anything without exactly 3 tokens
     if(tokens.length < 3) {
-        errors.push("missing | in: "+text);
+        errors.push("`"+ text + "` | missing '|'");
         return;
     }
     if(tokens.length > 3) {
-        errors.push("additional | in: "+text);
+        errors.push("`"+ text + "` | additional '|'");
         return;
     }
     
@@ -36,11 +36,11 @@ function parse(text) {
 
     // no ID's found
     if(id.length === 0) {
-        errors.push("no ID's found in: "+text);
+        errors.push("`"+ text + "` | no ID's found");
         return;
     } 
     if(id.length > 2) {
-        errors.push("more than 2 ID's found in: "+text);
+        errors.push("`"+ text + "` | more than 2 ID's found");
         return;
     }
 
@@ -59,6 +59,7 @@ function parse(text) {
             // ok, so it was a discord ID, but we
             // have no record of the user, so
             // we have to abort...
+            errors.push("`"+ text + "` | unknown user id");
             return;
         }
 
@@ -73,12 +74,12 @@ function parse(text) {
     // now split out the games and trim any whitespace
     gamer.games = tokens[1].split(",").map(function (s) { return s.trim() }); 
     if(gamer.games.length === 1 && gamer.games[0].length === 0) {
-        warnings.push("@"+gamer.discord+": no games listed");
+        warnings.push("`@"+gamer.discord+"`: no games listed");
     }
 
     gamer.tz = tokens[2].trim();
     if(!moment.tz.zone(gamer.tz)) {
-        warnings.push("@"+gamer.discord+": unknown timezone: "+gamer.tz);
+        warnings.push("`@"+gamer.discord+"`: unknown timezone: "+gamer.tz);
     }
 
     // set a flag to indicate if the entry has been modified
@@ -119,7 +120,7 @@ function scrape(channel) {
             while(m = match.shift()) {
                 gamer = parse(m);
                 if (gamer) {
-                    yield db.collection(config.modules.gamers.collection).updateOne(
+                    yield db.collection(config.modules.gamer.collection).updateOne(
                         { 
                             discord : gamer.discord,  
                             // only update non-modified entries
@@ -129,7 +130,7 @@ function scrape(channel) {
                         { upsert: true }    
                     );
                 } else {
-                    errors.push(m);
+                    // errors.push(m);
                 }
             }
         }

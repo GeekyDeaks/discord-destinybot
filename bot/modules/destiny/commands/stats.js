@@ -42,7 +42,7 @@ function exec(cmd) {
                 return bot.sendMessage(msg, "did you forget something?");
             }
 
-            busyMsg = yield bot.sendMessage(msg, "Looking up **"+md.escape(name)+"** :mag:");
+            busyMsg = yield bot.sendMessage(msg, ":mag: Looking up **"+md.escape(name)+"**");
             var c = yield api.search(memType, name);
             if(!c.length) {
                 return bot.updateMessage(busyMsg, 
