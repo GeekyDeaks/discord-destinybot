@@ -55,33 +55,24 @@ function help(cmd) {
 
         var msg = cmd.msg;
         var args = cmd.args;
-
+        
         if(args.length > 0) {
             var c = args[0];
             if(!commands[c]) {
                 return bot.sendMessage(msg, "command `"+c+"` not recognised");
             }
-            if(commands[c].usage) {
-                return bot.sendMessage(msg, "\tusage: " + commands[c].usage);
-            } else {
-                return bot.sendMessage(msg, "no usage defined for command `"+c+"`");
-            }
+
+            return bot.sendMessage(msg, commandHelp(c).join("\n"));
         }
 
         var toSend = [];
-        Object.keys(commands).forEach(function (name) {
-            if (name === commands[name].name) {
-                toSend.push("**" + name + "** - " + commands[name].desc);
-                if (commands[name].alias.length > 0) {
-                    toSend.push("\t_aliases: " + commands[name].alias.join(" | ") + "_");
-                }
-                if(commands[name].usage) {
-                    toSend.push("\tusage: " + 
-                        // if we have an array, then just join everything with \n
-                        (Array.isArray(commands[name].usage) ? commands[name].usage.join("\n") : commands[name].usage)
-                    );
-                }
-            }
+        Object.keys(commands).sort().forEach(function (name) {
+
+            if(name !== commands[name].name) return; // skip aliases
+            if(commands[name].admin && !isAdmin(msg)) return; // skip admin commands for non-admin
+
+            toSend = toSend.concat(commandHelp(name));
+
         });
 
         return bot.sendMessage(msg, toSend.join("\n"));
@@ -89,10 +80,25 @@ function help(cmd) {
     });
 }
 
+function commandHelp(name) {
+    var toSend = [];
+    toSend.push("**" + name + "** - " + commands[name].desc);
+    if (commands[name].alias.length > 0) {
+        toSend.push("\t_aliases: " + commands[name].alias.join(" | ") + "_");
+    }
+    if (commands[name].usage) {
+        toSend.push("\tusage: " +
+            // if we have an array, then just join everything with \n
+            (Array.isArray(commands[name].usage) ? commands[name].usage.join("\n") : commands[name].usage)
+        );
+    }
+    return toSend;
+}
+
 commands.help = {
     desc: 'List commands',
     name: 'help',
-    usage: 'help [command]',
+    usage: '`help [command]`',
     alias: ['h'],
     exec: help
 };
