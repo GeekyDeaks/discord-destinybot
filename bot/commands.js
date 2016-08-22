@@ -113,7 +113,8 @@ function parseMessage(msg) {
         // look for the command prefix
         if(!msg.content.toLowerCase().startsWith(config.commandPrefix)) return;
 
-        logger.debug("got message from [%s] in channel [%s]: ", msg.author.username, msg.channel.name, msg.content);
+        logger.debug("got message from [%s] in channel [%s]: ", 
+            msg.author.username, (msg.channel.name || "PM"), msg.content);
 
         //strip off the prefix and split into args
         var args = msg.content.substring(config.commandPrefix.length).trim().match(/[^\s]+|"(?:\\"|[^"])+"/g);
@@ -149,7 +150,8 @@ function parseMessage(msg) {
 }
 
 function isAdmin(msg) {
-    var role = msg.channel.server.roles.get("name", config.discord.adminRole);
+    var server = msg.server || app.defaultServer;
+    var role = server.roles.get("name", config.discord.adminRole);
     if(!role) return false;
 
     return msg.author.hasRole(role);

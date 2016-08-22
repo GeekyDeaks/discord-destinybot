@@ -14,10 +14,12 @@ function exec(cmd) {
    return co(function* () {
         var msg = cmd.msg;
 
+        var server = msg.server || app.defaultServer;
+
         var busyMsg = yield bot.sendMessage(msg, ":stopwatch: Parsing #" + config.modules.voc.psnChannel);
 
         // get the channel details
-        var channel = msg.server.channels.get("name", config.modules.voc.psnChannel);
+        var channel = server.channels.get("name", config.modules.voc.psnChannel);
 
         if(!channel) {
             return bot.updateMessage(busyMsg, "cannot find channel #"+config.modules.voc.psnChannel);

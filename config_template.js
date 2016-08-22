@@ -4,7 +4,8 @@ module.exports = {
 
     discord: {
         token: "DISCORD_TOKEN",
-        adminRole: "Modteam"
+        adminRole: "Modteam",
+        defaultServer: ""
     },
     modules: {
         db : {

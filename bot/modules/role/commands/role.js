@@ -17,6 +17,8 @@ function exec(cmd) {
         var msg = cmd.msg;
         var args = cmd.args;
 
+        var server = msg.server || app.defaultServer;
+
         if(args.length === 0) {
             // send a list of roles:
 
@@ -41,7 +43,7 @@ function exec(cmd) {
         }
 
         // 
-        var serverRole = msg.channel.server.roles.get("name", role.name);
+        var serverRole = server.roles.get("name", role.name);
         if(!serverRole) {
             return bot.sendMessage(msg, "oops, something is not right.  Could not find role `"+role.name+"`");
         }

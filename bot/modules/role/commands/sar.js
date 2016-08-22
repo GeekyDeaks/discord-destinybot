@@ -18,6 +18,7 @@ function exec(cmd) {
         var args = cmd.args;
 
         var role;
+        var server = msg.server || app.defaultServer;
 
         if(args.length === 0) {
             // send a list of SARs
@@ -51,8 +52,8 @@ function exec(cmd) {
                 }
 
                 // check if the role exists
-                if (!msg.channel.server.roles.get("name", role.name)) {
-                    return bot.sendMessage(msg, "role `" + role.name + "` not found on the server");
+                if (!server.roles.get("name", role.name)) {
+                    return bot.sendMessage(msg, "role `" + role.name + "` not found on server: `"+server.name+"`");
                 }
 
                 // add the role alias

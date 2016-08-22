@@ -20,6 +20,8 @@ function exec(cmd) {
         var now = moment();
         var joinedAt = 'Unknown';
 
+        var server = msg.server || app.defaultServer;
+
         // mentions take precedent
         if (msg.mentions.length > 0) {
             name = msg.mentions[0].username;
@@ -51,7 +53,7 @@ function exec(cmd) {
         // get joined at timestamp
         var user = bot.users.get("username", gamer.discord);
         if (user) {
-            var detailsOf = msg.channel.server.detailsOfUser(user);
+            var detailsOf = server.detailsOfUser(user);
             joinedAt = new Date(detailsOf.joinedAt).toUTCString();
         }
 
