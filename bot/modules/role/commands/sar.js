@@ -4,6 +4,7 @@ var co = require('co');
 var util = require('util');
 var logger = require('winston');
 var md = require('../../../markdown');
+var message = require('../../../message');
 
 var app = require.main.exports;
 var bot = app.bot;
@@ -34,7 +35,7 @@ function exec(cmd) {
                 );
             }
 
-            return bot.sendMessage(msg, toSend.join("\n"));
+            return message.send(msg, toSend, cmd.isPublic);
         }
 
         switch (args.shift().toLowerCase()) {
@@ -42,7 +43,7 @@ function exec(cmd) {
                 args = args.join(" ").split(";");
 
                 if (args.length < 2) {
-                    return bot.sendMessage(msg, "syntax: add role;alias[;description]");
+                    return message.send(msg, "syntax: add role;alias[;description]", cmd.isPublic, 10000);
                 }
 
                 role = {
@@ -53,7 +54,7 @@ function exec(cmd) {
 
                 // check if the role exists
                 if (!server.roles.get("name", role.name)) {
-                    return bot.sendMessage(msg, "role `" + role.name + "` not found on server: `"+server.name+"`");
+                    return message.send(msg, "role `" + role.name + "` not found on server: `"+server.name+"`", cmd.isPublic, 10000);
                 }
 
                 // add the role alias
@@ -62,19 +63,19 @@ function exec(cmd) {
                     { upsert: true }
                 );
 
-                return bot.sendMessage(msg, "SAR `" + role.alias + "` for role `" + role.name + "` added");
+                return message.send(msg, "SAR `" + role.alias + "` for role `" + role.name + "` added", isPublic);
             case 'del':
                 if (args.length === 0) {
                     // send a list of roles:
-                    return bot.sendMessage(msg, "No alias specified");
+                    return message.send(msg, "No alias specified", isPublic, 10000);
                 }
 
                 var alias = args[0];
 
                 if(yield db.collection(config.modules.role.collection.deleteOne({ alias : alias }))) {
-                    return bot.sendMessage(msg, "SAR `" + alias + "` deleted");
+                    return message.send(msg, "SAR `" + alias + "` deleted", isPublic);
                 } else {
-                    return bot.sendMessage(msg, "Cannot find alias `" + alias + "`");
+                    return message.send(msg, "Cannot find alias `" + alias + "`", isPublic);
                 }
         }
 

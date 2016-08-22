@@ -5,6 +5,7 @@ var co = require('co');
 var md = require('../../../markdown');
 var api = require('../api');
 var membership = require('../membership');
+var message = require('../../../message');
 
 var app = require.main.exports;
 var bot = app.bot;
@@ -39,14 +40,14 @@ function exec(cmd) {
 
             if(!name) {
                 // should not really get here...
-                return bot.sendMessage(msg, "did you forget something?");
+                return message.send(msg, "did you forget something?", cmd.isPublic, 10000);
             }
 
-            busyMsg = yield bot.sendMessage(msg, ":mag: Looking up **"+md.escape(name)+"**");
+            busyMsg = yield message.send(msg, ":mag: Looking up **"+md.escape(name)+"**", cmd.isPublic);
             var c = yield api.search(memType, name);
             if(!c.length) {
-                return bot.updateMessage(busyMsg, 
-                    "Sorry, bungie does not seem to know anything about **"+md.escape(name)+"**");
+                return message.update(busyMsg, 
+                    "Sorry, bungie does not seem to know anything about **"+md.escape(name)+"**", 10000);
             }
             var stats = yield api.stats(memType, c[0].membershipId);
             name = c[0].displayName;
@@ -86,14 +87,14 @@ function exec(cmd) {
                 );     
             }
 
-            return bot.updateMessage(busyMsg, toSend.join("\n"));
+            return message.update(busyMsg, toSend);
         } catch (err) { 
             var errmsg = "sorry, something unexpected happened: ```"+err+"```";
 
             if(busyMsg) {
-                bot.updateMessage(busyMsg, errmsg);
+                message.update(busyMsg, errmsg, 10000);
             } else {
-                bot.sendMessage(msg, errmsg);
+                message.send(msg, errmsg, cmd.isPublic, 10000);
             }
         }
     });

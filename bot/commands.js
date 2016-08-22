@@ -143,6 +143,12 @@ function parseMessage(msg) {
             name: cmdName
         };
 
+        // check if the last argument was public
+        if(args.length && (args[args.length - 1].toLowerCase() === 'public')) {
+            cmd.isPublic = msg.channel && !msg.channel.isPrivate; // only set isPublic if we are on the server
+            args.length--;
+        }
+
         logger.debug("executing command [%s] with args [%s]", cmdName, args.join(","));
         // all looks good, so let's run the command
         yield commands[cmdName].exec(cmd);

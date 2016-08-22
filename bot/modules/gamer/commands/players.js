@@ -5,6 +5,7 @@ var util = require('util');
 var logger = require('winston');
 var md = require('../../../markdown');
 var moment = require('moment-timezone');
+var message = require('../../../message');
 
 var app = require.main.exports;
 var bot = app.bot;
@@ -20,18 +21,16 @@ function exec(cmd) {
         var now = moment();
 
         if (!game) {
-            return bot.sendMessage(msg, "did you forget something?");
+            return message.send(msg, "did you forget something?", cmd.isPublic, 10000);
         }
 
-        var p = yield db.collection(config.modules.gamer.collection).find({ games : game}).toArray();
+        var p = yield db.collection(config.modules.gamer.collection).find({ games : game}).sort({"discord" : 1}).toArray();
 
         if (!p || p.length === 0) {
-            return bot.sendMessage(msg, "Sorry, could not find any players for **" + game + "**");
+            return message.send(msg, "Sorry, could not find any players for **" + game + "**", cmd.isPublic, 10000);
         }
 
-        var toSend = [];
-        var line;
-        var length = 0;
+        var toSend = ["```ruby\n━━ "+game+" players ━━━━━━━━━━━━━━━━━━━━━```"];
         var g;
         while (g = p.shift()) {
             var localtime;
@@ -42,26 +41,14 @@ function exec(cmd) {
                 localtime = "  Timezone: " + g.tz;
             }
 
-            line = "```ruby\n" +
+            toSend.push("```ruby\n" +
                 "Discord ID: @" + g.discord + "\n" +
                 "       PSN: " + g.psn + "\n" +
-                localtime + "```";
-
-
-            if (length + line.length > 1930) {
-                // push the current message
-                bot.sendMessage(msg, toSend.join("\n"));
-                length = 0;
-                toSend.length = 0;
-            }
-
-            toSend.push(line);
-            length += line.length;
+                localtime + "```");
 
         }
 
-
-        return bot.sendMessage(msg, toSend.join("\n"));
+        return message.send(msg, toSend, cmd.isPublic);
     });
 
 }

@@ -4,6 +4,7 @@ var co = require('co');
 //var psn = require('../psn');
 var md = require('../../../markdown');
 var parse = require('../parse');
+var message = require('../../../message');
 
 var app = require.main.exports;
 var bot = app.bot;
@@ -16,13 +17,13 @@ function exec(cmd) {
 
         var server = msg.server || app.defaultServer;
 
-        var busyMsg = yield bot.sendMessage(msg, ":stopwatch: Parsing #" + config.modules.voc.psnChannel);
+        var busyMsg = yield message.send(msg, ":stopwatch: Parsing #" + config.modules.voc.psnChannel, cmd.isPublic);
 
         // get the channel details
         var channel = server.channels.get("name", config.modules.voc.psnChannel);
 
         if(!channel) {
-            return bot.updateMessage(busyMsg, "cannot find channel #"+config.modules.voc.psnChannel);
+            return message.update(busyMsg, "cannot find channel #"+config.modules.voc.psnChannel, 10000);
         }
 
         yield parse.scrape(channel);
@@ -65,12 +66,7 @@ function exec(cmd) {
             })
         }
 
-        var report = toSend.join("\n");
-        if(report.length > 1930) {
-            bot.sendMessage(msg, ":warning: too many problems to report fully");
-        }
-
-        yield bot.updateMessage(busyMsg, report.substr(0, 1930));
+        yield message.update(busyMsg, toSend);
 
     });
 

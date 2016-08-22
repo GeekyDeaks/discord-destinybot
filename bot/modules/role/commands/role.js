@@ -4,6 +4,7 @@ var co = require('co');
 var util = require('util');
 var logger = require('winston');
 var md = require('../../../markdown');
+var message = require('../../../message');
 
 var app = require.main.exports;
 var bot = app.bot;
@@ -31,7 +32,7 @@ function exec(cmd) {
                         (role.desc ? " | " + role.desc : "") );
             }
 
-            return bot.sendMessage(msg, toSend.join("\n"));
+            return message.send(msg, toSend, cmd.isPublic);
         }
 
         var alias = args[0];
@@ -39,21 +40,21 @@ function exec(cmd) {
 
         var role = yield db.collection(config.modules.role.collection).findOne({ alias : alias});
         if(!role) {
-            return bot.sendMessage(msg, "role `" + alias + "` not found");
+            return message.send(msg, "role `" + alias + "` not found", cmd.isPublic, 10000 );
         }
 
         // 
         var serverRole = server.roles.get("name", role.name);
         if(!serverRole) {
-            return bot.sendMessage(msg, "oops, something is not right.  Could not find role `"+role.name+"`");
+            return message.send(msg, "oops, something is not right.  Could not find role `"+role.name+"`", cmd.isPublic, 10000 );
         }
 
         if (msg.author.hasRole(serverRole)) {
             yield msg.author.removeFrom(serverRole);
-            return bot.sendMessage(msg, "you are not `" + role.alias + "`");
+            return message.send(msg, "you are not `" + role.alias + "`", cmd.isPublic);
         } else {
             yield msg.author.addTo(serverRole);
-            return bot.sendMessage(msg, "you are now `" + role.alias + "`");
+            return message.send(msg, "you are now `" + role.alias + "`", cmd.isPublic);
         }
 
     });

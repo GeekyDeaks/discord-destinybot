@@ -5,6 +5,7 @@ var util = require('util');
 var logger = require('winston');
 var md = require('../../../markdown');
 var moment = require('moment-timezone');
+var message = require('../../../message');
 
 var app = require.main.exports;
 var bot = app.bot;
@@ -34,12 +35,12 @@ function exec(cmd) {
 
         if (!name) {
             // should not get here..
-            return bot.sendMessage(msg, "did you forget something?");
+            return message.send(msg, "did you forget something?", cmd.isPublic, 10000);
         }
 
         var gamer = yield db.collection(config.modules.gamer.collection).findOne({ discord: name });
         if (!gamer) {
-            return bot.sendMessage(msg, "Sorry, could not find **" + md.escape(name) + "**");
+            return message.send(msg, "Sorry, could not find **" + md.escape(name) + "**", cmd.isPublic, 10000);
         }
 
         var localtime;
@@ -57,12 +58,12 @@ function exec(cmd) {
             joinedAt = new Date(detailsOf.joinedAt).toUTCString();
         }
 
-        return bot.sendMessage(msg, "```ruby\n" +
+        return message.send(msg, "```ruby\n" +
             "Discord ID: @" + gamer.discord + "\n" +
             "       PSN: " + gamer.psn + "\n" +
             "     Games: " + gamer.games.join(", ") + "\n" +
             " Joined At: " + joinedAt + "\n" +
-            localtime + "```");
+            localtime + "```", cmd.isPublic);
 
     });
 
