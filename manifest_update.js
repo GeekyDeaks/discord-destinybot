@@ -39,6 +39,7 @@ function processTable(table) {
             });
         });
 
+        logger.debug("read %s rows from %s", rows.length, table.name);
         var json;
 
         for (var r = 0; r < rows.length; r++) {
@@ -53,23 +54,14 @@ function processTable(table) {
                 return;
             }
 
-            yield new Promise(function (resolve, reject) {
-                mdb.collection(config.modules.destiny.collection+'.' + lang + '.' + table.name).replaceOne(
-                    { "_id": json._id }, json, { upsert: true },
-                    function (err) {
-                        if (err) return reject(err)
-                        resolve();
-                    }
-                );
-
-            });
+            yield mdb.collection(config.modules.destiny.collection+'.' + lang + '.' + table.name).replaceOne(
+                    { "_id": json._id }, json, { upsert: true });
 
         }
 
         logger.debug("processed %s rows", rows.length);
 
     });
-
 
 }
 
@@ -123,12 +115,7 @@ function update() {
 
         logger.debug("SQLite DB opened successfully");
 
-        mdb = yield new Promise(function (resolve, reject) {
-            MongoClient.connect(config.modules.db.url, function (err, res) {
-                if(err) return reject(err);
-                resolve(res);
-            });
-        });
+        mdb = yield MongoClient.connect(config.modules.db.url);
 
         logger.debug("Connected to mongoDB");
 
@@ -158,7 +145,9 @@ if(process.argv.length > 2) {
             sdb.close();
             mdb.close();
         }).catch(function (err) {
-            console.err(err);
+            console.error(err);
+            // we have to forceably exit for some reason...
+            process.exit();
         });
 } else {
     console.log('Usage: manifest_update [lang]');
