@@ -76,7 +76,10 @@ function help(cmd) {
                     toSend.push("\t_aliases: " + commands[name].alias.join(" | ") + "_");
                 }
                 if(commands[name].usage) {
-                    toSend.push("\tusage: " + commands[name].usage);
+                    toSend.push("\tusage: " + 
+                        // if we have an array, then just join everything with \n
+                        (Array.isArray(commands[name].usage) ? commands[name].usage.join("\n") : commands[name].usage)
+                    );
                 }
             }
         });
@@ -113,7 +116,7 @@ function parseMessage(msg) {
         logger.debug("got message from [%s] in channel [%s]: ", msg.author.username, msg.channel.name, msg.content);
 
         //strip off the prefix and split into args
-        var args = msg.content.substring(config.commandPrefix.length).trim().match(/\w+|"(?:\\"|[^"])+"/g);
+        var args = msg.content.substring(config.commandPrefix.length).trim().match(/[^\s]+|"(?:\\"|[^"])+"/g);
         var cmdName = args.shift().toLowerCase();
 
         logger.debug("found command '%s'", cmdName);

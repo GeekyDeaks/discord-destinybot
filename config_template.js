@@ -10,6 +10,9 @@ module.exports = {
         db : {
             url: "mongodb://localhost:27017/des"
         },
+        role : {
+            collection: "roles"
+        },
         destiny: {
             apikey: "BUNGIE_TOKEN",
             url: "https://www.bungie.net/Platform/Destiny",
