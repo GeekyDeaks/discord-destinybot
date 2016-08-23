@@ -4,6 +4,7 @@ var logger = require('winston');
 var fs = require('fs');
 var path = require('path');
 var co = require('co');
+var message = require('./message');
 
 var app = require.main.exports;
 var bot = app.bot;
@@ -131,12 +132,6 @@ function parseMessage(msg) {
         // yep, ok then see if we have that command loaded
         if(!commands[cmdName] || !commands[cmdName].exec) return;
 
-        // check if it's an admin command
-        if(commands[cmdName].admin && !isAdmin(msg)) {
-            // see if we have the admin role
-            return bot.sendMessage(msg, "Not authorised");
-        }
-
         var cmd = {
             msg: msg,
             args: args,
@@ -149,13 +144,19 @@ function parseMessage(msg) {
             args.length--;
         }
 
+        // check if it's an admin command
+        if(commands[cmdName].admin && !isAdmin(msg)) {
+            // see if we have the admin role
+            return message.send(msg, "You are not authorised to run `"+cmdName+"`", cmd.isPublic, 10000);
+        }
+
         logger.debug("executing command [%s] with args [%s]", cmdName, args.join(","));
         // all looks good, so let's run the command
         yield commands[cmdName].exec(cmd);
 
     }).catch(function (err) {
         logger.error("Error when parsing msg '"+msg+"':"+err);
-        bot.sendMessage(msg, "Oops, something went unexpectedly wrong\n```"+err+"```");
+        message.send(msg, "Oops, something went unexpectedly wrong\n```"+err+"```", cmd.isPublic, 10000);
     });
 
 
