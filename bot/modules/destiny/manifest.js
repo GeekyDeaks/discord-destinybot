@@ -12,6 +12,10 @@ function getDestinyActivityDefinition(hash, lang) {
     return db.collection(col).findOne({ hash: hash });
 }
 
+function getDesintyActivityCategoryDefinition(hash, lang) {
+    var col = config.modules.destiny.collection+'.'+(lang || config.language)+'DesintyActivityCategoryDefinition';
+    return db.collection(col).findOne({ hash: hash });
+}
 
 module.exports.getDestinyActivityDefinition = getDestinyActivityDefinition;
-
+module.exports.getDesintyActivityCategoryDefinition = getDesintyActivityCategoryDefinition;
