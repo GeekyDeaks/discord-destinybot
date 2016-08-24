@@ -135,12 +135,13 @@ function parseMessage(msg) {
         var cmd = {
             msg: msg,
             args: args,
-            name: cmdName
+            name: cmdName,
+            isPublic : false
         };
 
         // check if the last argument was public
         if(args.length && (args[args.length - 1].toLowerCase() === 'public')) {
-            cmd.isPublic = msg.channel && !msg.channel.isPrivate; // only set isPublic if we are on the server
+            cmd.isPublic = true;
             args.length--;
         }
 
@@ -156,7 +157,7 @@ function parseMessage(msg) {
 
     }).catch(function (err) {
         logger.error("Error when parsing msg '"+msg+"':"+err);
-        message.send(msg, "Oops, something went unexpectedly wrong\n```"+err+"```", cmd.isPublic, 10000);
+        message.send(msg, "Oops, something went unexpectedly wrong\n```"+err+"```", !msg.channel.isPrivate, 10000);
     });
 
 
