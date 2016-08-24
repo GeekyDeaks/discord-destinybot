@@ -9,7 +9,16 @@ module.exports = {
     },
     modules: {
         db : {
-            url: "mongodb://localhost:27017/des"
+            // Update url with actual mongo connection string. 
+            url: "mongodb://localhost:27017/des",
+            // all options are optional
+            /*options: { 
+                uri_decode_auth: ""
+                db: "",
+                server: "",
+                replSet: "",
+                promiseLibrary: ""
+            }*/
         },
         role : {
             collection: "roles"
