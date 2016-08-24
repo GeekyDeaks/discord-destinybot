@@ -29,10 +29,17 @@ bot.on("debug", function (msg) {
     logger.debug(msg);
 });
 
-bot.on("ready", function () {
+bot.once("ready", function () {
     bot.setPlayingGame("Global Thermonuclear War with WOPR");
     logger.info("%s is ready!", bot.internal.user.username);
     logger.verbose("Listening to %s channels on %s servers", bot.channels.length, bot.servers.length);
+
+    // configure the default servers
+    if(app.defaultServer = bot.servers.get("name", config.discord.defaultServer)) {
+        logger.info("setting default server to: %s [%s]", app.defaultServer.name, app.defaultServer.id);
+    } else {
+        logger.warn("unable to find default server: %s", config.discord.defaultServer);
+    }
 });
 
 bot.on("disconnected", function () {

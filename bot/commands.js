@@ -4,6 +4,7 @@ var logger = require('winston');
 var fs = require('fs');
 var path = require('path');
 var co = require('co');
+var message = require('./message');
 
 var app = require.main.exports;
 var bot = app.bot;
@@ -55,30 +56,24 @@ function help(cmd) {
 
         var msg = cmd.msg;
         var args = cmd.args;
-
+        
         if(args.length > 0) {
             var c = args[0];
             if(!commands[c]) {
                 return bot.sendMessage(msg, "command `"+c+"` not recognised");
             }
-            if(commands[c].usage) {
-                return bot.sendMessage(msg, "\tusage: " + commands[c].usage);
-            } else {
-                return bot.sendMessage(msg, "no usage defined for command `"+c+"`");
-            }
+
+            return bot.sendMessage(msg, commandHelp(c).join("\n"));
         }
 
         var toSend = [];
-        Object.keys(commands).forEach(function (name) {
-            if (name === commands[name].name) {
-                toSend.push("**" + name + "** - " + commands[name].desc);
-                if (commands[name].alias.length > 0) {
-                    toSend.push("\t_aliases: " + commands[name].alias.join(" | ") + "_");
-                }
-                if(commands[name].usage) {
-                    toSend.push("\tusage: " + commands[name].usage);
-                }
-            }
+        Object.keys(commands).sort().forEach(function (name) {
+
+            if(name !== commands[name].name) return; // skip aliases
+            if(commands[name].admin && !isAdmin(msg)) return; // skip admin commands for non-admin
+
+            toSend = toSend.concat(commandHelp(name));
+
         });
 
         return bot.sendMessage(msg, toSend.join("\n"));
@@ -86,10 +81,25 @@ function help(cmd) {
     });
 }
 
+function commandHelp(name) {
+    var toSend = [];
+    toSend.push("**" + name + "** - " + commands[name].desc);
+    if (commands[name].alias.length > 0) {
+        toSend.push("\t_aliases: " + commands[name].alias.join(" | ") + "_");
+    }
+    if (commands[name].usage) {
+        toSend.push("\tusage: " +
+            // if we have an array, then just join everything with \n
+            (Array.isArray(commands[name].usage) ? commands[name].usage.join("\n") : commands[name].usage)
+        );
+    }
+    return toSend;
+}
+
 commands.help = {
     desc: 'List commands',
     name: 'help',
-    usage: 'help [command]',
+    usage: '`help [command]`',
     alias: ['h'],
     exec: help
 };
@@ -108,12 +118,13 @@ function parseMessage(msg) {
         if (msg.author.bot) return;
 
         // look for the command prefix
-        if(!msg.content.startsWith(config.commandPrefix)) return;
+        if(!msg.content.toLowerCase().startsWith(config.commandPrefix)) return;
 
-        logger.debug("got message from [%s] in channel [%s]: ", msg.author.username, msg.channel.name, msg.content);
+        logger.debug("got message from [%s] in channel [%s]: ", 
+            msg.author.username, (msg.channel.name || "PM"), msg.content);
 
         //strip off the prefix and split into args
-        var args = msg.content.substring(config.commandPrefix.length).trim().split(" ");
+        var args = msg.content.substring(config.commandPrefix.length).trim().match(/[^\s]+|"(?:\\"|[^"])+"/g);
         var cmdName = args.shift().toLowerCase();
 
         logger.debug("found command '%s'", cmdName);
@@ -121,17 +132,23 @@ function parseMessage(msg) {
         // yep, ok then see if we have that command loaded
         if(!commands[cmdName] || !commands[cmdName].exec) return;
 
-        // check if it's an admin command
-        if(commands[cmdName].admin && !isAdmin(msg)) {
-            // see if we have the admin role
-            return bot.sendMessage(msg, "Not authorised");
-        }
-
         var cmd = {
             msg: msg,
             args: args,
             name: cmdName
         };
+
+        // check if the last argument was public
+        if(args.length && (args[args.length - 1].toLowerCase() === 'public')) {
+            cmd.isPublic = msg.channel && !msg.channel.isPrivate; // only set isPublic if we are on the server
+            args.length--;
+        }
+
+        // check if it's an admin command
+        if(commands[cmdName].admin && !isAdmin(msg)) {
+            // see if we have the admin role
+            return message.send(msg, "You are not authorised to run `"+cmdName+"`", cmd.isPublic, 10000);
+        }
 
         logger.debug("executing command [%s] with args [%s]", cmdName, args.join(","));
         // all looks good, so let's run the command
@@ -139,10 +156,18 @@ function parseMessage(msg) {
 
     }).catch(function (err) {
         logger.error("Error when parsing msg '"+msg+"':"+err);
-        bot.sendMessage(msg, "Oops, something went unexpectedly wrong\n```"+err+"```");
+        message.send(msg, "Oops, something went unexpectedly wrong\n```"+err+"```", cmd.isPublic, 10000);
     });
 
 
+}
+
+function isAdmin(msg) {
+    var server = msg.server || app.defaultServer;
+    var role = server.roles.get("name", config.discord.adminRole);
+    if(!role) return false;
+
+    return msg.author.hasRole(role);
 }
 
 module.exports.load = load;

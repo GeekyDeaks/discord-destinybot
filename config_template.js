@@ -4,7 +4,8 @@ module.exports = {
 
     discord: {
         token: "DISCORD_TOKEN",
-        adminRole: "Modteam"
+        adminRole: "Modteam",
+        defaultServer: ""
     },
     modules: {
         db : {
@@ -19,6 +20,9 @@ module.exports = {
                 promiseLibrary: ""
             }*/
         },
+        role : {
+            collection: "roles"
+        },
         destiny: {
             apikey: "BUNGIE_TOKEN",
             url: "https://www.bungie.net/Platform/Destiny",
@@ -28,8 +32,10 @@ module.exports = {
         voc: {
             psnChannel: "psn"
         },
-        welcome: {
-            
+        welcome: {},
+        util : {},
+        gamer: {
+            collection: "gamers"
         }
     },
     commandPrefix: "d!",
