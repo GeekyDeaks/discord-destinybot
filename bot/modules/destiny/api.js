@@ -95,7 +95,7 @@ function manifest() {
 function advisor() {
     // /Advisors/V2/
 
-    var op = util.format('/Advisors/V2/');
+    var op = util.format('/Advisors/V2?definitions=true');
     return destinyAPI(op);
 }
 
