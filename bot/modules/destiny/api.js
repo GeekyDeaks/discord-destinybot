@@ -92,7 +92,47 @@ function manifest() {
     return destinyAPI(op);
 }
 
+function advisor() {
+    // /Advisors/V2/
+
+    var op = util.format('/Advisors/V2/');
+    return destinyAPI(op);
+}
+
+
+/**
+ * To-Do (not yet implemented)
+ * 
+ * @var type membershipType
+ * @var id destinyMemberShipId
+ * @var charId characterId
+ *
+ * syntax of cmd would be:
+ * /d advisor xbl unisys12 titan
+ *
+ * Will have to search for user first,
+ * using search cmd above to find
+ * the characterId. Possible this 
+ * will not work on account with 
+ * two of the same class. Could be 
+ * possible to provide feedback to 
+ * user in the form of looking up
+ * the user account and return a list
+ * of players characters. Followed
+ * by asking which one they would Like
+ * to search for and providing a 
+ * cmd they can copy and past back
+ * into chat. 
+ */
+function playerAdvisor(type, id) {
+    // {membershipType}/Account/{destinyMembershipId}/Character/{characterId}/Advisors/V2/
+
+    var op = util.format('{type}/Account/{id}/Character/{characterId}/Advisors/V2/');
+    return destinyAPI(op);
+}
+
 module.exports.stats = stats;
 module.exports.search = search;
 module.exports.summary = summary;
 module.exports.manifest = manifest;
+module.exports.advisor = advisor;
