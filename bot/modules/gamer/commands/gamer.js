@@ -43,27 +43,30 @@ function exec(cmd) {
             return message.send(msg, "Sorry, could not find **" + md.escape(name) + "**", cmd.isPublic, 10000);
         }
 
-        var localtime;
-        // figure out the Localtime
-        if (gamer.tz && moment.tz.zone(gamer.tz)) {
-            localtime = " Localtime: " + now.tz(gamer.tz).format("HH:mm (Z z)");
-        } else {
-            localtime = "  Timezone: " + gamer.tz;
-        }
-
+        var toSend = ["```ruby"];
+            toSend.push("Discord ID: @" + gamer.discord);
+        if(gamer.psn)
+            toSend.push("       PSN: " + gamer.psn);
+        if(gamer.xbl)
+            toSend.push("       XBL: " + gamer.xbl);
+        if(gamer.games)
+            toSend.push("     Games: " + gamer.games.join(", "));
         // get joined at timestamp
         var user = bot.users.get("username", gamer.discord);
         if (user) {
             var detailsOf = server.detailsOfUser(user);
-            joinedAt = new Date(detailsOf.joinedAt).toUTCString();
+            joinedAt = new Date(detailsOf.joinedAt).toISOString();
+            toSend.push(" Joined At: " + joinedAt);
         }
+        
+        if(gamer.tz && moment.tz.zone(gamer.tz)) {
+            toSend.push(" Localtime: " + now.tz(gamer.tz).format("HH:mm (Z z)"));
+        } else if(gamer.tz) {
+            toSend.push("  Timezone: " + gamer.tz);
+        }
+        toSend.push("```");
 
-        return message.send(msg, "```ruby\n" +
-            "Discord ID: @" + gamer.discord + "\n" +
-            "       PSN: " + gamer.psn + "\n" +
-            "     Games: " + gamer.games.join(", ") + "\n" +
-            " Joined At: " + joinedAt + "\n" +
-            localtime + "```", cmd.isPublic);
+        return message.send(msg, toSend, cmd.isPublic);
 
     });
 

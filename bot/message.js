@@ -65,7 +65,9 @@ function _send(dest, content, expire) {
     return co(function* () {
         var m;
 
-        var isPublic = !(dest.channel && dest.channel.isPrivate);
+        // check if the destination is either a user or a 
+        // private channel
+        var isPublic = !(dest.constructor.name === "User" || dest.channel.isPrivate);
 
         // build up the message
         if (Array.isArray(content)) {

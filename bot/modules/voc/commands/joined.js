@@ -45,7 +45,9 @@ function exec(cmd) {
         Object.keys(users).sort(function(a, b) {
             return users[a].joinedAt - users[b].joinedAt;
         }).forEach(function (u) {
-            toSend.push(u + " | " + new Date(users[u].joinedAt).toISOString() + " | " + users[u].tenure)
+            toSend.push(md.escape(u) + 
+                " | " + new Date(users[u].joinedAt).toISOString() + 
+                " | " + users[u].tenure)
         });
 
         message.send(msg, toSend, cmd.isPublic);

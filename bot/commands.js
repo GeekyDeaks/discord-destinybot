@@ -141,7 +141,7 @@ function parseMessage(msg) {
 
         // check if the last argument was public
         if(args.length && (args[args.length - 1].toLowerCase() === 'public')) {
-            cmd.isPublic = true;
+            cmd.isPublic = !msg.channel.isPrivate;
             args.length--;
         }
 
