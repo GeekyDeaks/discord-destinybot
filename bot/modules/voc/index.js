@@ -11,7 +11,7 @@ function init(bot) {
     try {
          commands.load(__dirname);
     } catch (err) {
-        logger.error("failed whilst loading destiny commands: ", err);
+        logger.error("failed whilst loading voc commands: ", err);
     }
 
     return Promise.resolve();

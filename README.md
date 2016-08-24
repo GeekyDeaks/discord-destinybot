@@ -24,7 +24,7 @@ grown organically and now has a few other features related to gaming in general
 
 6. Get your bungie APIKEY from 
     [https://www.bungie.net/en/User/API](https://www.bungie.net/en/User/API)
-    and save it under `config.destiny.apikey`
+    and save it under `config.modules.destiny.apikey`
 
 7. Add the app to your discord account [https://discordapp.com/developers/applications/me](https://discordapp.com/developers/applications/me)
 

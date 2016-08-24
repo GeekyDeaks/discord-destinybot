@@ -9,6 +9,7 @@ var message = require('../../../message');
 var app = require.main.exports;
 var bot = app.bot;
 var config = app.config;
+var db = app.db;
 
 function exec(cmd) {
 
@@ -30,12 +31,17 @@ function exec(cmd) {
 
         // scan through the list of Users
         var missing = [];
-        bot.users.forEach(function (u) {
-            if(u.bot) return; // skip the bots
-            //if(!psn.gamers[u.username]) {
-            //    missing.push(u.username);
-            //} 
-        });
+        var gamer;
+        var members = server.members;
+        for(var m = 0; m < members.length ; m++) {
+            if(members[m].bot) continue;
+            gamer = yield db.collection(config.modules.gamer.collection).findOne( 
+                { discord : members[m].username } );
+
+            if(!gamer) {
+                missing.push(members[m].username);
+            } 
+        }
 
         var toSend = [];
 
@@ -67,6 +73,7 @@ function exec(cmd) {
         }
 
         yield message.update(busyMsg, toSend);
+        //yield message.send(msg, toSend, cmd.isPublic);
 
     });
 

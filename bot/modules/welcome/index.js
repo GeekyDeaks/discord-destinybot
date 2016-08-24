@@ -4,9 +4,18 @@ var logger = require('winston');
 
 var app = require.main.exports;
 var bot = app.bot;
+var commands = app.commands;
 
 function init(bot) {
     logger.debug("init welcome module");
+
+    // load the commands
+    try {
+         commands.load(__dirname);
+    } catch (err) {
+        logger.error("failed whilst loading welcome commands: ", err);
+    }
+
     return Promise.resolve();
 }
 

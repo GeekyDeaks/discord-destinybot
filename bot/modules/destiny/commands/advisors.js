@@ -27,8 +27,8 @@ function exec(cmd) {
         var activityName = advisor.data.activities.display;
         var categories = advisor.data.activityCategories;
 
-
-        for (let i in activityName) {
+        var i;
+        for (i in activities) {
             console.log(i);
         }
 
