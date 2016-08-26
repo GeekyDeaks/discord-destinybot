@@ -24,7 +24,9 @@ function exec(cmd) {
             return message.send(msg, "did you forget something?", cmd.isPublic, 10000);
         }
 
-        var p = yield db.collection(config.modules.gamer.collection).find({ games : game}).sort({"discord" : 1}).toArray();
+        var regex = { $regex: '^'+game+'$', $options : 'i' };
+
+        var p = yield db.collection(config.modules.gamer.collection).find({ games : regex}).sort({"discord" : 1}).toArray();
 
         if (!p || p.length === 0) {
             return message.send(msg, "Sorry, could not find any players for **" + game + "**", cmd.isPublic, 10000);

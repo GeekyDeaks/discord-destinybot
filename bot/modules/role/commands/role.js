@@ -38,7 +38,9 @@ function exec(cmd) {
         var alias = args[0];
         // check if the role exists
 
-        var role = yield db.collection(config.modules.role.collection).findOne({ alias : alias});
+        var regex = { $regex: '^'+alias+'$', $options : 'i' };
+
+        var role = yield db.collection(config.modules.role.collection).findOne({ alias : regex});
         if(!role) {
             return message.send(msg, "role `" + alias + "` not found", cmd.isPublic, 10000 );
         }

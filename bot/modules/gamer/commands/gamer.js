@@ -38,7 +38,9 @@ function exec(cmd) {
             return message.send(msg, "did you forget something?", cmd.isPublic, 10000);
         }
 
-        var gamer = yield db.collection(config.modules.gamer.collection).findOne({ discord: name });
+        var regex = { $regex: '^'+name+'$', $options : 'i' };
+
+        var gamer = yield db.collection(config.modules.gamer.collection).findOne({ discord: regex });
         if (!gamer) {
             return message.send(msg, "Sorry, could not find **" + md.escape(name) + "**", cmd.isPublic, 10000);
         }
