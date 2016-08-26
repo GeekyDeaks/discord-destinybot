@@ -6,6 +6,7 @@ var logger = require('winston');
 var md = require('../../../markdown');
 var moment = require('moment-timezone');
 var message = require('../../../message');
+var gamer = require('../index');
 
 var app = require.main.exports;
 var bot = app.bot;
@@ -23,48 +24,44 @@ function exec(cmd) {
 
         var server = msg.server || app.defaultServer;
 
-        // mentions take precedent
+        var g;
+
+        // figure out the username
         if (msg.mentions.length > 0) {
             name = msg.mentions[0].username;
+            g = yield gamer.findById(msg.mentions[0].id);
+        } else if(cmd.args[0]) {
+            name = cmd.args[0].replace(/^@/, '');
+            g = yield gamer.findOneByName(name);
         } else {
-            name = cmd.args[0] || cmd.msg.author.username;
+            name = cmd.msg.author.username;
+            g = yield gamer.findById(cmd.msg.author.id);
         }
 
-        // sometimes we get the @ come through..
-        name = name.replace(/^@/, '');
-
-        if (!name) {
-            // should not get here..
-            return message.send(msg, "did you forget something?", cmd.isPublic, 10000);
-        }
-
-        var regex = { $regex: '^'+name+'$', $options : 'i' };
-
-        var gamer = yield db.collection(config.modules.gamer.collection).findOne({ discord: regex });
-        if (!gamer) {
+        if (!g) {
             return message.send(msg, "Sorry, could not find **" + md.escape(name) + "**", cmd.isPublic, 10000);
         }
 
         var toSend = ["```ruby"];
-            toSend.push("Discord ID: @" + gamer.discord);
-        if(gamer.psn)
-            toSend.push("       PSN: " + gamer.psn);
-        if(gamer.xbl)
-            toSend.push("       XBL: " + gamer.xbl);
-        if(gamer.games)
-            toSend.push("     Games: " + gamer.games.join(", "));
+            toSend.push("Discord ID: @" + g.discord.name);
+        if(g.psn)
+            toSend.push("       PSN: " + g.psn);
+        if(g.xbl)
+            toSend.push("       XBL: " + g.xbl);
+        if(g.games)
+            toSend.push("     Games: " + g.games.join(", "));
         // get joined at timestamp
-        var user = bot.users.get("username", gamer.discord);
+        var user = bot.users.get("id", g.discord.id);
         if (user) {
             var detailsOf = server.detailsOfUser(user);
             joinedAt = new Date(detailsOf.joinedAt).toISOString();
             toSend.push(" Joined At: " + joinedAt);
         }
         
-        if(gamer.tz && moment.tz.zone(gamer.tz)) {
-            toSend.push(" Localtime: " + now.tz(gamer.tz).format("HH:mm (Z z)"));
-        } else if(gamer.tz) {
-            toSend.push("  Timezone: " + gamer.tz);
+        if(g.tz && moment.tz.zone(g.tz)) {
+            toSend.push(" Localtime: " + now.tz(g.tz).format("HH:mm (Z z)"));
+        } else if(g.tz) {
+            toSend.push("  Timezone: " + g.tz);
         }
         toSend.push("```");
 
@@ -75,7 +72,7 @@ function exec(cmd) {
 }
 
 module.exports = {
-    desc: 'Lookup gamer details for a discord account',
+    desc: 'Lookup g details for a discord account',
     name: 'gamer',
     usage: '`gamer <@discord-id>`',
     alias: ['psn', 'xbl'],

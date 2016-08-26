@@ -5,6 +5,7 @@ var co = require('co');
 var md = require('../../../markdown');
 var parse = require('../parse');
 var message = require('../../../message');
+var gamer = require('../../gamer');
 
 var app = require.main.exports;
 var bot = app.bot;
@@ -31,14 +32,13 @@ function exec(cmd) {
 
         // scan through the list of Users
         var missing = [];
-        var gamer;
+        var g;
         var members = server.members;
         for(var m = 0; m < members.length ; m++) {
             if(members[m].bot) continue;
-            gamer = yield db.collection(config.modules.gamer.collection).findOne( 
-                { discord : members[m].username } );
+            g = yield gamer.findById(members[m].id); 
 
-            if(!gamer) {
+            if(!g) {
                 missing.push(members[m].username);
             } 
         }

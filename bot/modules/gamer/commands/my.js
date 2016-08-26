@@ -17,7 +17,6 @@ function exec(cmd) {
     return co(function* (){
 
         var msg = cmd.msg;
-        var name = msg.author.name;
         var args = cmd.args;
 
         var option = args.shift();
@@ -26,19 +25,21 @@ function exec(cmd) {
             case 'xbl':
                 if(!args.length) return message.send(msg, "missing xbl gamertag", cmd.isPublic, 10000);
                 yield db.collection(config.modules.gamer.collection).updateOne(
-                    { discord: name },
-                    { $set: { xbl: args[0], modified: true } },
+                    { "discord.id": msg.author.id },
+                    { $set: { xbl: args[0], "discord.name" : msg.author.name, modified: true } },
                     { upsert: true }
                 );
-                break;
+                return message.send(msg, "Updated XBL Tag to: "+args[0]);
+
             case 'psn':
                 if(!args.length) return message.send(msg, "missing psn id", cmd.isPublic, 10000);
                 yield db.collection(config.modules.gamer.collection).updateOne(
-                    { discord: name },
-                    { $set: { psn: args[0], modified: true } },
+                    { "discord.id": msg.author.id },
+                    { $set: { psn: args[0], "discord.name" : msg.author.name, modified: true } },
                     { upsert: true }
                 );
-                break;
+                return message.send(msg, "Updated PSN Tag to: "+args[0]);
+
             case 'game':
                 if(!args.length) return message.send(msg, "no games specified", cmd.isPublic, 10000);
                 break;
@@ -63,5 +64,6 @@ module.exports = {
             "\t\t`tz <timezone>` - set your timezone",
             "\t\t`game [+game]|[-game]` - add or remove a game"],
     alias: [],
-    exec: exec
+    exec: exec,
+    admin: true
 };

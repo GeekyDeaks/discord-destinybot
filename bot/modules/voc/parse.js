@@ -45,16 +45,15 @@ function parse(text) {
     }
 
     // we expect the first ID to be the discord one
-    gamer.discord = id[0];
+    var name = id[0];
     var discord;
-    var found = false;
 
     // check if it looks like a mention
-    if(gamer.discord.match(/^\<\d+\>$/)) {
-        discord = gamer.discord.replace(/[\<\>]/g, "");
-
+    if(name.match(/^\<\d+\>$/)) {
         // yep, looks like a discord id, figure out who
-        discord = bot.users.get("id", discord);
+        name = name.replace(/[\<\>]/g, "");
+
+        discord = bot.users.get("id", name);
         if(!discord) {
             // ok, so it was a discord ID, but we
             // have no record of the user, so
@@ -63,13 +62,23 @@ function parse(text) {
             return;
         }
 
-        gamer.discord = discord.username;
 
+
+    } else {
+        discord = bot.users.get("name", name);
+        if(!discord) {
+            errors.push("`"+ text + "` | unknown user name");
+            return;
+        }
     }
+    gamer.discord = {
+        name : discord.username,
+        id : discord.id
+    };
 
     // if we have two ID's then the second one should be the PSN
     // otherwise the PSN is the same as the discord ID
-    gamer.psn = (id.length === 2) ? id[1] : gamer.discord;
+    gamer.psn = (id.length === 2) ? id[1] : gamer.discord.name;
 
     // now split out the games and trim any whitespace
     gamer.games = tokens[1].split(",").map(function (s) { return s.trim() }); 
@@ -122,7 +131,7 @@ function scrape(channel) {
                 if (gamer) {
                     yield db.collection(config.modules.gamer.collection).updateOne(
                         { 
-                            discord : gamer.discord,  
+                            "discord.id" : gamer.discord.id,  
                             // only update non-modified entries
                             modified : false
                         },
