@@ -10,6 +10,56 @@ var message = require('../../../message');
 var app = require.main.exports;
 var bot = app.bot;
 var config = app.config;
+var db = app.db;
+
+
+function stats(type, name) {
+    return co(function* () {
+
+        var m = yield api.search(type, name);
+        if(!m.length) return;
+
+        var stats = yield api.stats(type, m[0].membershipId);
+        if(!stats) return;
+
+        var pve = stats.mergedAllCharacters.results.allPvE.allTime;
+        var pvp = stats.mergedAllCharacters.results.allPvP.allTime;
+
+        var toSend = [];
+        var line = [];
+
+        if (pve) {
+            line[0] = "```ruby";
+            line[1] = "━━ " + membership.name(type) + " / " + m[0].displayName + " / PvE ";
+            line[1] += "━".repeat(40 - line[1].length);
+            line.push("         Time Played: " + pve.secondsPlayed.basic.displayValue);
+            line.push(" Highest Light Level: " + pve.highestLightLevel.basic.displayValue);
+            line.push("                 KPD: " + pve.killsDeathsRatio.basic.displayValue);
+            line.push("     Precision Kills: " + pve.precisionKills.basic.displayValue);
+            line.push("         Best Weapon: " + pve.weaponBestType.basic.displayValue);
+            line.push("```");
+            toSend.push(line.join("\n"));
+        }
+        
+        if (pvp) {
+            line.length = 0;
+            line[0] = "```ruby";
+            line[1] = "━━ " + membership.name(type) + " / " + m[0].displayName + " / PvP ";
+            line[1] += "━".repeat(40 - line[1].length);
+            line.push("         Time Played: " + pvp.secondsPlayed.basic.displayValue);
+            line.push(" Highest Light Level: " + pvp.highestLightLevel.basic.displayValue);
+            line.push("                 KPD: " + pvp.killsDeathsRatio.basic.displayValue);
+            line.push("     Precision Kills: " + pvp.precisionKills.basic.displayValue);
+            line.push("         Best Weapon: " + pvp.weaponBestType.basic.displayValue);
+            line.push("      Win Loss Ratio: " + pvp.winLossRatio.basic.displayValue);
+            line.push("       Longest Spree: " + pvp.longestKillSpree.basic.displayValue);
+            line.push("```");
+            toSend.push(line.join("\n"));            
+
+        }
+        return toSend;
+    });
+}
 
 
 function exec(cmd) {
@@ -20,6 +70,8 @@ function exec(cmd) {
         var memType = membership.type(cmd);
         var name;
         var busyMsg;
+        var xbl;
+        var psn;
 
         try {
 
@@ -33,61 +85,47 @@ function exec(cmd) {
             // sometimes we get the @ come through..
             name = name.replace(/^@/, '');
 
-            //var gamer = psn.lookup(name);
-            //if (gamer) {
-            //    name = gamer.psn;
-            //}
+            busyMsg = yield message.send(msg, ":mag: Looking up **"+md.escape(name)+"**", cmd.isPublic);
 
-            if(!name) {
-                // should not really get here...
-                return message.send(msg, "did you forget something?", cmd.isPublic, 10000);
+            var regex = { $regex: '^'+name+'$', $options : 'i' };
+            // lookup the user 
+            var gamer = yield db.collection(config.modules.gamer.collection).findOne({ discord: regex });
+            if(gamer) {
+                xbl = gamer.xbl;
+                psn = gamer.psn;
+            } else {
+                xbl = name;
+                psn = name;
             }
 
-            busyMsg = yield message.send(msg, ":mag: Looking up **"+md.escape(name)+"**", cmd.isPublic);
-            var c = yield api.search(memType, name);
-            if(!c.length) {
+            var toSend = [];
+            var mt;
+            var out;
+            while(mt = memType.shift()) {
+                //
+                out = undefined;
+                switch(mt) {
+                    case membership.XBL:
+                        if(xbl)
+                            out = yield stats(membership.XBL, xbl);
+                        break;
+                    case membership.PSN:
+                        if(psn) 
+                            out = yield stats(membership.PSN, psn);
+                        break;
+                }
+                // concat the array in place
+                // http://stackoverflow.com/questions/4156101/javascript-push-array-values-into-another-array
+                if(out) toSend.push.apply(toSend, out);
+            }
+            
+            if(!toSend.length) {
                 return message.update(busyMsg, 
                     "Sorry, bungie does not seem to know anything about **"+md.escape(name)+"**", 10000);
             }
-            var stats = yield api.stats(memType, c[0].membershipId);
-            name = c[0].displayName;
-
-            var pve = stats.mergedAllCharacters.results.allPvE.allTime;
-            var pvp = stats.mergedAllCharacters.results.allPvP.allTime;
-
-            var toSend = [];
-            var firstline;
-            //toSend.push("**"+md.escape(name)+"**");
-            if (pve) {
-                firstline = "━━ "+name+" / PvE ";
-                firstline += "━".repeat(40 - firstline.length);
-                toSend.push("```ruby\n"+
-                    firstline + "\n" +
-                    "         Time Played: " + pve.secondsPlayed.basic.displayValue + "\n" +
-                    " Highest Light Level: " + pve.highestLightLevel.basic.displayValue + "\n" +
-                    "                 KPD: " + pve.killsDeathsRatio.basic.displayValue + "\n" +
-                    "     Precision Kills: " + pve.precisionKills.basic.displayValue + "\n" +
-                    "         Best Weapon: " + pve.weaponBestType.basic.displayValue + "\n" +
-                    "```"
-                );                
-            }
-            if (pvp) {
-                firstline = "━━ "+name+" / PvP ";
-                firstline += "━".repeat(40 - firstline.length);
-                toSend.push("```ruby\n"+
-                    firstline + "\n" +
-                    "         Time Played: " + pvp.secondsPlayed.basic.displayValue + "\n" +
-                    " Highest Light Level: " + pvp.highestLightLevel.basic.displayValue + "\n" +
-                    "                 KPD: " + pvp.killsDeathsRatio.basic.displayValue + "\n" +
-                    "     Precision Kills: " + pvp.precisionKills.basic.displayValue + "\n" +
-                    "         Best Weapon: " + pvp.weaponBestType.basic.displayValue + "\n" +
-                    "      Win Loss Ratio: " + pvp.winLossRatio.basic.displayValue + "\n" +
-                    "       Longest Spree: " + pvp.longestKillSpree.basic.displayValue + "\n" +
-                    "```"
-                );     
-            }
 
             return message.update(busyMsg, toSend);
+
         } catch (err) { 
             var errmsg = "sorry, something unexpected happened: ```"+err+"```";
 
