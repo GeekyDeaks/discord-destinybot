@@ -3,6 +3,7 @@
 var co = require('co');
 var logger = require('winston');
 var moment = require('moment-timezone');
+var gamer = require('../gamer');
 
 var app = require.main.exports;
 var bot = app.bot;
@@ -83,12 +84,12 @@ function parse(text) {
     // now split out the games and trim any whitespace
     gamer.games = tokens[1].split(",").map(function (s) { return s.trim() }); 
     if(gamer.games.length === 1 && gamer.games[0].length === 0) {
-        warnings.push("`@"+gamer.discord+"`: no games listed");
+        warnings.push("`@"+gamer.discord.name+"`: no games listed");
     }
 
     gamer.tz = tokens[2].trim();
     if(!moment.tz.zone(gamer.tz)) {
-        warnings.push("`@"+gamer.discord+"`: unknown timezone: "+gamer.tz);
+        warnings.push("`@"+gamer.discord.name+"`: unknown timezone: "+gamer.tz);
     }
 
     // set a flag to indicate if the entry has been modified
@@ -98,6 +99,40 @@ function parse(text) {
     logger.debug("gamer: ", gamer);
 
     return gamer;
+
+}
+
+function update(msg) {
+    return co(function* () {
+        // relax the match so that we can try and catch more 
+        // parsing errors without erroring on general text
+        var match = msg.content.match(/\-.+\|.+/g);
+        var vgamer;
+
+        // no match, skip this one
+        if (!match) return;
+
+        // we can have multiple PSN entries in each
+        // message, so we just loop around each one
+        var m;
+        while (m = match.shift()) {
+            vgamer = parse(m);
+            if (vgamer) {
+                // try and find our gamer
+                var g = yield gamer.findById(vgamer.discord.id);
+
+                if(g && g.modified) {
+                    warnings.push("`@"+g.discord.name+"`: skipped, user modified");
+                    continue;
+                }
+                // upsert the entry
+                yield gamer.upsert(vgamer);
+            } else {
+                // errors.push(m);
+            }
+        }
+    });
+
 
 }
 
@@ -114,34 +149,7 @@ function scrape(channel) {
         // the logs appear in reverse order, so we need to 
         // process them in reverse (popped) to get them chronologically
         while (msg = logs.pop()) {
-
-            // relax the match so that we can try and catch more 
-            // parsing errors without erroring on general text
-            var match = msg.content.match(/\-.+\|.+/g);
-            var gamer;
-
-            // no match, skip this one
-            if (!match) continue;
-
-            // we can have multiple PSN entries in each
-            // message, so we just loop around each one
-            var m;
-            while(m = match.shift()) {
-                gamer = parse(m);
-                if (gamer) {
-                    yield db.collection(config.modules.gamer.collection).updateOne(
-                        { 
-                            "discord.id" : gamer.discord.id,  
-                            // only update non-modified entries
-                            modified : false
-                        },
-                        { $set: gamer }, 
-                        { upsert: true }    
-                    );
-                } else {
-                    // errors.push(m);
-                }
-            }
+            update(msg);
         }
 
     });
@@ -150,4 +158,5 @@ function scrape(channel) {
 
 module.exports.warnings = warnings;
 module.exports.errors = errors;
+module.exports.update = update;
 module.exports.scrape = scrape;
