@@ -1,10 +1,12 @@
 'use strict';
 
 var logger = require('winston');
+var co = require('co');
 
 var app = require.main.exports;
 var bot = app.bot;
 var commands = app.commands;
+var db = app.db;
 
 function init(bot) {
     logger.debug("init welcome module");
@@ -19,47 +21,54 @@ function init(bot) {
     return Promise.resolve();
 }
 
-/*
 bot.on("serverNewMember", function(server, user) {
-    logger.info("New User: %s", user.name);
 
-    if(!config.welcome.enabled) return;
+    return co(function* () {
 
+        logger.info("New User: %s", user.name);
 
-    if(config.welcome.auto) {
-        var role = server.roles.get("name", config.welcome.auto);
-        if(role) {
-            logger.verbose("adding user: %s to role: %s", user.name, role.name);
-            user.addTo(role);
-        } else {
-            logger.error("AutoUpgrade role %s does not appear to exist!", config.welcome.auto);
+        var welcome = yield db.collection('settings').findOne({ "name": "welcome" });
+
+        // no settings or disabled
+        if (!welcome || !welcome.enabled) return;
+
+        if (welcome.auto) {
+            var role = server.roles.get("name", welcome.auto);
+            if (role) {
+                logger.verbose("adding user: %s to role: %s", user.name, role.name);
+                user.addTo(role);
+            } else {
+                logger.error("AutoUpgrade role %s does not appear to exist!", welcome.auto);
+            }
+
         }
 
-    }
+        var channel = server.channels.get("name", welcome.channel);
+        if (!channel) {
+            return logger.error("unable to welcome %s: channel %s not found", user.name, welcome.channel);
+        }
+        bot.sendMessage(channel, welcome.msg.replace(/:USER:/g, "<@" + user.id + ">"));
 
-    var channel = server.channels.get("name", config.welcome.channel);
-    if(!channel) {
-        return logger.error("unable to welcome %s: channel %s not found", user.name, config.welcome.channel);
-    }
-    bot.sendMessage(channel, config.welcome.msg.replace(/:USER:/g, "<@"+user.id+">"));
+    });
 });
 
 bot.on("serverMemberRemoved", function(server, user) {
-    logger.info("User: %s has left", user.name);
+
+    return co(function* () {
+
+        logger.info("User: %s has left", user.name);
+        var welcome = yield db.collection('settings').findOne({ "name": "welcome" });
+
+        // no settings or disabled
+        if (!welcome || !welcome.enabled) return;
+
+        var channel = server.channels.get("name", welcome.channel);
+        if (!channel) {
+            return logger.error("unable to say goodbye to %s: channel %s not found", user.name, welcome.channel);
+        }
+        bot.sendMessage(channel, user.name + " has left - bye bye!");
+
+    });
 });
-
-function isAdmin(msg) {
-
-    var roles = msg.channel.server.roles;
-
-    for (var r = 0; r < roles.length; r++) {
-        if (roles[r].name !== config.discord.adminRole) continue;
-        // found the admin role
-        return msg.author.hasRole(roles[r]);
-    }
-    return false;
-}
-
-/* */
 
 module.exports.init = init;
