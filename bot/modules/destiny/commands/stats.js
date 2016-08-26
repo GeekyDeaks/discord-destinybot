@@ -6,6 +6,7 @@ var md = require('../../../markdown');
 var api = require('../api');
 var membership = require('../membership');
 var message = require('../../../message');
+var gamer = require('../../gamer');
 
 var app = require.main.exports;
 var bot = app.bot;
@@ -75,24 +76,26 @@ function exec(cmd) {
 
         try {
 
+            var g;
+
             // figure out the username
-            if(msg.mentions.length > 0) {
+            if (msg.mentions.length > 0) {
                 name = msg.mentions[0].username;
+                g = yield gamer.findById(msg.mentions[0].id);
+            } else if(cmd.args[0]) {
+                name = cmd.args[0].replace(/^@/, '');
+                g = yield gamer.findOneByName(name);
             } else {
-                name = cmd.args[0] || cmd.msg.author.username;
+                name = cmd.msg.author.username;
+                g = yield gamer.findById(cmd.msg.author.id);
             }
 
-            // sometimes we get the @ come through..
-            name = name.replace(/^@/, '');
-
+            // we should get here pretty quick
             busyMsg = yield message.send(msg, ":mag: Looking up **"+md.escape(name)+"**", cmd.isPublic);
 
-            var regex = { $regex: '^'+name+'$', $options : 'i' };
-            // lookup the user 
-            var gamer = yield db.collection(config.modules.gamer.collection).findOne({ discord: regex });
-            if(gamer) {
-                xbl = gamer.xbl;
-                psn = gamer.psn;
+            if(g) {
+                xbl = g.xbl;
+                psn = g.psn;
             } else {
                 xbl = name;
                 psn = name;
