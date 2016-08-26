@@ -60,10 +60,10 @@ function help(cmd) {
         if(args.length > 0) {
             var c = args[0];
             if(!commands[c]) {
-                return bot.sendMessage(msg, "command `"+c+"` not recognised");
+                return message.send(msg, "command `"+c+"` not recognised", cmd.isPublic, 10000);
             }
 
-            return bot.sendMessage(msg, commandHelp(c).join("\n"));
+            return message.send(msg, commandHelp(c).join("\n"), cmd.isPublic);
         }
 
         var toSend = [];
@@ -72,11 +72,11 @@ function help(cmd) {
             if(name !== commands[name].name) return; // skip aliases
             if(commands[name].admin && !isAdmin(msg)) return; // skip admin commands for non-admin
 
-            toSend = toSend.concat(commandHelp(name));
+            toSend.push(commandHelp(name).join("\n"));
 
         });
 
-        return bot.sendMessage(msg, toSend.join("\n"));
+        return message.send(msg, toSend, cmd.isPublic);
 
     });
 }
