@@ -14,7 +14,7 @@ function init() {
     logger.debug("init db module");
 
     return co(function* () {
-        app.db = yield mongoClient.connect(config.modules.db.url);
+        app.db = yield mongoClient.connect(config.modules.db.url, { poolSize : 1 });
         logger.debug("connected to %s",config.modules.db.url);
 
     });

@@ -75,7 +75,7 @@ function upsert(gamer) {
     return db.collection(config.modules.gamer.collection).update(
         { "discord.id": gamer.discord.id },
         { $set: gamer },
-        { upsert: true }
+        { upsert: true, w : 1 }
     );
 }
 
