@@ -171,7 +171,11 @@ function parseMessage(msg) {
 
     }).catch(function (err) {
         logger.error("Error when parsing msg '"+msg+"':"+err);
-        message.send(msg, "Oops, something went unexpectedly wrong\n```"+err+"```", !msg.channel.isPrivate, 10000);
+        message.send(msg, 
+           ["Oops, something went unexpectedly wrong and I saw this error:", 
+            "```"+err+"```", 
+           "Please check to see if the command worked as it can sometimes be a problem with discord.",
+           "Otherwise, please try the command again" ], !msg.channel.isPrivate, 10000);
     });
 
 
