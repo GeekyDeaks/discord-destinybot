@@ -63,19 +63,19 @@ function exec(cmd) {
                     { upsert: true }
                 );
 
-                return message.send(msg, "SAR `" + role.alias + "` for role `" + role.name + "` added", isPublic);
+                return message.send(msg, "SAR `" + role.alias + "` for role `" + role.name + "` added", cmd.isPublic);
             case 'del':
                 if (args.length === 0) {
                     // send a list of roles:
-                    return message.send(msg, "No alias specified", isPublic, 10000);
+                    return message.send(msg, "No alias specified", cmd.isPublic, 10000);
                 }
 
                 var alias = args[0];
 
                 if(yield db.collection(config.modules.role.collection.deleteOne({ alias : alias }))) {
-                    return message.send(msg, "SAR `" + alias + "` deleted", isPublic);
+                    return message.send(msg, "SAR `" + alias + "` deleted", cmd.isPublic);
                 } else {
-                    return message.send(msg, "Cannot find alias `" + alias + "`", isPublic);
+                    return message.send(msg, "Cannot find alias `" + alias + "`", cmd.isPublic);
                 }
         }
 
