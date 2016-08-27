@@ -25,7 +25,7 @@ function exec(cmd) {
             }
 
             return message.send(msg, 
-                "```ruby\n"+
+                "```" + cmd.format +"\n"+
                 "     Channel: "+welcome.channel+"\n"+
                 "Auto-Upgrade: "+welcome.auto+"\n"+
                 "     Enabled: "+welcome.enabled+"\n"+

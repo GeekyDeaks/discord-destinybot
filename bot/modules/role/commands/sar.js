@@ -28,7 +28,7 @@ function exec(cmd) {
             var rc = db.collection(config.modules.role.collection).find().sort("alias");
             while(yield rc.hasNext()) {
                 role = yield rc.next();
-                toSend.push("```ruby\n" +
+                toSend.push("```" +cmd.format + "\n" +
                     "Alias: " + role.alias + "\n" +
                     " Role: " + role.name + "\n" +
                     " Desc: " + (role.desc || "") + "```"

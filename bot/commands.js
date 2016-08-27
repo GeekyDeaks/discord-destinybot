@@ -120,24 +120,38 @@ function parseMessage(msg) {
         // look for the command prefix
         if(!msg.content.toLowerCase().startsWith(config.commandPrefix)) return;
 
+        var cmd = {
+            msg: msg,
+            isPublic : false
+        };
+
         logger.debug("got message from [%s] in channel [%s]: ", 
             msg.author.username, (msg.channel.name || "PM"), msg.content);
 
         //strip off the prefix and split into args
         var args = msg.content.substring(config.commandPrefix.length).trim().match(/[^\s]+|"(?:\\"|[^"])+"/g);
-        var cmdName = args.shift().toLowerCase();
+
+        // check if the last argument/command was or ends with a format request
+        var match = args[args.length - 1].match(/^(.*)\!([^\!]*)$/);
+        if(match) {
+            cmd.format = match[2];
+            // if there was anything prior to the !, save it
+            if(match[1]) {
+                args[args.length - 1] = match[1];
+            } else {
+                args.length--;
+            }
+        } else {
+            cmd.format = 'ruby';
+        }
+
+        cmd.args = args;
+        var cmdName = cmd.cmdName = args.shift().toLowerCase();
 
         logger.debug("found command '%s'", cmdName);
 
         // yep, ok then see if we have that command loaded
         if(!commands[cmdName] || !commands[cmdName].exec) return;
-
-        var cmd = {
-            msg: msg,
-            args: args,
-            name: cmdName,
-            isPublic : false
-        };
 
         // check if the last argument was public
         if(args.length && (args[args.length - 1].toLowerCase() === 'public')) {

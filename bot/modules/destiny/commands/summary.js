@@ -18,7 +18,7 @@ var db = app.db;
 var genderType = ['Male', 'Female'];
 var classType = ['Titan', 'Hunter', 'Warlock'];
 
-function summary(type, name) {
+function summary(type, name, format) {
     return co(function* () {
 
         var m = yield api.search(type, name);
@@ -42,7 +42,7 @@ function summary(type, name) {
 
                 line[0] = "━━ "+ membership.name(type) + " / " + m[0].displayName+" / "+ (c + 1) + " ";
                 line[0] += "━".repeat(40 - line[0].length);
-                line[0] = "```ruby\n" + line[0];
+                line[0] = "```" + format + "\n" + line[0];
 
                 line.push("    Guardian: "+ genderType[guardian.characterBase.genderType] + " " +
                         classType[guardian.characterBase.classType]);
@@ -111,11 +111,11 @@ function exec(cmd) {
                 switch(mt) {
                     case membership.XBL:
                         if(xbl)
-                            out = yield summary(membership.XBL, xbl);
+                            out = yield summary(membership.XBL, xbl, cmd.format);
                         break;
                     case membership.PSN:
                         if(psn) 
-                            out = yield summary(membership.PSN, psn);
+                            out = yield summary(membership.PSN, psn, cmd.format);
                         break;
                 }
                 // concat the array in place

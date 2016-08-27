@@ -14,7 +14,7 @@ var config = app.config;
 var db = app.db;
 
 
-function stats(type, name) {
+function stats(type, name, format) {
     return co(function* () {
 
         var m = yield api.search(type, name);
@@ -30,7 +30,7 @@ function stats(type, name) {
         var line = [];
 
         if (pve) {
-            line[0] = "```ruby";
+            line[0] = "```" + format;
             line[1] = "━━ " + membership.name(type) + " / " + m[0].displayName + " / PvE ";
             line[1] += "━".repeat(40 - line[1].length);
             line.push("         Time Played: " + pve.secondsPlayed.basic.displayValue);
@@ -44,7 +44,7 @@ function stats(type, name) {
         
         if (pvp) {
             line.length = 0;
-            line[0] = "```ruby";
+            line[0] = "```" + format;
             line[1] = "━━ " + membership.name(type) + " / " + m[0].displayName + " / PvP ";
             line[1] += "━".repeat(40 - line[1].length);
             line.push("         Time Played: " + pvp.secondsPlayed.basic.displayValue);
@@ -110,11 +110,11 @@ function exec(cmd) {
                 switch(mt) {
                     case membership.XBL:
                         if(xbl)
-                            out = yield stats(membership.XBL, xbl);
+                            out = yield stats(membership.XBL, xbl, cmd.format);
                         break;
                     case membership.PSN:
                         if(psn) 
-                            out = yield stats(membership.PSN, psn);
+                            out = yield stats(membership.PSN, psn, cmd.format);
                         break;
                 }
                 // concat the array in place

@@ -32,12 +32,12 @@ function exec(cmd) {
             return message.send(msg, "Sorry, could not find any players for **" + game + "**", cmd.isPublic, 10000);
         }
 
-        var toSend = ["```ruby\n━━ "+game+" players ━━━━━━━━━━━━━━━━━━━━━```"];
+        var toSend = ["```" + cmd.format + "\n━━ "+game+" players ━━━━━━━━━━━━━━━━━━━━━```"];
         var g;
         var line = [];
         while (g = p.shift()) {
 
-            line = ["```ruby"];
+            line = ["```" + cmd.format];
             line.push("Discord ID: @" + g.discord.name);
             if (g.psn)
                 line.push("       PSN: " + g.psn);

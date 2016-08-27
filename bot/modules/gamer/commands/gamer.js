@@ -42,7 +42,7 @@ function exec(cmd) {
             return message.send(msg, "Sorry, could not find **" + md.escape(name) + "**", cmd.isPublic, 10000);
         }
 
-        var toSend = ["```ruby"];
+        var toSend = ["```" + cmd.format];
             toSend.push("Discord ID: @" + g.discord.name);
         if(g.psn)
             toSend.push("       PSN: " + g.psn);
