@@ -15,7 +15,7 @@ function exec(cmd) {
         var msg = cmd.msg;
         var args = cmd.args;
         var server = msg.server || app.defaultServer;
-        var welcome = { name : 'welcome' };
+        var welcome = { name : 'welcome', enabled : false };
 
         if(args.length === 0) {
 
@@ -40,7 +40,7 @@ function exec(cmd) {
                 yield db.collection('settings').updateOne( { "name" : "welcome" }, { $set: welcome }, { upsert : true});
                 return message.send(msg, "welcome message enabled", cmd.isPublic);
             case 'disable':
-                config.welcome.enabled = false;
+                welcome.enabled = false;
                 yield db.collection('settings').updateOne( { "name" : "welcome" }, { $set: welcome }, { upsert : true});
                 return message.send(msg, "welcome message disabled", cmd.isPublic);
             case 'channel':
