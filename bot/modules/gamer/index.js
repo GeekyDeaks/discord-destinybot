@@ -71,7 +71,16 @@ function lookup() {
 
 }
 
+function upsert(gamer) {
+    return db.collection(config.modules.gamer.collection).update(
+        { "discord.id": gamer.discord.id },
+        { $set: gamer },
+        { upsert: true }
+    );
+}
+
 module.exports.findById = findById;
 //module.exports.findByName = findByName;
 module.exports.findOneByName = findOneByName;
+module.exports.upsert = upsert;
 module.exports.init = init;
