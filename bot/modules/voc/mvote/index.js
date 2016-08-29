@@ -94,4 +94,4 @@ koa
   .use(router.routes())
   .use(router.allowedMethods());
 
-koa.listen(3000);
+koa.listen(config.modules.voc.mvote.port);
