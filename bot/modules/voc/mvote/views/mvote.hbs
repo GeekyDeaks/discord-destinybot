@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js">
+  </script>
+  <script>
+$(document).ready(function(){
+    $("input").click(function(){
+      var $row = $(this).closest("tr");
+      console.log("value = "+$(this).val());
+      switch($(this).val()) {
+        case 'approve':
+          console.log('approve!');
+          $row.removeClass("disapprove");
+          $row.addClass("approve");
+          break;
+        case 'neutral':
+          console.log('neutral!');
+          $row.removeClass("disapprove");
+          $row.removeClass("approve");
+          break;
+        case 'disapprove':
+          console.log('disapprove!');
+          $row.removeClass("approve");
+          $row.addClass("disapprove");
+          break;
+      }
+    });
+});
+</script>
+  <title>{{server}} - Membership Vote</title>
+<style>
+body {  
+  background-color: white;
+  font-family: "Arial";
+}
+
+h1 {
+  font-family: "Arial";
+}
+
+.neutral {
+  backgroup-color: white;
+  color: black;
+}
+
+.approve {
+  background-color: green;
+  color: white;
+}
+
+.disapprove {
+  background-color: red;
+  color: white;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+}
+
+th {
+   background-color: #777;
+   color: white;
+}
+
+
+</style>
+</head>
+<body>
+  <h1>{{server}} Membership Vote</h1>
+
+  <form action="" method="post">
+    <table >
+      <tr>
+        <th>Candidate</th>
+        <th>Joined</th>
+        <th>Approve</th>
+        <th>Neutral</th>
+        <th>Disapprove</th>
+      </tr>
+      {{#each candidates}}
+      <tr id="{{this.id}}">
+        <td>{{this.name}}</td>
+        <td>{{this.joined}}</td>
+        <td><input type="radio" name="{{this.id}}" value="approve"/></td>
+        <td><input type="radio" name="{{this.id}}" value="neutral" checked/></td>
+        <td><input type="radio" name="{{this.id}}" value="disapprove"/></td>
+      {{/each}}
+    </table>
+    <hr/>
+    <input type="submit" value="Submit">
+  </form>
+
+</body>
+</html>
