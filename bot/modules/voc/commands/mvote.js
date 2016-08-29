@@ -34,7 +34,8 @@ function exec(cmd) {
                 {$set : { token : token, createdAt : now, submitted: false}}, {upsert : true});
 
                 // create a URL for the message author
-                return message.send(msg, "Click this link to vote: http://127.0.0.1:3000/mvote/"+token, false);
+                var url = "http://"+config.modules.voc.mvote.host+":"+config.modules.voc.mvote.port+"/mvote/"+token;
+                return message.send(msg, "Click this link to vote: "+url, false);
             } else {
                 return message.send(msg, "Sorry, either the membership vote is not active or you are not eligible to vote", false);
             }
