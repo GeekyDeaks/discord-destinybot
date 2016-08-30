@@ -26,16 +26,17 @@ function exec(cmd) {
 
         if(args.length === 0) {
             // check if the vote is underway
-            if(vote && isEligible(msg)) {
+            if(vote && vote.state === "running" && isEligible(msg)) {
                 var now = new Date().getTime();
                 var token = crypto.createHash('md5').update(msg.author.id+"@"+now).digest('hex');
                 // save the hash
-                yield collection.update({ type: "voter", "discord" : msg.author.id},
-                {$set : { token : token, createdAt : now, submitted: false}}, {upsert : true});
+                yield collection.update({ type: "voter", "id" : msg.author.id},
+                    {$set : { token : token, createdAt : now, name : msg.author.name, sort : msg.author.name.toUpperCase() }, 
+                      $inc: { tokens: 1} }, {upsert : true});
 
                 // create a URL for the message author
-                var url = "http://"+config.modules.voc.mvote.host+":"+config.modules.voc.mvote.port+"/mvote/"+token;
-                return message.send(msg, "Click this link to vote: "+url, false);
+                var url = "http://"+config.modules.voc.mvote.host+":"+config.modules.voc.mvote.port+"/mvote/cast/"+token;
+                return message.send(msg, "Please use this link to vote: "+url, false);
             } else {
                 return message.send(msg, "Sorry, either the membership vote is not active or you are not eligible to vote", false);
             }
@@ -45,76 +46,57 @@ function exec(cmd) {
         if(!isAdmin(msg)) return message.send(msg, "you do not have permission to administer a vote", false);
 
         switch (option) {
-            case 'status':
+            case 'review':
                 if(!vote) {
-                    return message.send(msg, "no vote started");
+                    return message.send(msg, "no vote created");
                 }
-                var toSend = [];
-                var line = [];
-                var startedBy = server.members.get("id", vote.startedBy);
-                line.push("```"+cmd.format);
-                line.push("Started At: " + new Date(vote.startedAt).toISOString());
-                line.push("Started By: " + startedBy.username);
-                line.push("    Active: "+ vote.active);
-                line.push("```");
-                toSend.push(line.join("\n"));
-                toSend.push("```"+cmd.format+"\n━━ Candidates ━━━━━━━━━━━━━━━━━━━```");
+                var now = new Date().getTime();
+                var token = crypto.createHash('md5').update(msg.author.id+"@"+now).digest('hex');
+                // save the hash
+                yield collection.update({ type: "review" },
+                    {$set : { token : token, createdAt : now}}, {upsert : true});
 
-                var candidate;
-                var cc = collection.find({ type : "candidate"}).sort("joinedAt");
-                var vc;
-                var voter;
-                var member;
-                var result;
-                while (yield cc.hasNext()) {
-                    candidate = yield cc.next();
-                    //
-                    member = server.members.get("id", candidate.discord);
-                    if(!member) {
-                        logger.error("mvote: failed to resolve discord ID: "+candidate.discord);
-                        continue;
-                    }
-                    candidate.approve = candidate.neutral = candidate.disapprove = 0;
-                    vc = collection.find({ type : vote, candidate : candidate.discord });
-                    while (yield vc.hasNext()) {
-                        voter = yield vc.next();
-                        //candidate.approve += voter.approve;
-                        //candidate.neutral += voter.neutral;
-                        //candidate.disapprove += voter.disapprove;
-                    }
-
-                    logger.debug("mvote: candidate: ", candidate);
-                    
-                    if(candidate.disapprove) {
-                        result = 'disapprove';
-                    } else if(!candidate.approve) {
-                        result = 'neutral';
-                    } else {
-                        result = 'approve';
-                    }
-
-                    toSend.push(member.username + ","+ new Date(candidate.joinedAt).toISOString() +
-                    "," + result +
-                    ","+candidate.approve+","+candidate.neutral+","+candidate.disapprove);
-                }
-
-                return message.send(msg, toSend, false);
-            case 'start':
+                var url = "http://"+config.modules.voc.mvote.host+":"+config.modules.voc.mvote.port+"/mvote/review/"+token;
+                return message.send(msg, "Please use this link to review: "+url, false);
+                
+            case 'create':
                 if(vote) {
                     return message.send(msg, "stop and clear current vote first", false);
                 }
+                if(!args.length) {
+                    return message.send(msg, "you need to specify a title for the vote", false);
+                }
                 var details = {
                     type: "details",
-                    startedAt: moment().valueOf(),
-                    startedBy: msg.author.id,
-                    active: true
+                    title: args.join(" "),
+                    createdAt: moment().valueOf(),
+                    createdBy: msg.author.id,
+                    state: "created"
                 }
                 logger.debug("started vote: ", details);
                 yield collection.insert(details);
+                return message.send(msg, "vote created", false);
+            case 'start':
+                if (!vote) {
+                    return message.send(msg, "no vote created", false);
+                }
+                if(vote.state !== "created") {
+                    return message.send(msg, "vote already started", false);
+                }
+                yield collection.update({type : "details"}, 
+                    {$set : {
+                        state : "running",
+                        startedAt: moment().valueOf(),
+                        startedBy: msg.author.id
+                    }});
+                logger.debug("started vote: ", details);
                 return message.send(msg, "vote started", false);
             case 'seed':
-                if(!vote || !vote.active) {
-                    return message.send(msg, "no active vote in progress", false);
+                if (!vote) {
+                    return message.send(msg, "no vote created", false);
+                }
+                if (vote.state !== "created") {
+                    return message.send(msg, "vote already started", false);
                 }
 
                 var roleName = args.shift();
@@ -141,32 +123,71 @@ function exec(cmd) {
                     joinedAt = server.detailsOfUser(member).joinedAt;
                     if (joinedAt < day.valueOf()) {
                         count++;
-                        yield addCandidate(member.id, joinedAt);
+                        yield addCandidate(member, joinedAt, 1);
                     }
                 }
                 return message.send(msg, "seeded "+count+" candidates", false);
             case 'end':
-                if(!vote || !vote.active) {
-                    return message.send(msg, "no active vote in progress", false);
-                }       
-                yield collection.update( {type : "details"}, {$set : { active : false}});
+                if (!vote) {
+                    return message.send(msg, "no vote created", false);
+                }
+                if (vote.state !== "running") {
+                    return message.send(msg, "vote is not running", false);
+                }
+                yield collection.update({type : "details"}, 
+                    {$set : {
+                        state : "ended",
+                        endedAt: moment().valueOf(),
+                        endedBy: msg.author.id
+                    }});
                 return message.send(msg, "voting ended", false);         
             case 'clear':
                 if(!vote) {
                     return message.send(msg, "no vote to clear", false);
                 }
-                if(vote.active) { 
-                    return message.send(msg, "vote still running", false);
+                if(vote.state !== 'ended') { 
+                    return message.send(msg, "vote has not ended", false);
                 }
                 // remove the vote
                 yield collection.remove({});
                 return message.send(msg, "voting cleared", false);
             case 'add':
+                if (!vote) {
+                    return message.send(msg, "no vote created", false);
+                }
+                if (vote.state !== "created") {
+                    return message.send(msg, "vote already started", false);
+                }
+                if(!args.length) {
+                    return message.send(msg, "no user specified", false);
+                }
 
-                break;
+                var member = server.members.get("name", args[0]);
+                if(!member) {
+                    return message.send(msg, "unable to find member `"+args[0]+"` on this server", false);
+                }
+                var joinedAt = server.detailsOfUser(member).joinedAt;
+                addCandidate(member, joinedAt, args[1]);
+                return message.send(msg, "added candidate `"+args[0]+"`", false);
+
             case 'del':
+                if (!vote) {
+                    return message.send(msg, "no vote created", false);
+                }
+                if (vote.state !== "created") {
+                    return message.send(msg, "vote already started", false);
+                }
+                if(!args.length) {
+                    return message.send(msg, "no user specified", false);
+                }
 
-                break;
+                var member = server.members.get("name", args[0]);
+                
+                if(!member) {
+                    return message.send(msg, "unable to find member `"+args[0]+"` on this server", false);
+                }
+                yield collection.remove({ type: "candidate", id : member.id});
+                return message.send(msg, "deleted candidate `"+args[0]+"`", false);
             default:
                 return message.send(msg, "sorry, don't know what to do with `"+option+"`", false);
         }
@@ -176,10 +197,11 @@ function exec(cmd) {
    });
 }
 
-function addCandidate(discord, joinedAt) {
+function addCandidate(member, joinedAt, round) {
     var collection = db.collection(config.modules.voc.mvote.collection);
-    return collection.update({ type : "candidate", discord : discord} ,
-    {$set : { joinedAt : joinedAt }}, {upsert : true});
+    return collection.update({ type : "candidate", id : member.id},
+        {$set : { joinedAt : joinedAt, name : member.name, sort : member.name.toUpperCase(), round: round }}, 
+        {upsert : true});
 }
 
 function isEligible(msg) {
@@ -200,14 +222,15 @@ module.exports = {
     desc: 'Membership vote',
     name: 'mvote',
     usage: ["",  // this causes a CR
-            "\t\t`mvote` - generate a URL to vote",
-            "\t\t`mvote status` - report voting status and/or results",
+            "\t\t`mvote` - generate a URL to vote or view results",
+            "\t\t`mvote create <title>` - create a new vote",
+            "\t\t`mvote review` - review vote",
+            "\t\t`mvote seed <role> <YYYY-MM-DD>` - seed with users in <role> who joined prior to <date>",
+            "\t\t`mvote add <user> [round]` - add user to the vote",
+            "\t\t`mvote del <user>` - remove user from the vote",
             "\t\t`mvote start` - starts a membership vote",
-            "\t\t\mvote seed <role> <YYYY-MM-DD>` - seed with users in <role> who joined after <date>",
             "\t\t`mvote end` - ends the vote and prevents any further vote casting",
-            "\t\t`mvote clear` - clears the vote results",
-            "\t\t`mvote add <user>` - add user to the ote",
-            "\t\t`mvote del <user>` - remove user from the vote"],
+            "\t\t`mvote clear` - clears the vote results"],
     alias: [],
     exec: exec,
     admin: false

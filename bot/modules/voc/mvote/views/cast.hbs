@@ -59,11 +59,27 @@ table {
 }
 
 table, th, td {
-    border: 1px solid #ddd;
+    border: 1px solid LightGrey;
+    padding: 2px;
 }
 
 th {
-   background-color: #777;
+   background-color: RoyalBlue;
+   color: white;
+}
+
+th.round1 {
+   background-color: RoyalBlue;
+   color: white;
+}
+
+th.round2 {
+   background-color: Orange;
+   color: white;
+}
+
+th.round3 {
+   background-color: OrangeRed;
    color: white;
 }
 
@@ -71,27 +87,32 @@ th {
 </style>
 </head>
 <body>
-  <h1>{{server}} Membership Vote</h1>
+  <h1>{{title}}</h1>
 
   <form action="" method="post">
-    <table >
+    {{#rounds}}
+    <h3>{{round}}{{suffix}} Voting Round</h3>
+    <table>
       <tr>
-        <th>Candidate</th>
-        <th>Joined</th>
-        <th>Approve</th>
-        <th>Neutral</th>
-        <th>Disapprove</th>
+        <th class="round{{round}}">#</th>
+        <th class="round{{round}}">Candidate</th>
+        <th class="round{{round}}">Joined</th>
+        <th class="round{{round}}">Approve</th>
+        <th class="round{{round}}">Neutral</th>
+        <th class="round{{round}}">Disapprove</th>
       </tr>
-      {{#each candidates}}
-      <tr id="{{this.id}}">
-        <td>{{this.name}}</td>
-        <td>{{this.joined}}</td>
-        <td><input type="radio" name="{{this.id}}" value="approve"/></td>
-        <td><input type="radio" name="{{this.id}}" value="neutral" checked/></td>
-        <td><input type="radio" name="{{this.id}}" value="disapprove"/></td>
-      {{/each}}
+      {{#candidates}}
+      <tr id="{{id}}">
+        <td>{{cnum}}</td>
+        <td>{{name}}</td>
+        <td>{{joined}}</td>
+        <td><input type="radio" name="{{id}}" value="approve"/></td>
+        <td><input type="radio" name="{{id}}" value="neutral" checked/></td>
+        <td><input type="radio" name="{{id}}" value="disapprove"/></td>
+      {{/candidates}}
     </table>
     <hr/>
+    {{/rounds}}
     <input type="submit" value="Submit">
   </form>
 
