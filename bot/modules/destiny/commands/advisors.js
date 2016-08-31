@@ -143,8 +143,8 @@ function exec(cmd) {
             var activityName = activities[input].display.advisorTypeCategory;         
             
             busyMsg = yield message.send(msg, "Looking up Advisors for the activity " + activityName + " :mag: ");
-            var bounties = activities[input].bountyHashes;
-            var items = activities[input].extended.winRewardDetails.rewardItemHashes
+            /*var bounties = activities[input].bountyHashes;
+            var items = activities[input].extended.winRewardDetails.rewardItemHashes*/
             
             var toSend = [];
             var firstline;
