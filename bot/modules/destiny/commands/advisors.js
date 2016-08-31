@@ -21,14 +21,7 @@ function exec(cmd) {
         var busyMsg;
 
         // Retrieve latest Advisor Data
-        var advisor = yield api.advisor();
-
-        /**
-         * Base Response property
-         * - data
-         * - definitions
-         */
-        var res = [advisor].Response;
+        var res = yield api.advisor();
 
         /**
          * == Response.data ==
@@ -37,7 +30,7 @@ function exec(cmd) {
          * - activities, 
          * - activityCategories
          */
-        var resData = [res].data;
+        var resData = res.data;
 
         /**
          * === Response.data.activities ===
@@ -69,7 +62,7 @@ function exec(cmd) {
          * - bountyHashes
          * - extended
          */
-        var activities = [resData].activities;
+        var activities = resData.activities;
 
         /**
          * === Response.data.activityCategories ===
@@ -84,7 +77,7 @@ function exec(cmd) {
          *      'destiny.manifest.en.DestinyActivityCategoryDefinition'
          * ).find({ hash: hash});
          */
-        var activityCategories = [resData].activityCategories;
+        //var activityCategories = [resData].activityCategories;
 
         /**
          * == Response.definitions ==
@@ -125,7 +118,7 @@ function exec(cmd) {
          * - enemyRaces
          * - flags
          */
-        var definitions = [res].definitions;
+        var definitions = res.definitions;
 
         /**
          * === Response.definitions.destinitions ===
@@ -144,13 +137,46 @@ function exec(cmd) {
          * 4072959335
          * 4233735899
          */
-        var destinations = [definitions].destinations;
+        var destinations = definitions.destinations; 
 
-        //console.log("Activity found was " + activities[input].display.advisorTypeCategory);
-        busyMsg = yield bot.sendMessage(msg, "Pulling latest Destiny Daily and Weekly Advisors** :mag:");
-        
-    })
+        try {
+            var activityName = activities[input].display.advisorTypeCategory;         
+            
+            busyMsg = yield message.send(msg, "Looking up Advisors for the activity " + activityName + " :mag: ");
+            var bounties = activities[input].bountyHashes;
+            var items = activities[input].extended.winRewardDetails.rewardItemHashes
+            
+            var toSend = [];
+            var firstline;
+            firstline = "━━ "+activityName;
+            firstline += "━".repeat(40 - firstline.length);
+            toSend.push("```ruby\n"+
+                firstline + "\n" +
+                "Location: " + activities[input].display.flavor + "\n" +
+                "Bounties: " + activities[input].bountyHashes + "\n" +
+                "   Items: " + activities[input].extended.winRewardDetails[0].rewardItemHashes + "\n" +
+                "```"
+            );
 
+            return message.update(busyMsg, toSend);
+        } catch(err) {
+            var errmsg = "sorry, something unexpected happened: ```"+err+"```";
+
+            if(busyMsg) {
+                message.update(busyMsg, errmsg, 10000);
+            } else {
+                message.send(msg, errmsg, cmd.isPublic, 10000);
+            }
+        }
+    });
+
+}
+
+function parseHash(hash) {
+    var list = [];
+    for (var i = 0; i < hash.length; i++) {
+        console.log(hash[i]);
+    }
 }
 
 module.exports = {
