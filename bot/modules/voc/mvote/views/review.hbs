@@ -62,6 +62,16 @@ th.round3 {
    color: white;
 }
 
+td.approve {
+   background-color: Green;
+   color: white;
+}
+
+td.disapprove {
+   background-color: OrangeRed;
+   color: white;
+}
+
 
 </style>
 </head>
@@ -109,12 +119,20 @@ th.round3 {
         <th class="round{{round}}">#</th>
         <th class="round{{round}}">Candidate</th>
         <th class="round{{round}}">Joined</th>
+        <th class="round{{round}}">Outcome</th>
+        <th class="round{{round}}">#Approve</th>
+        <th class="round{{round}}">#Neutral</th>
+        <th class="round{{round}}">#Disapprove</th>
       </tr>
       {{#candidates}}
       <tr id="{{id}}">
         <td>{{cnum}}</td>
         <td>{{name}}</td>
         <td>{{joined}}</td>
+        <td class="{{results.outcome}}">{{results.outcome}}</td>
+        <td>{{results.approve}}</td>
+        <td>{{results.neutral}}</td>
+        <td>{{results.disapprove}}</td>
       {{/candidates}}
     </table>
     {{/rounds}}

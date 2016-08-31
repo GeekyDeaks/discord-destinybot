@@ -83,6 +83,11 @@ th.round3 {
    color: white;
 }
 
+td.center {
+  text-align: center;
+  vertical-align: middle;
+}
+
 
 </style>
 </head>
@@ -106,9 +111,9 @@ th.round3 {
         <td>{{cnum}}</td>
         <td>{{name}}</td>
         <td>{{joined}}</td>
-        <td><input type="radio" name="{{id}}" value="approve"/></td>
-        <td><input type="radio" name="{{id}}" value="neutral" checked/></td>
-        <td><input type="radio" name="{{id}}" value="disapprove"/></td>
+        <td class="center"><input type="radio" name="{{id}}" value="approve"/></td>
+        <td class="center"><input type="radio" name="{{id}}" value="neutral" checked/></td>
+        <td class="center"><input type="radio" name="{{id}}" value="disapprove"/></td>
       {{/candidates}}
     </table>
     <hr/>

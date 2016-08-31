@@ -24,13 +24,16 @@ function exec(cmd) {
         var collection = db.collection(config.modules.voc.mvote.collection);
         var vote = yield collection.findOne({ type : "details" });
 
+        var _id;
+
         if(args.length === 0) {
             // check if the vote is underway
             if(vote && vote.state === "running" && isEligible(msg)) {
                 var now = new Date().getTime();
                 var token = crypto.createHash('md5').update(msg.author.id+"@"+now).digest('hex');
                 // save the hash
-                yield collection.update({ type: "voter", "id" : msg.author.id},
+                _id = 'voter.'+msg.author.id;
+                yield collection.update({ _id : _id, type: "voter", "id" : msg.author.id},
                     {$set : { token : token, createdAt : now, name : msg.author.name, sort : msg.author.name.toUpperCase() }, 
                       $inc: { tokens: 1} }, {upsert : true});
 
@@ -53,7 +56,8 @@ function exec(cmd) {
                 var now = new Date().getTime();
                 var token = crypto.createHash('md5').update(msg.author.id+"@"+now).digest('hex');
                 // save the hash
-                yield collection.update({ type: "review" },
+                _id = 'review';
+                yield collection.update({ _id : _id, type: _id },
                     {$set : { token : token, createdAt : now}}, {upsert : true});
 
                 var url = "http://"+config.modules.voc.mvote.host+":"+config.modules.voc.mvote.port+"/mvote/review/"+token;
@@ -67,6 +71,7 @@ function exec(cmd) {
                     return message.send(msg, "you need to specify a title for the vote", false);
                 }
                 var details = {
+                    _id: "details",
                     type: "details",
                     title: args.join(" "),
                     createdAt: moment().valueOf(),
@@ -74,6 +79,7 @@ function exec(cmd) {
                     state: "created"
                 }
                 logger.debug("started vote: ", details);
+                
                 yield collection.insert(details);
                 return message.send(msg, "vote created", false);
             case 'start':
@@ -199,7 +205,8 @@ function exec(cmd) {
 
 function addCandidate(member, joinedAt, round) {
     var collection = db.collection(config.modules.voc.mvote.collection);
-    return collection.update({ type : "candidate", id : member.id},
+    var _id = 'candidate.'+member.id;
+    return collection.update({ _id : _id, type : "candidate", id : member.id},
         {$set : { joinedAt : joinedAt, name : member.name, sort : member.name.toUpperCase(), round: round }}, 
         {upsert : true});
 }

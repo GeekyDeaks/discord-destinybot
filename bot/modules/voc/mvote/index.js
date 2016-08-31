@@ -35,6 +35,35 @@ function numberSuffix(i) {
 }
 
 
+function getResults(candidate) {
+    return co(function* (){
+        var collection = db.collection(config.modules.voc.mvote.collection);
+
+        var cast;
+        var results = {
+            approve: 0,
+            neutral: 0,
+            disapprove: 0
+        };
+        var cv = collection.find({ type: "vote", candidate : candidate});
+        while( yield cv.hasNext() ) {
+            cast = yield cv.next();
+            results[cast.vote]++;
+        }
+
+        if(results.disapprove) {
+            results.outcome = 'disapprove';
+        } else if(!results.approve) {
+            results.outcome = 'neutral';
+        } else {
+            results.outcome = 'approve';
+        }
+
+        return results;
+    });
+}
+
+
 function getCandidates() {
 
     return co(function* () {
@@ -60,6 +89,7 @@ function getCandidates() {
             rounds[candidate.round].candidates.push({
                 cnum: ++cnum,
                 name: candidate.name,
+                results: (yield getResults(candidate.id)),
                 joined: moment(candidate.joinedAt).format("YYYY-MM-DD"),
                 id: candidate.id
             });
@@ -141,10 +171,13 @@ router.post('/mvote/cast/:token', koaBody, function *(next) {
     yield collection.remove({ type : "vote", voter: voter.id });
 
     var ids = Object.keys(this.request.body);
+    var _id;
     for(var i = 0; i < ids.length; i++) {
         var vote = this.request.body[ids[i]];
         // set the vote
+        _id = 'vote.'+voter.id+'.'+ids[i];
         yield collection.insert({
+            _id : _id,
             type : "vote",
             voter : voter.id,
             candidate : ids[i],
