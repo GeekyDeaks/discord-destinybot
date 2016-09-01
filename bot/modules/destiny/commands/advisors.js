@@ -166,7 +166,7 @@ function exec(cmd) {
                     "Location: " + activities[input].display.flavor + "\n" +
                     "Bounties: " + activities[input].bountyHashes + "\n" +
                     "   Items: " + activities[input].extended.winRewardDetails[0].rewardItemHashes + "\n" +
-                    "```"
+                    "```" + "\n" +
                     encodeURI("http://www.bungie.net" + activities[input].display.image)
                 );
 
