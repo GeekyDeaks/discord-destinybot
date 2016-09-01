@@ -167,6 +167,7 @@ function exec(cmd) {
                     "Bounties: " + activities[input].bountyHashes + "\n" +
                     "   Items: " + activities[input].extended.winRewardDetails[0].rewardItemHashes + "\n" +
                     "```"
+                    encodeURI("http://www.bungie.net" + activities[input].display.image)
                 );
 
                 return message.update(busyMsg, toSend);
