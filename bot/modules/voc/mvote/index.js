@@ -118,7 +118,7 @@ function getVoters() {
         var voters = [];
         while (yield vc.hasNext()) {
             voter = yield vc.next();
-            voter.firstTokenAt = moment(voter.createdAt).toISOString()
+            voter.lastTokenAt = moment(voter.createdAt).format("YYYY-MM-DD hh:mm:ss")
             voters.push(voter);
         }
         return voters;
@@ -219,23 +219,27 @@ router.get('/mvote/review/:token', function *(next) {
         title : vote.title,
         state: vote.state,
         createdBy : server.members.get("id", vote.createdBy).name,
-        createdAt : moment(vote.createdAt).toISOString(),
+        createdAt : moment(vote.createdAt).format("YYYY-MM-DD hh:mm:ss"),
         startedBy : (vote.startedBy ? server.members.get("id", vote.startedBy).name : ""),
-        startedAt : (vote.startedAt ? moment(vote.startedAt).toISOString() : ""),
+        startedAt : (vote.startedAt ? moment(vote.startedAt).format("YYYY-MM-DD hh:mm:ss") : ""),
         endedBy : (vote.endedBy ? server.members.get("id", vote.endedBy).name : ""),
-        endedAt : (vote.endedAt ? moment(vote.endedAt).toISOString() : "")
+        endedAt : (vote.endedAt ? moment(vote.endedAt).format("YYYY-MM-DD hh:mm:ss") : "")
     }
 
     var voters = yield getVoters();
     var totalSubmitted = 0;
+    var lastTokenAt = 0;
     voters.forEach(function(v) {
         if(v.submitted) totalSubmitted++;
+        lastTokenAt = Math.max(lastTokenAt, v.createdAt);
     });
 
     yield this.render('review', {
         title: vote.title,
         vote: vsend,
         voters: voters,
+        lastTokenAt: moment(lastTokenAt).format("YYYY-MM-DD hh:mm:ss"),
+        idleTime: moment(lastTokenAt).fromNow(),
         totalSubmitted: totalSubmitted,
         rounds: (yield getCandidates())
     });

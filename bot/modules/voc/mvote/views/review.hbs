@@ -87,7 +87,8 @@ td.disapprove {
     <tr><th class="detail">Started By</th><td>{{vote.startedBy}}</td></tr>
     <tr><th class="detail">Ended At</th><td>{{vote.endedAt}}</td></tr>
     <tr><th class="detail">Ended By</th><td>{{vote.endedBy}}</td></tr>
-    <tr><th class="detail">Votes</th><td>{{totalSubmitted}}</td></tr>
+    <tr><th class="detail">Votes Cast</th><td>{{totalSubmitted}}</td></tr>
+    <tr><th class="detail">Last Token At</th><td>{{lastTokenAt}} ({{idleTime}})</td></tr>
   </table>
 
   <hr/>
@@ -95,7 +96,7 @@ td.disapprove {
   <table>
     <tr>
       <th>Name</th>
-      <th>First Token</th>
+      <th>Last Token At</th>
       <th>#Tokens</th>
       <th>#Submitted</th>
     </tr>
@@ -103,7 +104,7 @@ td.disapprove {
     {{#voters}}
     <tr>
       <td>{{name}}</td>
-      <td>{{firstTokenAt}}</td>
+      <td>{{lastTokenAt}}</td>
       <td>{{tokens}}</td>
       <td>{{submitted}}</td>
     </tr>
