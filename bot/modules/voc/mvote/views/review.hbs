@@ -87,6 +87,7 @@ td.disapprove {
     <tr><th class="detail">Started By</th><td>{{vote.startedBy}}</td></tr>
     <tr><th class="detail">Ended At</th><td>{{vote.endedAt}}</td></tr>
     <tr><th class="detail">Ended By</th><td>{{vote.endedBy}}</td></tr>
+    <tr><th class="detail">Votes</th><td>{{totalSubmitted}}</td></tr>
   </table>
 
   <hr/>
@@ -108,7 +109,6 @@ td.disapprove {
     </tr>
     {{/voters}}
   </table>
-
   <hr/>
   <h1>Candidates</h1>
 
@@ -123,6 +123,7 @@ td.disapprove {
         <th class="round{{round}}">#Approve</th>
         <th class="round{{round}}">#Neutral</th>
         <th class="round{{round}}">#Disapprove</th>
+        <th class="round{{round}}">#Total</th>
       </tr>
       {{#candidates}}
       <tr id="{{id}}">
@@ -133,6 +134,7 @@ td.disapprove {
         <td>{{results.approve}}</td>
         <td>{{results.neutral}}</td>
         <td>{{results.disapprove}}</td>
+        <td>{{results.total}}</td>
       {{/candidates}}
     </table>
     {{/rounds}}

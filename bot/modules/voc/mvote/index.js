@@ -52,6 +52,8 @@ function getResults(candidate) {
             results[cast.vote]++;
         }
 
+        results.total = results.approve + results.neutral + results.disapprove;
+
         if(results.disapprove) {
             results.outcome = 'disapprove';
         } else if(!results.approve) {
@@ -224,10 +226,17 @@ router.get('/mvote/review/:token', function *(next) {
         endedAt : (vote.endedAt ? moment(vote.endedAt).toISOString() : "")
     }
 
+    var voters = yield getVoters();
+    var totalSubmitted = 0;
+    voters.forEach(function(v) {
+        if(v.submitted) totalSubmitted++;
+    });
+
     yield this.render('review', {
         title: vote.title,
         vote: vsend,
-        voters: (yield getVoters()),
+        voters: voters,
+        totalSubmitted: totalSubmitted,
         rounds: (yield getCandidates())
     });
     
