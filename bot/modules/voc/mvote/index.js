@@ -7,6 +7,7 @@ var koaBody = require('koa-body')();
 var hbs = require('koa-hbs');
 var moment = require('moment');
 var co = require('co');
+var crypto = require('crypto');
 
 var app = require.main.exports;
 var bot = app.bot;
@@ -230,8 +231,57 @@ router.get('/mvote/review/:token', function *(next) {
         rounds: (yield getCandidates())
     });
     
+});
 
+// -------------------------
+// loadtesting routes
+//
 
+router.get('/mvote/loadtest/:token/candidates', function *(next) {
+    logger.info('received mvote/loadtest//candidates GET with token: '+this.params.token);
+    // make sure the token is still valid
+    this.body = yield getCandidates();
+});
+
+router.get('/mvote/loadtest/:token/voters/:role', function *(next) {
+    logger.info('received mvote/loadtest//voters GET with token: '+this.params.token);
+    var server = app.defaultServer;
+    var role = server.roles.get("name", this.params.role);
+    if(!role) {
+        this.body = 'role not found';
+        return;
+    }
+    var voters = {};
+    server.members.forEach(function(m) {
+        if(!m.hasRole(role)) return;
+
+        voters[m.id] = {
+            id: m.id,
+            name: m.name,
+            sort: m.name.toUpperCase()
+        };
+    });
+    this.body = voters;
+});
+
+router.get('/mvote/loadtest/:token/token/:id', function *(next) {
+
+    logger.info('received mvote/loadtest//token GET with token: '+this.params.token);
+    var collection = db.collection(config.modules.voc.mvote.collection);
+    var server = app.defaultServer;
+    var now = new Date().getTime();
+    var m = server.members.get("id", this.params.id);
+    var token = crypto.createHash('md5').update(m.id + "@" + now).digest('hex');
+    
+    // save the hash
+    var _id = 'voter.' + m.id;
+    yield collection.update({ _id: _id, type: "voter", "id": m.id },
+        {
+            $set: { token: token, createdAt: now, name: m.name, sort: m.name.toUpperCase() },
+            $inc: { tokens: 1 }
+        }, { upsert: true });
+
+    this.body = token;
 
 });
 

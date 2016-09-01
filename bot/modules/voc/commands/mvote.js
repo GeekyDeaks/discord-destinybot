@@ -49,6 +49,19 @@ function exec(cmd) {
         if(!isAdmin(msg)) return message.send(msg, "you do not have permission to administer a vote", false);
 
         switch (option) {
+            case 'loadtest':
+                if (!vote) {
+                    return message.send(msg, "no vote created");
+                }
+                var now = new Date().getTime();
+                var token = crypto.createHash('md5').update(msg.author.id + "@" + now).digest('hex');
+                // save the hash
+                _id = 'loadtest';
+                yield collection.update({ _id: _id, type: _id },
+                    { $set: { token: token, createdAt: now } }, { upsert: true });
+
+                var url = "http://" + config.modules.voc.mvote.host + ":" + config.modules.voc.mvote.port + "/mvote/loadtest/" + token;
+                return message.send(msg, "Please use this link to loadtest: " + url, false);
             case 'review':
                 if(!vote) {
                     return message.send(msg, "no vote created");
@@ -79,7 +92,7 @@ function exec(cmd) {
                     state: "created"
                 }
                 logger.debug("started vote: ", details);
-                
+
                 yield collection.insert(details);
                 return message.send(msg, "vote created", false);
             case 'start':
