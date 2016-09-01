@@ -212,7 +212,8 @@ function exec(cmd) {
                     "    Skulls: " + activityInfo.skulls[0].displayName + "\n" +
                     "               "+activityInfo.skulls[0].description + "\n" +
                     "   Rewards: " + rewardValue + " " + definitions.items[rewardHash].itemName + "\n" +
-                    "```"
+                    "```" + "\n" +
+                    encodeURI("http://www.bungie.net" + activities[input].display.image)
                 );
 
                 return message.update(busyMsg, toSend);
