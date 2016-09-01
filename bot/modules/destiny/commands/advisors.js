@@ -19,6 +19,7 @@ function exec(cmd) {
         var input = cmd.args[0];
         //var activity = input.replace(/\s+/g, "");
         var busyMsg;
+        var input;
 
         // Retrieve latest Advisor Data
         var res = yield api.advisor();
@@ -139,44 +140,95 @@ function exec(cmd) {
          */
         var destinations = definitions.destinations; 
 
-        try {
-            var activityName = activities[input].display.advisorTypeCategory;         
-            
-            busyMsg = yield message.send(msg, "Looking up Advisors for the activity " + activityName + " :mag: ");
-            /*var bounties = activities[input].bountyHashes;
-            var items = activities[input].extended.winRewardDetails.rewardItemHashes*/
-            
-            var toSend = [];
-            var firstline;
-            firstline = "━━ "+activityName;
-            firstline += "━".repeat(40 - firstline.length);
-            toSend.push("```ruby\n"+
-                firstline + "\n" +
-                "Location: " + activities[input].display.flavor + "\n" +
-                "Bounties: " + activities[input].bountyHashes + "\n" +
-                "   Items: " + activities[input].extended.winRewardDetails[0].rewardItemHashes + "\n" +
-                "```"
-            );
+        /**
+         * Trials Advisor
+         *****************************/
+        if (cmd.args[0] == 'trials') {
+            try {
+                var activityName = activities[input].display.advisorTypeCategory;         
+                
+                busyMsg = yield message.send(msg, "Looking up Advisors for the activity " + activityName + " :mag: ");
+                var items = activities[input].extended.winRewardDetails.rewardItemHashes
+                
+                // Check if rewardItems are available. If not, Trials is currently not active
+                if (!items) {
+                    return message.update(busyMsg, activityName + " is currently not active. I am essential "+
+                        "a dumb AI with no frame, not a fortune teller");
+                }
 
-            return message.update(busyMsg, toSend);
-        } catch(err) {
-            var errmsg = "sorry, something unexpected happened: ```"+err+"```";
+                var bounties = activities[input].bountyHashes;                
+                var toSend = [];
+                var firstline;
+                firstline = "━━ "+activityName;
+                firstline += "━".repeat(40 - firstline.length);
+                toSend.push("```ruby\n"+
+                    firstline + "\n" +
+                    "Location: " + activities[input].display.flavor + "\n" +
+                    "Bounties: " + activities[input].bountyHashes + "\n" +
+                    "   Items: " + activities[input].extended.winRewardDetails[0].rewardItemHashes + "\n" +
+                    "```"
+                );
 
-            if(busyMsg) {
-                message.update(busyMsg, errmsg, 10000);
-            } else {
-                message.send(msg, errmsg, cmd.isPublic, 10000);
+                return message.update(busyMsg, toSend);
+            } catch(err) {
+                var errmsg = "sorry, something unexpected happened: ```"+err+"```";
+
+                if(busyMsg) {
+                    message.update(busyMsg, errmsg, 10000);
+                } else {
+                    message.send(msg, errmsg, cmd.isPublic, 10000);
+                }
             }
         }
+
+        /**
+         * Daily Heroic Story Advisor
+         ****************************/
+         if (cmd.args[0] == 'ds') {
+            input = 'dailychapter';
+            try {         
+                
+                busyMsg = yield message.send(msg, "Looking up Advisors for the activity " + 
+                    activities[input].display.advisorTypeCategory + 
+                    " :mag: "
+                );
+                var activityHash = activities[input].display.activityHash;
+                var activityInfo = definitions.activities[activityHash];
+                var destHash = activities[input].display.destinationHash;
+                var tiers = activities[input].activityTiers[0];
+                var rewardHash = tiers.rewards[0].rewardItems[0].itemHash;
+                var rewardValue = tiers.rewards[0].rewardItems[0].value;
+                
+                var toSend = [];
+                var firstline;
+                firstline = "━━ "+activities[input].display.advisorTypeCategory;
+                firstline += "━".repeat(40 - firstline.length);
+                toSend.push("```ruby\n"+
+                    firstline + "\n" +
+                    " Objective: " + activityInfo.activityDescription + "\n" +
+                    "  Location: " + destinations[destHash].destinationName + "\n" +
+                    "     Level: " + tiers.activityData.displayLevel + "\n" +
+                    "     Light: " + tiers.activityData.recommendedLight + "\n" +
+                    "    Skulls: " + activityInfo.skulls[0].displayName + "\n" +
+                    "               "+activityInfo.skulls[0].description + "\n" +
+                    "   Rewards: " + rewardValue + " " + definitions.items[rewardHash].itemName + "\n" +
+                    "```"
+                );
+
+                return message.update(busyMsg, toSend);
+            } catch(err) {
+                var errmsg = "sorry, something unexpected happened: ```"+err+"```";
+
+                if(busyMsg) {
+                    message.update(busyMsg, errmsg, 10000);
+                } else {
+                    message.send(msg, errmsg, cmd.isPublic, 10000);
+                }
+            }
+         }
+
     });
 
-}
-
-function parseHash(hash) {
-    var list = [];
-    for (var i = 0; i < hash.length; i++) {
-        console.log(hash[i]);
-    }
 }
 
 module.exports = {
