@@ -17,5 +17,10 @@ function getDesintyActivityCategoryDefinition(hash, lang) {
     return db.collection(col).findOne({ hash: hash });
 }
 
+function getDestinyInventoryItemDefinition(hash, lang) {
+    var col = config.modules.destiny.collection+'.'+(lang || config.language)+'DestinyInventoryItemDefinition';
+    return db.collection(col).findOne({ '_id': hash });
+}
+
 module.exports.getDestinyActivityDefinition = getDestinyActivityDefinition;
 module.exports.getDesintyActivityCategoryDefinition = getDesintyActivityCategoryDefinition;
