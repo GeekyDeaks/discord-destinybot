@@ -166,8 +166,7 @@ function exec(cmd) {
                     "Location: " + activities[input].display.flavor + "\n" +
                     "Bounties: " + activities[input].bountyHashes + "\n" +
                     "   Items: " + activities[input].extended.winRewardDetails[0].rewardItemHashes + "\n" +
-                    "```" + "\n" +
-                    encodeURI("http://www.bungie.net" + activities[input].display.image)
+                    "```" + "\n"
                 );
 
                 return message.update(busyMsg, toSend);
@@ -213,8 +212,7 @@ function exec(cmd) {
                     "    Skulls: " + activityInfo.skulls[0].displayName + "\n" +
                     "               "+activityInfo.skulls[0].description + "\n" +
                     "   Rewards: " + rewardValue + " " + definitions.items[rewardHash].itemName + "\n" +
-                    "```" + "\n" +
-                    encodeURI("http://www.bungie.net" + activities[input].display.image)
+                    "```" + "\n"
                 );
 
                 return message.update(busyMsg, toSend);
