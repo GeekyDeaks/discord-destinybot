@@ -189,6 +189,9 @@ function exec(cmd) {
                 addCandidate(member, joinedAt, args[1]);
                 return message.send(msg, "added candidate `"+args[0]+"`", false);
 
+            case 'rm':
+            case 'remove':
+            case 'delete':
             case 'del':
                 if (!vote) {
                     return message.send(msg, "no vote created", false);
