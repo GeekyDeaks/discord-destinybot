@@ -3,6 +3,7 @@
 var co = require('co');
 var util = require('util');
 var logger = require('winston');
+var Table = require('cli-table2');
 var api = require('../api');
 var manifest = require('../manifest');
 var message = require('../../../message');
@@ -90,28 +91,71 @@ function heroicStrike(format, activities, definitions, destinations) {
     var tiers = activity.activityTiers;
     var skulls = activity.extended.skullCategories[0].skulls;
 
-    var toSend = ["```"+format];
+    var detailTable = new Table({
+        chars: {
+            'top': '', 'top-mid': '', 'top-left': '', 'top-right': ''
+            , 'bottom': '', 'bottom-mid': '', 'bottom-left': '', 'bottom-right': ''
+            , 'left': '', 'left-mid': '', 'mid': '', 'mid-mid': ''
+            , 'right': '', 'right-mid': '', 'middle': ' | '
+        },
+        style: { 'padding-left': 0, 'padding-right': 0 },
+        colWidths: [10, 40],
+        wordWrap: true
+    });
+
+    var rewardsTable = new Table({
+        chars: {
+            'top': '', 'top-mid': '', 'top-left': '', 'top-right': ''
+            , 'bottom': '', 'bottom-mid': '', 'bottom-left': '', 'bottom-right': ''
+            , 'left': '', 'left-mid': '', 'mid': '', 'mid-mid': ''
+            , 'right': '', 'right-mid': '', 'middle': ' | '
+        },
+        style: { 'padding-left': 0, 'padding-right': 0 },
+        colWidths: [10, 40],
+        wordWrap: true
+    });
+
+    var skullsTable = new Table({
+        chars: {
+            'top': '', 'top-mid': '', 'top-left': '', 'top-right': ''
+            , 'bottom': '', 'bottom-mid': '', 'bottom-left': '', 'bottom-right': ''
+            , 'left': '', 'left-mid': '', 'mid': '', 'mid-mid': ''
+            , 'right': '', 'right-mid': '', 'middle': ' | '
+        },
+        style: { 'padding-left': 0, 'padding-right': 0 },
+        colWidths: [10, 10, 30],
+        wordWrap: true
+    });
+
+    //var toSend = ["```"+format];
+    
     var firstline;
     firstline = "━━ " + activity.display.advisorTypeCategory + " ";
-    firstline += "━".repeat(40 - firstline.length);
-    toSend.push(firstline);
-    toSend.push(" Objective: " + activityInfo.activityDescription);
-    toSend.push("  Location: " + destinations[destHash].destinationName);
-    toSend.push("     Level: " + tiers[0].activityData.displayLevel);
-    toSend.push("     Light: " + tiers[0].activityData.recommendedLight);
-    toSend.push("    Skulls: ");
+    firstline += "━".repeat(50 - firstline.length);
+  
+    detailTable.push([{hAlign:'right',content:'Objective'}, activityInfo.activityDescription]);
+    detailTable.push([{hAlign:'right',content:'Location'}, destinations[destHash].destinationName]);
+    detailTable.push([{hAlign:'right',content:'Level'}, tiers[0].activityData.displayLevel]);
+    detailTable.push([{hAlign:'right',content:'Light'}, tiers[0].activityData.recommendedLight]);
+    var firstSkull = true;
     skulls.forEach(function (s) {
-        toSend.push(" ".repeat(14 - s.displayName.length) + s.displayName + " - " + s.description);
+        skullsTable.push([{hAlign:'right',content: (firstSkull ? "Skulls" : "")}, 
+            { hAlign:'right',content: s.displayName } , s.description]);
+        firstSkull = false;
     });
-    toSend.push("   Rewards: ");
+    var firstReward = true;
     tiers[0].rewards.forEach(function (r) {
         r.rewardItems.forEach(function (i) {
-            toSend.push("            " + (i.value ? i.value + " " : "") + definitions.items[i.itemHash].itemName);
+            rewardsTable.push([{hAlign:'right',content: (firstReward ? "Rewards" : "")},
+                (i.value ? i.value + " " : "") + definitions.items[i.itemHash].itemName]);
+            firstReward = false;
         });
     });
 
-    toSend.push("```");
-    return(toSend.join("\n"));
+    return("```"+format+"\n"+ firstline+"\n"+
+            detailTable.toString().replace(/ +\n/g, "\n")+"\n"+
+            skullsTable.toString().replace(/ +\n/g, "\n")+"\n"+
+            rewardsTable.toString().replace(/ +\n/g, "\n")+"```");
 }
 
 function exec(cmd) {
@@ -255,9 +299,13 @@ function exec(cmd) {
                 case 'story':  
                     toSend.push(dailyChapter(cmd.format, activities, definitions, destinations));
                     break;
+                case 'strike':
+                    toSend.push(heroicStrike(cmd.format, activities, definitions, destinations));
+                    break;            
                 case 'all':
                     toSend.push(dailyChapter(cmd.format, activities, definitions, destinations));
                     toSend.push(heroicStrike(cmd.format, activities, definitions, destinations));
+                    break;
             }
             return yield message.update(busyMsg, toSend);
 
