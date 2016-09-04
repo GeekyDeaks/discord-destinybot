@@ -7,156 +7,158 @@ var Table = require('cli-table2');
 var api = require('../api');
 var manifest = require('../manifest');
 var message = require('../../../message');
+var moment = require('moment');
 
 var app = require.main.exports;
 var bot = app.bot;
 var config = app.config;
 
+var lineLength = 47;
 
-function trials(format, input, activities) {
-    return co(function* () {
-        var activityName = activities[input].display.advisorTypeCategory;
+var detailBorders = {
+            'top': '', 'top-mid': '', 'top-left': '', 'top-right': ''
+            , 'bottom': '', 'bottom-mid': '', 'bottom-left': '', 'bottom-right': ''
+            , 'left': '', 'left-mid': '', 'mid': '', 'mid-mid': ''
+            , 'right': '', 'right-mid': '', 'middle': ' | '
+};
 
-        var items = activities[input].extended.winRewardDetails.rewardItemHashes
+var noBorders = {
+            'top': '', 'top-mid': '', 'top-left': '', 'top-right': ''
+            , 'bottom': '', 'bottom-mid': '', 'bottom-left': '', 'bottom-right': ''
+            , 'left': '', 'left-mid': '', 'mid': '', 'mid-mid': ''
+            , 'right': '', 'right-mid': '', 'middle': ''
+};
 
-        // Check if rewardItems are available. If not, Trials is currently not active
-        if (!items) {
-            return (activityName + " is currently not active. I am essentially " +
-                "a dumb AI with no frame, not a fortune teller");
-        }
 
-        var bounties = activities[input].bountyHashes;
-        var toSend = ["```"+cmd.format];
-        var firstline;
-        firstline = "━━ " + activityName + " ";
-        firstline += "━".repeat(40 - firstline.length);
-        toSend.push(firstline);
-        toSend.push("Location: " + activities[input].display.flavor);
-        toSend.push("Bounties: " + activities[input].bountyHashes);
-        toSend.push("   Items: " + activities[input].extended.winRewardDetails[0].rewardItemHashes);
-        toSend.push("```");
+function trials(format, activities, definitions, destinations) {
 
-        return toSend.join("\n");
+    var activity = activities.trials;
+
+    var toSend = ["```" + format];
+
+    var titleLine;
+    titleLine = "-- " + activity.display.advisorTypeCategory + " ";
+    titleLine += "-".repeat(lineLength - titleLine.length);
+    toSend.push(titleLine);
+
+    // check if it's active
+    var status = activity.status;
+
+    var detailTable = new Table({
+        chars: detailBorders,
+        style: { 'padding-left': 0, 'padding-right': 0 },
+        colWidths: [10, lineLength - 10 - 3],
+        wordWrap: true
     });
 
-}
-
-function dailyChapter(format, activities, definitions, destinations) {
-
-    logger.verbose('reporting dailychapter');
-
-    var input = 'dailychapter';
-    var activityHash = activities[input].display.activityHash;
-    var activityInfo = definitions.activities[activityHash];
-    var destHash = activities[input].display.destinationHash;
-    var tiers = activities[input].activityTiers;
-
-    var toSend = ["```"+format];
-    var firstline;
-    firstline = "━━ " + activities[input].display.advisorTypeCategory + " ";
-    firstline += "━".repeat(40 - firstline.length);
-    toSend.push(firstline);
-    toSend.push(" Objective: " + activityInfo.activityDescription);
-    toSend.push("  Location: " + destinations[destHash].destinationName);
-    toSend.push("     Level: " + tiers[0].activityData.displayLevel);
-    toSend.push("     Light: " + tiers[0].activityData.recommendedLight);
-    if (activityInfo.skulls.length) {
-        toSend.push("    Skulls: " + activityInfo.skulls.map(function (s) { return s.displayName }).join(", "));
-        activityInfo.skulls.forEach(function (s) {
-            toSend.push("               " + s.description);
-        });
+    detailTable.push([{ hAlign: 'right', content: 'Status' }, status.active ? "Active" : "Inactive"]);
+    if(status.active && status.expirationKnown) {
+        detailTable.push([{ hAlign: 'right', content: 'Ends' }, moment(status.expirationDate).fromNow()]);
     }
+    toSend.push(detailTable.toString().replace(/ +\n/g, "\n"));
 
-    if (tiers.length) {
-        toSend.push("   Rewards: ");
-        tiers.forEach(function (t) {
-            t.rewards.forEach(function (r) {
-                r.rewardItems.forEach(function (i) {
-                    toSend.push("            " + i.value + " " + definitions.items[i.itemHash].itemName);
-                });
-            });
+    // rewards
+    // this does not appear to be defined in the hash, need to check the db
+    /* 
+    activity.extended.winRewardDetails.forEach(function (reward) {
+        var rewardRank;
+        rewardRank = "## Reward Rank " + reward.rewardRank + " ";
+        rewardRank += "#".repeat(lineLength - rewardRank.length);
+        toSend.push(rewardRank);
+
+        var rewardTable = new Table({
+            chars: detailBorders,
+            style: { 'padding-left': 0, 'padding-right': 0 },
+            colWidths: [10, lineLength - 10 - 3],
+            wordWrap: true
         });
-    }
+
+        reward.rewardRank;
+        reward.rewardItemHashes.forEach(function (item) {
+            if(!definitions.items[item]) return;
+            rewardTable.push([{hAlign:'right',content: definitions.items[item].itemTypeName}, definitions.items[item].itemName]);
+        });
+        toSend.push(rewardTable.toString().replace(/ +\n/g, "\n"))
+
+    });
+    /**/
     toSend.push("```");
-    return(toSend.join("\n"));
+
+    return toSend.join("\n");
 }
 
-function heroicStrike(format, activities, definitions, destinations) {
+//
+// Report on an activity with a single tier of rewards
+// 
+function singleTier(format, activity, definitions, destinations) {
 
     logger.verbose('reporting heroicstrike');
-    var activity = activities['heroicstrike'];
+    //var activity = activities['heroicstrike'];
     var activityHash = activity.display.activityHash;
     var activityInfo = definitions.activities[activityHash];
     var destHash = activity.display.destinationHash;
     var tiers = activity.activityTiers;
-    var skulls = activity.extended.skullCategories[0].skulls;
+    var skulls =  activity.extended ? activity.extended.skullCategories[0].skulls : activityInfo.skulls;
 
     var detailTable = new Table({
-        chars: {
-            'top': '', 'top-mid': '', 'top-left': '', 'top-right': ''
-            , 'bottom': '', 'bottom-mid': '', 'bottom-left': '', 'bottom-right': ''
-            , 'left': '', 'left-mid': '', 'mid': '', 'mid-mid': ''
-            , 'right': '', 'right-mid': '', 'middle': ' | '
-        },
+        chars: detailBorders,
         style: { 'padding-left': 0, 'padding-right': 0 },
-        colWidths: [10, 40],
+        colWidths: [10, lineLength - 10 - 3],
         wordWrap: true
     });
 
     var rewardsTable = new Table({
-        chars: {
-            'top': '', 'top-mid': '', 'top-left': '', 'top-right': ''
-            , 'bottom': '', 'bottom-mid': '', 'bottom-left': '', 'bottom-right': ''
-            , 'left': '', 'left-mid': '', 'mid': '', 'mid-mid': ''
-            , 'right': '', 'right-mid': '', 'middle': ' | '
-        },
+        chars: noBorders,
         style: { 'padding-left': 0, 'padding-right': 0 },
-        colWidths: [10, 40],
+        colWidths: [5, lineLength - 5],
         wordWrap: true
     });
 
     var skullsTable = new Table({
-        chars: {
-            'top': '', 'top-mid': '', 'top-left': '', 'top-right': ''
-            , 'bottom': '', 'bottom-mid': '', 'bottom-left': '', 'bottom-right': ''
-            , 'left': '', 'left-mid': '', 'mid': '', 'mid-mid': ''
-            , 'right': '', 'right-mid': '', 'middle': ' | '
-        },
+        chars: detailBorders,
         style: { 'padding-left': 0, 'padding-right': 0 },
-        colWidths: [10, 10, 30],
+        colWidths: [10, lineLength - 10 - 3],
         wordWrap: true
     });
-
-    //var toSend = ["```"+format];
     
-    var firstline;
-    firstline = "━━ " + activity.display.advisorTypeCategory + " ";
-    firstline += "━".repeat(50 - firstline.length);
+    var toSend = ["```"+format];
+    
+    var titleLine;
+    titleLine = "-- " + activity.display.advisorTypeCategory + " ";
+    titleLine += "-".repeat(lineLength - titleLine.length);
+    toSend.push(titleLine);
   
+    detailTable.push([{hAlign:'right',content:'Name'}, activityInfo.activityName]);
     detailTable.push([{hAlign:'right',content:'Objective'}, activityInfo.activityDescription]);
     detailTable.push([{hAlign:'right',content:'Location'}, destinations[destHash].destinationName]);
     detailTable.push([{hAlign:'right',content:'Level'}, tiers[0].activityData.displayLevel]);
     detailTable.push([{hAlign:'right',content:'Light'}, tiers[0].activityData.recommendedLight]);
-    var firstSkull = true;
+
+    toSend.push(detailTable.toString().replace(/ +\n/g, "\n"));
+
+    var skullHeader = "## Modifiers ";
+    skullHeader += "#".repeat(lineLength - skullHeader.length);
+    toSend.push(skullHeader);
     skulls.forEach(function (s) {
-        skullsTable.push([{hAlign:'right',content: (firstSkull ? "Skulls" : "")}, 
-            { hAlign:'right',content: s.displayName } , s.description]);
-        firstSkull = false;
+        skullsTable.push([{ hAlign:'right',content: s.displayName } , s.description]);
     });
-    var firstReward = true;
+    toSend.push(skullsTable.toString().replace(/ +\n/g, "\n"));
+
+    var rewardHeader = "## Rewards ";
+    rewardHeader += "#".repeat(lineLength - rewardHeader.length);
+    toSend.push(rewardHeader);
     tiers[0].rewards.forEach(function (r) {
         r.rewardItems.forEach(function (i) {
-            rewardsTable.push([{hAlign:'right',content: (firstReward ? "Rewards" : "")},
+            rewardsTable.push(["",
                 (i.value ? i.value + " " : "") + definitions.items[i.itemHash].itemName]);
-            firstReward = false;
         });
     });
+    toSend.push(rewardsTable.toString().replace(/ +\n/g, "\n"));
+    toSend.push("```");
 
-    return("```"+format+"\n"+ firstline+"\n"+
-            detailTable.toString().replace(/ +\n/g, "\n")+"\n"+
-            skullsTable.toString().replace(/ +\n/g, "\n")+"\n"+
-            rewardsTable.toString().replace(/ +\n/g, "\n")+"```");
+    return(toSend.join("\n"));
 }
+
 
 function exec(cmd) {
 
@@ -292,20 +294,28 @@ function exec(cmd) {
             var toSend = [];
             switch (input.toLowerCase()) {
                 case 'trials':
-                    toSend.push(trials(cmd.format, input, activities))
+                    toSend.push(trials(cmd.format, activities, definitions, destinations));
                     break;
                 case 'ds':
+                case 'daily':
                 case 'dailystory':
                 case 'story':  
-                    toSend.push(dailyChapter(cmd.format, activities, definitions, destinations));
+                    toSend.push(singleTier(cmd.format, activities['dailychapter'], definitions, destinations));
                     break;
                 case 'strike':
-                    toSend.push(heroicStrike(cmd.format, activities, definitions, destinations));
+                    toSend.push(singleTier(cmd.format, activities['heroicstrike'], definitions, destinations));
+                    toSend.push(singleTier(cmd.format, activities['nightfall'], definitions, destinations));
                     break;            
                 case 'all':
-                    toSend.push(dailyChapter(cmd.format, activities, definitions, destinations));
-                    toSend.push(heroicStrike(cmd.format, activities, definitions, destinations));
+                    //toSend.push(dailyChapter(cmd.format, activities, definitions, destinations));
+                    //toSend.push(heroicStrike(cmd.format, activities, definitions, destinations));
+                    toSend.push(singleTier(cmd.format, activities['dailychapter'], definitions, destinations));
+                    toSend.push(singleTier(cmd.format, activities['heroicstrike'], definitions, destinations));
+                    toSend.push(singleTier(cmd.format, activities['nightfall'], definitions, destinations));
+                    toSend.push(trials(cmd.format, activities, definitions, destinations));
                     break;
+                default:
+                    return yield message.update(busyMsg, "Sorry, not sure what to lookup for `"+input+"`", 10000);
             }
             return yield message.update(busyMsg, toSend);
 
