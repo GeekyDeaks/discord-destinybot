@@ -214,7 +214,7 @@ function exec(cmd) {
                 return message.send(msg, "sorry, don't know what to do with `"+option+"`", false);
         }
 
-        //message.send(msg, toSend, cmd.isPublic);
+        //message.send(msg, toSend, cmd.pm);
 
    });
 }

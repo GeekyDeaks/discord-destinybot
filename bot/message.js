@@ -30,7 +30,7 @@ function update(prevMsg, content, expire) {
     return co(function* () {
         var m;
 
-        var isPublic = !prevMsg.channel.isPrivate;
+        var pm = prevMsg.channel.isPrivate;
 
         // build up the message
         if (Array.isArray(content)) {
@@ -46,17 +46,17 @@ function update(prevMsg, content, expire) {
 
         }
 
-        if(expire && isPublic) bot.deleteMessage(m, {"wait": expire});
+        if(expire && !pm) bot.deleteMessage(m, {"wait": expire});
         return m;
     });
 
     
 }
 
-function send(msg, content, isPublic, expire) {
+function send(msg, content, pm, expire) {
     
     // check if we should respond privately
-    return _send(isPublic ? msg : msg.author, content, expire);
+    return _send(pm ? msg.author : msg, content, expire);
 
 }
 
@@ -67,7 +67,7 @@ function _send(dest, content, expire) {
 
         // check if the destination is either a user or a 
         // private channel
-        var isPublic = !(dest.constructor.name === "User" || dest.channel.isPrivate);
+        var pm = dest.constructor.name === "User" || dest.channel.isPrivate;
 
         // build up the message
         if (Array.isArray(content)) {
@@ -75,12 +75,12 @@ function _send(dest, content, expire) {
 
             while(content.length) {
                 m = yield bot.sendMessage(dest, build(content));
-                if(expire && isPublic) bot.deleteMessage(m, {"wait": expire});
+                if(expire && !pm) bot.deleteMessage(m, {"wait": expire});
             }
 
         } else {
             m = yield bot.sendMessage(dest, content);
-            if(expire && isPublic) bot.deleteMessage(m, {"wait": expire});
+            if(expire && !pm) bot.deleteMessage(m, {"wait": expire});
         }
 
         return m;

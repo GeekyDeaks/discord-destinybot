@@ -39,7 +39,7 @@ function exec(cmd) {
         }
 
         if (!g) {
-            return message.send(msg, "Sorry, could not find **" + md.escape(name) + "**", cmd.isPublic, 10000);
+            return message.send(msg, "Sorry, could not find **" + md.escape(name) + "**", cmd.pm, 10000);
         }
 
         var toSend = ["```" + cmd.format];
@@ -65,7 +65,7 @@ function exec(cmd) {
         }
         toSend.push("```");
 
-        return message.send(msg, toSend, cmd.isPublic);
+        return message.send(msg, toSend, cmd.pm);
 
     });
 

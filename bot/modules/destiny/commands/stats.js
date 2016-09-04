@@ -91,7 +91,7 @@ function exec(cmd) {
             }
 
             // we should get here pretty quick
-            busyMsg = yield message.send(msg, ":mag: Looking up **"+md.escape(name)+"**", cmd.isPublic);
+            busyMsg = yield message.send(msg, ":mag: Looking up **"+md.escape(name)+"**", cmd.pm);
 
             if(g) {
                 xbl = g.xbl;
@@ -135,7 +135,7 @@ function exec(cmd) {
             if(busyMsg) {
                 message.update(busyMsg, errmsg, 10000);
             } else {
-                message.send(msg, errmsg, cmd.isPublic, 10000);
+                message.send(msg, errmsg, cmd.pm, 10000);
             }
         }
     });

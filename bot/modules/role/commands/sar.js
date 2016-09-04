@@ -35,7 +35,7 @@ function exec(cmd) {
                 );
             }
 
-            return message.send(msg, toSend, cmd.isPublic);
+            return message.send(msg, toSend, cmd.pm);
         }
 
         switch (args.shift().toLowerCase()) {
@@ -43,7 +43,7 @@ function exec(cmd) {
                 args = args.join(" ").split(";");
 
                 if (args.length < 2) {
-                    return message.send(msg, "syntax: add role;alias[;description]", cmd.isPublic, 10000);
+                    return message.send(msg, "syntax: add role;alias[;description]", cmd.pm, 10000);
                 }
 
                 role = {
@@ -54,7 +54,7 @@ function exec(cmd) {
 
                 // check if the role exists
                 if (!server.roles.get("name", role.name)) {
-                    return message.send(msg, "role `" + role.name + "` not found on server: `"+server.name+"`", cmd.isPublic, 10000);
+                    return message.send(msg, "role `" + role.name + "` not found on server: `"+server.name+"`", cmd.pm, 10000);
                 }
 
                 // add the role alias
@@ -63,19 +63,19 @@ function exec(cmd) {
                     { upsert: true }
                 );
 
-                return message.send(msg, "SAR `" + role.alias + "` for role `" + role.name + "` added", cmd.isPublic);
+                return message.send(msg, "SAR `" + role.alias + "` for role `" + role.name + "` added", cmd.pm);
             case 'del':
                 if (args.length === 0) {
                     // send a list of roles:
-                    return message.send(msg, "No alias specified", cmd.isPublic, 10000);
+                    return message.send(msg, "No alias specified", cmd.pm, 10000);
                 }
 
                 var alias = args[0];
 
                 if(yield db.collection(config.modules.role.collection.deleteOne({ alias : alias }))) {
-                    return message.send(msg, "SAR `" + alias + "` deleted", cmd.isPublic);
+                    return message.send(msg, "SAR `" + alias + "` deleted", cmd.pm);
                 } else {
-                    return message.send(msg, "Cannot find alias `" + alias + "`", cmd.isPublic);
+                    return message.send(msg, "Cannot find alias `" + alias + "`", cmd.pm);
                 }
         }
 
