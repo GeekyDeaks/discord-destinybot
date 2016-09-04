@@ -30,7 +30,14 @@ module.exports = {
             collection: "destiny.manifest"
         },
         voc: {
-            psnChannel: "psn"
+            psnChannel: "psn",
+            mvote : {
+                adminRole : "Modteam",
+                voteRole : "Member",
+                collection: "voc.mvote",
+                port: 8000,
+                host: '127.0.0.1'
+            }
         },
         welcome: {},
         util : {},

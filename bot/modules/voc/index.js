@@ -18,6 +18,11 @@ function init(bot) {
         logger.error("failed whilst loading voc commands: ", err);
     }
 
+    // see if we have mvote enabled
+    if(config.modules.voc.mvote) {
+        var mvote = require('./mvote');
+    }
+
     return Promise.resolve();
 }
 

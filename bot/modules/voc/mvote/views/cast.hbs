@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js">
+  </script>
+  <script>
+$(document).ready(function(){
+    $("input").click(function(){
+      var $row = $(this).closest("tr");
+      console.log("value = "+$(this).val());
+      switch($(this).val()) {
+        case 'approve':
+          console.log('approve!');
+          $row.removeClass("disapprove");
+          $row.addClass("approve");
+          break;
+        case 'neutral':
+          console.log('neutral!');
+          $row.removeClass("disapprove");
+          $row.removeClass("approve");
+          break;
+        case 'disapprove':
+          console.log('disapprove!');
+          $row.removeClass("approve");
+          $row.addClass("disapprove");
+          break;
+      }
+    });
+});
+</script>
+  <title>{{title}}</title>
+<style>
+body {  
+  background-color: white;
+  font-family: "Arial";
+}
+
+h1 {
+  font-family: "Arial";
+}
+
+.neutral {
+  backgroup-color: white;
+  color: black;
+}
+
+.approve {
+  background-color: green;
+  color: white;
+}
+
+.disapprove {
+  background-color: red;
+  color: white;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border: 1px solid LightGrey;
+    padding: 2px;
+}
+
+th {
+   background-color: RoyalBlue;
+   color: white;
+}
+
+th.round1 {
+   background-color: RoyalBlue;
+   color: white;
+}
+
+th.round2 {
+   background-color: Orange;
+   color: white;
+}
+
+th.round3 {
+   background-color: OrangeRed;
+   color: white;
+}
+
+td.center {
+  text-align: center;
+  vertical-align: middle;
+}
+
+
+</style>
+</head>
+<body>
+  <h1>{{title}}</h1>
+
+  <form action="" method="post">
+    {{#rounds}}
+    <h3>{{round}}{{suffix}} Voting Round</h3>
+    <table>
+      <tr>
+        <th class="round{{round}}">#</th>
+        <th class="round{{round}}">Candidate</th>
+        <th class="round{{round}}">Joined</th>
+        <th class="round{{round}}">Approve</th>
+        <th class="round{{round}}">Neutral</th>
+        <th class="round{{round}}">Disapprove</th>
+      </tr>
+      {{#candidates}}
+      <tr id="{{id}}">
+        <td>{{cnum}}</td>
+        <td>{{name}}</td>
+        <td>{{joined}}</td>
+        <td class="center"><input type="radio" name="{{id}}" value="approve"/></td>
+        <td class="center"><input type="radio" name="{{id}}" value="neutral" checked/></td>
+        <td class="center"><input type="radio" name="{{id}}" value="disapprove"/></td>
+      {{/candidates}}
+    </table>
+    <hr/>
+    {{/rounds}}
+    <input type="submit" value="Submit">
+  </form>
+
+</body>
+</html>
