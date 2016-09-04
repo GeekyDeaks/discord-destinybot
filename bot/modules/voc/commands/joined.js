@@ -19,13 +19,13 @@ function exec(cmd) {
         var server = msg.server || app.defaultServer;
 
         if(!name) {
-            return message.send(msg, "role missing", cmd.isPublic, 10000);
+            return message.send(msg, "role missing", cmd.pm, 10000);
         }
         // figure out the role
         var role = server.roles.get("name", name);
 
         if(!role) {
-            return message.send(msg, "unable to find role: "+name, cmd.isPublic, 10000 );
+            return message.send(msg, "unable to find role: "+name, cmd.pm, 10000 );
         }
 
         var now = Date.now();
@@ -50,7 +50,7 @@ function exec(cmd) {
                 " | " + users[u].tenure)
         });
 
-        message.send(msg, toSend, cmd.isPublic);
+        message.send(msg, toSend, cmd.pm);
 
    });
 }

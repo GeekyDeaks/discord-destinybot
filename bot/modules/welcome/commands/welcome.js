@@ -21,7 +21,7 @@ function exec(cmd) {
 
             welcome = yield db.collection('settings').findOne({ "name" : "welcome" });
             if(!welcome) {
-                return message.send(msg, "No welcome settings defined", cmd.isPublic);
+                return message.send(msg, "No welcome settings defined", cmd.pm);
             }
 
             return message.send(msg, 
@@ -30,7 +30,7 @@ function exec(cmd) {
                 "Auto-Upgrade: "+welcome.auto+"\n"+
                 "     Enabled: "+welcome.enabled+"\n"+
                 "     Message:\n"+welcome.msg+"```", 
-                cmd.isPublic
+                cmd.pm
             );
         }
 
@@ -38,21 +38,21 @@ function exec(cmd) {
             case 'enable':
                 welcome.enabled = true;
                 yield db.collection('settings').updateOne( { "name" : "welcome" }, { $set: welcome }, { upsert : true});
-                return message.send(msg, "welcome message enabled", cmd.isPublic);
+                return message.send(msg, "welcome message enabled", cmd.pm);
             case 'disable':
                 welcome.enabled = false;
                 yield db.collection('settings').updateOne( { "name" : "welcome" }, { $set: welcome }, { upsert : true});
-                return message.send(msg, "welcome message disabled", cmd.isPublic);
+                return message.send(msg, "welcome message disabled", cmd.pm);
             case 'channel':
 
                 if (args.length === 0) {
-                    return message.send(msg, "no channel specified", cmd.isPublic, 10000);
+                    return message.send(msg, "no channel specified", cmd.pm, 10000);
                 }
                 var channel = args[0];
 
                 // check if the channel exists
                 if (!server.channels.get("name", channel)) {
-                    return message.send(msg, "channel `" + channel + "` not found on the server", cmd.isPublic, 10000);
+                    return message.send(msg, "channel `" + channel + "` not found on the server", cmd.pm, 10000);
                 }
 
                 // update the channel
@@ -60,32 +60,32 @@ function exec(cmd) {
 
                 // save the settings
                 yield db.collection('settings').updateOne( { "name" : "welcome" }, { $set: welcome }, { upsert : true});
-                return message.send(msg, "changed welcome channel to `"+channel+"`", cmd.isPublic);
+                return message.send(msg, "changed welcome channel to `"+channel+"`", cmd.pm);
             case 'msg':
                 if (args.length === 0) {
                     // send a list of roles:
-                    return message.send(msg, "no msg specified", cmd.isPublic, 10000);
+                    return message.send(msg, "no msg specified", cmd.pm, 10000);
                 }
 
                 // return the message back to original
                 welcome.msg = args.join(" ");
                 yield db.collection('settings').updateOne( { "name" : "welcome" }, { $set: welcome }, { upsert : true});
-                return message.send(msg, "changed welcome message to:\n```\n"+welcome.msg+"```", cmd.isPublic);
+                return message.send(msg, "changed welcome message to:\n```\n"+welcome.msg+"```", cmd.pm);
             case 'auto-upgrade':
                 if (args.length === 0) {
                     // send a list of roles:
-                    return message.send(msg, "no role specified", cmd.isPublic, 10000);
+                    return message.send(msg, "no role specified", cmd.pm, 10000);
                 }
 
                 var role = args[0];
 
                 if (!server.roles.get("name", role)) {
-                    return message.send(msg, "role `" + role + "` not found on server `"+ server.name +"`", cmd.isPublic, 10000);
+                    return message.send(msg, "role `" + role + "` not found on server `"+ server.name +"`", cmd.pm, 10000);
                 }
 
                 welcome.auto = role;
                 yield db.collection('settings').updateOne( { "name" : "welcome" }, { $set: welcome }, { upsert : true});
-                return bot.sendMessage(msg, "changed auto-upgrade role to: `"+role+"`", cmd.isPublic);
+                return bot.sendMessage(msg, "changed auto-upgrade role to: `"+role+"`", cmd.pm);
         }
 
     });

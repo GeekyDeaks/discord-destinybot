@@ -19,7 +19,7 @@ function exec(cmd) {
 
         var server = msg.server || app.defaultServer;
 
-        var busyMsg = yield message.send(msg, ":stopwatch: Parsing #" + config.modules.voc.psnChannel, cmd.isPublic);
+        var busyMsg = yield message.send(msg, ":stopwatch: Parsing #" + config.modules.voc.psnChannel, cmd.pm);
 
         // get the channel details
         var channel = server.channels.get("name", config.modules.voc.psnChannel);
@@ -73,7 +73,7 @@ function exec(cmd) {
         }
 
         yield message.update(busyMsg, toSend);
-        //yield message.send(msg, toSend, cmd.isPublic);
+        //yield message.send(msg, toSend, cmd.pm);
 
     });
 

@@ -172,7 +172,7 @@ function exec(cmd) {
         var busyMsg;
 
         try {
-            busyMsg = yield message.send(msg, ":mag: Looking up Advisors", cmd.isPublic);
+            busyMsg = yield message.send(msg, ":mag: Looking up Advisors", cmd.pm);
             // Retrieve latest Advisor Data
             var res = yield api.advisor();
 
@@ -327,7 +327,7 @@ function exec(cmd) {
             if (busyMsg) {
                 message.update(busyMsg, errmsg, 10000);
             } else {
-                message.send(msg, errmsg, cmd.isPublic, 10000);
+                message.send(msg, errmsg, cmd.pm, 10000);
             }
         }
 

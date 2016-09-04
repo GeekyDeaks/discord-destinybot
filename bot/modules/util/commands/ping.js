@@ -10,7 +10,7 @@ function exec(cmd) {
 
     return co(function* () {
         var msg = cmd.msg;
-        var sentMsg = yield message.send(msg, "pong", cmd.isPublic);
+        var sentMsg = yield message.send(msg, "pong", cmd.pm);
         return message.update(sentMsg, "pong   |   Time taken: " + (sentMsg.timestamp - msg.timestamp) + "ms");
     });
 

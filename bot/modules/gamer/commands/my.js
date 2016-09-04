@@ -23,7 +23,7 @@ function exec(cmd) {
 
         switch(option.toLowerCase()) {
             case 'xbl':
-                if(!args.length) return message.send(msg, "missing xbl gamertag", cmd.isPublic, 10000);
+                if(!args.length) return message.send(msg, "missing xbl gamertag", cmd.pm, 10000);
                 yield db.collection(config.modules.gamer.collection).updateOne(
                     { "discord.id": msg.author.id },
                     { $set: { xbl: args[0], "discord.name" : msg.author.name, modified: true } },
@@ -32,7 +32,7 @@ function exec(cmd) {
                 return message.send(msg, "Updated XBL Tag to: "+args[0]);
 
             case 'psn':
-                if(!args.length) return message.send(msg, "missing psn id", cmd.isPublic, 10000);
+                if(!args.length) return message.send(msg, "missing psn id", cmd.pm, 10000);
                 yield db.collection(config.modules.gamer.collection).updateOne(
                     { "discord.id": msg.author.id },
                     { $set: { psn: args[0], "discord.name" : msg.author.name, modified: true } },
@@ -41,13 +41,13 @@ function exec(cmd) {
                 return message.send(msg, "Updated PSN Tag to: "+args[0]);
 
             case 'game':
-                if(!args.length) return message.send(msg, "no games specified", cmd.isPublic, 10000);
+                if(!args.length) return message.send(msg, "no games specified", cmd.pm, 10000);
                 break;
             case 'tz':
-                if(!args.length) return message.send(msg, "missing tz", cmd.isPublic, 10000);
+                if(!args.length) return message.send(msg, "missing tz", cmd.pm, 10000);
                 break;
             default:
-                return message.send(msg, "sorry, don't understand `"+option+"`", cmd.isPublic, 10000);
+                return message.send(msg, "sorry, don't understand `"+option+"`", cmd.pm, 10000);
 
         }
         

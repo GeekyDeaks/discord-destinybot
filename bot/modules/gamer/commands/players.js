@@ -21,7 +21,7 @@ function exec(cmd) {
         var now = moment();
 
         if (!game) {
-            return message.send(msg, "did you forget something?", cmd.isPublic, 10000);
+            return message.send(msg, "did you forget something?", cmd.pm, 10000);
         }
 
         var regex = { $regex: '^'+game+'$', $options : 'i' };
@@ -29,7 +29,7 @@ function exec(cmd) {
         var p = yield db.collection(config.modules.gamer.collection).find({ games : regex}).sort({"discord.name" : 1}).toArray();
 
         if (!p || p.length === 0) {
-            return message.send(msg, "Sorry, could not find any players for **" + game + "**", cmd.isPublic, 10000);
+            return message.send(msg, "Sorry, could not find any players for **" + game + "**", cmd.pm, 10000);
         }
 
         var toSend = ["```" + cmd.format + "\n━━ "+game+" players ━━━━━━━━━━━━━━━━━━━━━```"];
@@ -54,7 +54,7 @@ function exec(cmd) {
 
         }
 
-        return message.send(msg, toSend, cmd.isPublic);
+        return message.send(msg, toSend, cmd.pm);
     });
 
 }

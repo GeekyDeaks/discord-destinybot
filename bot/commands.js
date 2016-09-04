@@ -60,10 +60,10 @@ function help(cmd) {
         if(args.length > 0) {
             var c = args[0];
             if(!commands[c]) {
-                return message.send(msg, "command `"+c+"` not recognised", cmd.isPublic, 10000);
+                return message.send(msg, "command `"+c+"` not recognised", cmd.pm, 10000);
             }
 
-            return message.send(msg, commandHelp(c).join("\n"), cmd.isPublic);
+            return message.send(msg, commandHelp(c).join("\n"), cmd.pm);
         }
 
         var toSend = [];
@@ -76,7 +76,7 @@ function help(cmd) {
 
         });
 
-        return message.send(msg, toSend, cmd.isPublic);
+        return message.send(msg, toSend, cmd.pm);
 
     });
 }
@@ -122,7 +122,7 @@ function parseMessage(msg) {
 
         var cmd = {
             msg: msg,
-            isPublic : false
+            pm : (config.discord.pm || false)
         };
 
         logger.debug("got message from [%s] in channel [%s]: ", 
@@ -155,14 +155,14 @@ function parseMessage(msg) {
 
         // check if the last argument was public
         if(args.length && (args[args.length - 1].toLowerCase() === 'public')) {
-            cmd.isPublic = !msg.channel.isPrivate;
+            cmd.pm = msg.channel.isPrivate;
             args.length--;
         }
 
         // check if it's an admin command
         if(commands[cmdName].admin && !isAdmin(msg)) {
             // see if we have the admin role
-            return message.send(msg, "You are not authorised to run `"+cmdName+"`", cmd.isPublic, 10000);
+            return message.send(msg, "You are not authorised to run `"+cmdName+"`", cmd.pm, 10000);
         }
 
         logger.debug("executing command [%s] with args [%s]", cmdName, args.join(","));
@@ -175,7 +175,7 @@ function parseMessage(msg) {
            ["Oops, something went unexpectedly wrong and I saw this error:", 
             "```"+err+"```", 
            "Please check to see if the command worked as it can sometimes be a problem with discord.",
-           "Otherwise, please try the command again" ], !msg.channel.isPrivate, 10000);
+           "Otherwise, please try the command again" ], msg.channel.isPrivate, 10000);
     });
 
 
