@@ -32,8 +32,10 @@ var noBorders = {
 
 function trials(format, activities, definitions, destinations) {
 
+    
     var activity = activities.trials;
-
+    logger.verbose('reporting ' + activity.display.advisorTypeCategory);
+    
     var toSend = ["```" + format];
 
     var titleLine;
@@ -92,8 +94,8 @@ function trials(format, activities, definitions, destinations) {
 // 
 function singleTier(format, activity, definitions, destinations) {
 
-    logger.verbose('reporting heroicstrike');
-    //var activity = activities['heroicstrike'];
+    logger.verbose('reporting ' + activity.display.advisorTypeCategory);
+
     var activityHash = activity.display.activityHash;
     var activityInfo = definitions.activities[activityHash];
     var destHash = activity.display.destinationHash;
