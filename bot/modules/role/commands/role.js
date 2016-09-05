@@ -53,10 +53,10 @@ function exec(cmd) {
 
         if (msg.author.hasRole(serverRole)) {
             yield msg.author.removeFrom(serverRole);
-            return message.send(msg, "you are not `" + role.alias + "`", cmd.pm);
+            return message.send(msg, "you are no longer subscribed to `" + role.alias + "`", cmd.pm);
         } else {
             yield msg.author.addTo(serverRole);
-            return message.send(msg, "you are now `" + role.alias + "`", cmd.pm);
+            return message.send(msg, "you are now subscribed to `" + role.alias + "`", cmd.pm);
         }
 
     });
