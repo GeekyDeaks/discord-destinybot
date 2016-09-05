@@ -13,14 +13,15 @@ function getDestinyActivityDefinition(hash, lang) {
 }
 
 function getDesintyActivityCategoryDefinition(hash, lang) {
-    var col = config.modules.destiny.collection+'.'+(lang || config.language)+'DesintyActivityCategoryDefinition';
+    var col = config.modules.destiny.collection+'.'+(lang || config.language)+'.DesintyActivityCategoryDefinition';
     return db.collection(col).findOne({ hash: hash });
 }
 
 function getDestinyInventoryItemDefinition(hash, lang) {
-    var col = config.modules.destiny.collection+'.'+(lang || config.language)+'DestinyInventoryItemDefinition';
-    return db.collection(col).findOne({ '_id': hash });
+    var col = config.modules.destiny.collection+'.'+(lang || config.language)+'.DestinyInventoryItemDefinition';
+    return db.collection(col).findOne({ itemHash: hash });
 }
 
 module.exports.getDestinyActivityDefinition = getDestinyActivityDefinition;
 module.exports.getDesintyActivityCategoryDefinition = getDesintyActivityCategoryDefinition;
+module.exports.getDestinyInventoryItemDefinition = getDestinyInventoryItemDefinition;

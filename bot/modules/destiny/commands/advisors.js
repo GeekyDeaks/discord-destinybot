@@ -32,61 +32,76 @@ var noBorders = {
 
 function trials(format, activities, definitions, destinations) {
 
-    
-    var activity = activities.trials;
-    logger.verbose('reporting ' + activity.display.advisorTypeCategory);
-    
-    var toSend = ["```" + format];
+    return co(function* () {
 
-    var titleLine;
-    titleLine = "-- " + activity.display.advisorTypeCategory + " ";
-    titleLine += "-".repeat(lineLength - titleLine.length);
-    toSend.push(titleLine);
+        var activity = activities.trials;
+        logger.verbose('reporting ' + activity.display.advisorTypeCategory);
 
-    // check if it's active
-    var status = activity.status;
+        var toSend = ["```" + format];
 
-    var detailTable = new Table({
-        chars: detailBorders,
-        style: { 'padding-left': 0, 'padding-right': 0 },
-        colWidths: [10, lineLength - 10 - 3],
-        wordWrap: true
-    });
+        var titleLine;
+        titleLine = "-- " + activity.display.advisorTypeCategory + " ";
+        titleLine += "-".repeat(lineLength - titleLine.length);
+        toSend.push(titleLine);
 
-    detailTable.push([{ hAlign: 'right', content: 'Status' }, status.active ? "Active" : "Inactive"]);
-    if(status.active && status.expirationKnown) {
-        detailTable.push([{ hAlign: 'right', content: 'Ends' }, moment(status.expirationDate).fromNow()]);
-    }
-    toSend.push(detailTable.toString().replace(/ +\n/g, "\n"));
+        // check if it's active
+        var status = activity.status;
 
-    // rewards
-    // this does not appear to be defined in the hash, need to check the db
-    /* 
-    activity.extended.winRewardDetails.forEach(function (reward) {
-        var rewardRank;
-        rewardRank = "## Reward Rank " + reward.rewardRank + " ";
-        rewardRank += "#".repeat(lineLength - rewardRank.length);
-        toSend.push(rewardRank);
-
-        var rewardTable = new Table({
+        var detailTable = new Table({
             chars: detailBorders,
             style: { 'padding-left': 0, 'padding-right': 0 },
             colWidths: [10, lineLength - 10 - 3],
+            colAligns: [ 'right', 'left'],
             wordWrap: true
         });
 
-        reward.rewardRank;
-        reward.rewardItemHashes.forEach(function (item) {
-            if(!definitions.items[item]) return;
-            rewardTable.push([{hAlign:'right',content: definitions.items[item].itemTypeName}, definitions.items[item].itemName]);
-        });
-        toSend.push(rewardTable.toString().replace(/ +\n/g, "\n"))
+        detailTable.push(['Status', status.active ? "Active" : "Inactive"]);
+        if (status.active && status.expirationKnown) {
+            detailTable.push(['Ends', moment(status.expirationDate).format('YYYY-MM-DD HH:mm') + 
+                " ("+moment(status.expirationDate).fromNow()+ ")"]);
+        }
+        toSend.push(detailTable.toString().replace(/ +\n/g, "\n"));
+
+        logger.debug("rewards: ", activity.extended.winRewardDetails);
+
+        // getDestinyInventoryItemDefinition
+        // rewards
+        var rank;
+        var ranks = activity.extended.winRewardDetails;
+        for(rank = 0; rank < ranks.length; rank++) {
+
+            // skip anything that has 0 rewards
+            var rewards = ranks[rank].rewardItemHashes;
+            if(!rewards.length) continue;
+
+            var rewardRank;
+            rewardRank = "## Reward Rank " + ranks[rank].rewardRank + " ";
+            rewardRank += "#".repeat(lineLength - rewardRank.length);
+            toSend.push(rewardRank);  
+
+            var rewardTable = new Table({
+                chars: detailBorders,
+                style: { 'padding-left': 0, 'padding-right': 0 },
+                //colWidths: [10, lineLength - 10 - 3],
+                colAligns: [ 'right', 'left'],
+                wordWrap: true
+            });
+
+            for(var reward = 0; reward < rewards.length; reward++) {
+                // lookup the reward
+                // item.itemDescription
+                var item = yield manifest.getDestinyInventoryItemDefinition(rewards[reward], 'en');
+                rewardTable.push([item.itemTypeName, item.itemName]);
+            }
+
+            toSend.push(rewardTable.toString().replace(/ +\n/g, "\n"));
+        }
+
+        toSend.push("```");
+
+        return toSend.join("\n");
 
     });
-    /**/
-    toSend.push("```");
-
-    return toSend.join("\n");
 }
 
 //
@@ -296,7 +311,7 @@ function exec(cmd) {
             var toSend = [];
             switch (input.toLowerCase()) {
                 case 'trials':
-                    toSend.push(trials(cmd.format, activities, definitions, destinations));
+                    toSend.push(yield trials(cmd.format, activities, definitions, destinations));
                     break;
                 case 'ds':
                 case 'daily':
@@ -315,7 +330,7 @@ function exec(cmd) {
                     toSend.push(singleTier(cmd.format, activities['dailychapter'], definitions, destinations));
                     toSend.push(singleTier(cmd.format, activities['heroicstrike'], definitions, destinations));
                     toSend.push(singleTier(cmd.format, activities['nightfall'], definitions, destinations));
-                    toSend.push(trials(cmd.format, activities, definitions, destinations));
+                    toSend.push(yield trials(cmd.format, activities, definitions, destinations));
                     break;
                 default:
                     return yield message.update(busyMsg, "Sorry, not sure what to lookup for `"+input+"`", 10000);
@@ -338,7 +353,7 @@ function exec(cmd) {
 
 module.exports = {
     desc: 'Get list of daily and weekly advisors',
-    name: 'advisor',
-    alias: ['ad'],
+    name: 'advisors',
+    alias: ['ad', 'advisor'],
     exec: exec
 }
