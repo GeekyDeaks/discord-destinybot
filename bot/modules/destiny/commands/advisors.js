@@ -62,8 +62,7 @@ function trials(format, activities, definitions, destinations) {
         }
         toSend.push(detailTable.toString().replace(/ +\n/g, "\n"));
 
-        logger.debug("rewards: ", activity.extended.winRewardDetails);
-
+        //logger.debug("rewards: ", activity.extended.winRewardDetails);
         // getDestinyInventoryItemDefinition
         // rewards
         var rank;
