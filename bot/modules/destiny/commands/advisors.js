@@ -304,6 +304,7 @@ function exec(cmd) {
                 case 'story':  
                     toSend.push(singleTier(cmd.format, activities['dailychapter'], definitions, destinations));
                     break;
+                case 'weekly':
                 case 'strike':
                     toSend.push(singleTier(cmd.format, activities['heroicstrike'], definitions, destinations));
                     toSend.push(singleTier(cmd.format, activities['nightfall'], definitions, destinations));
