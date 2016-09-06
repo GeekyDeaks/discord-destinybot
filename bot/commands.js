@@ -105,11 +105,11 @@ commands.help = {
     exec: help
 };
 
-function closestCommand(cmd) {
+function closestCommand(cmd, isAdmin) {
     var distance = Object.keys(commands).filter(function (cname) {
-        return(commands[cname].name === cname);
+        return (!(commands[cname].admin && !isAdmin));
     }).map(function (cname) {
-        return [cname, levenshtein.get(cmd.toLowerCase(), cname.toLowerCase())];
+        return [commands[cname].name, levenshtein.get(cmd.toLowerCase(), cname.toLowerCase())];
     });
 
     distance.sort(function (a,b) {
@@ -173,7 +173,7 @@ function parseMessage(msg) {
         // yep, ok then see if we have that command loaded
         if(!commands[cmdName] || !commands[cmdName].exec) {
             return message.send(msg, "Sorry " + msg.author.mention() + ", I am not sure what to do with `"+
-            cmdName + "`.  Did you mean `"+closestCommand(cmdName)+"`?", cmd.pm, 10000);
+            cmdName + "`.  Did you mean `"+closestCommand(cmdName, isAdmin(msg))+"`?", cmd.pm, 10000);
         }
 
         logger.debug("found command '%s'", cmdName);
