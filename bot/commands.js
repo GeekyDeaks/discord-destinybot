@@ -5,6 +5,7 @@ var fs = require('fs');
 var path = require('path');
 var co = require('co');
 var message = require('./message');
+var levenshtein = require('fast-levenshtein');
 
 var app = require.main.exports;
 var bot = app.bot;
@@ -104,6 +105,21 @@ commands.help = {
     exec: help
 };
 
+function closestCommand(cmd) {
+    var distance = Object.keys(commands).filter(function (cname) {
+        return(commands[cname].name === cname);
+    }).map(function (cname) {
+        return [cname, levenshtein.get(cmd.toLowerCase(), cname.toLowerCase())];
+    });
+
+    distance.sort(function (a,b) {
+        return a[1] - b[1];
+    });
+
+    return distance[0][0];
+
+}
+
 bot.on("messageUpdated", function (msg0, msg1) {
     parseMessage(msg1);
 });
@@ -148,16 +164,19 @@ function parseMessage(msg) {
         cmd.args = args;
         var cmdName = cmd.cmdName = args.shift().toLowerCase();
 
-        logger.debug("found command '%s'", cmdName);
-
-        // yep, ok then see if we have that command loaded
-        if(!commands[cmdName] || !commands[cmdName].exec) return;
-
         // check if the last argument was public
         if(args.length && (args[args.length - 1].toLowerCase() === 'public')) {
             cmd.pm = msg.channel.isPrivate;
             args.length--;
         }
+
+        // yep, ok then see if we have that command loaded
+        if(!commands[cmdName] || !commands[cmdName].exec) {
+            return message.send(msg, "Sorry " + msg.author.mention() + ", I am not sure what to do with `"+
+            cmdName + "`.  Did you mean `"+closestCommand(cmdName)+"`?", cmd.pm, 10000);
+        }
+
+        logger.debug("found command '%s'", cmdName);
 
         // check if it's an admin command
         if(commands[cmdName].admin && !isAdmin(msg)) {
