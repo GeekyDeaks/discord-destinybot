@@ -64,15 +64,24 @@ function init() {
     });
 }
 
+// workaround for authorisation issues
+bot.internal.sendWS = function sendWS(object) {
+    if (this.websocket) {
+        if (object.d.token) object.d.token = config.discord.token;
+        this.websocket.send(JSON.stringify(object));
+    }
+};
+
 function login() {
 
     return co(function* () {
 
-        var token = yield bot.loginWithToken(config.discord.token);
+        var token = yield bot.loginWithToken("Bot "+config.discord.token);
         if (!token) {
             throw new Error("Failed to acquire token");
         }
         logger.info("Logged into discord with token: ", token);
+        
     });
 
 }
