@@ -29,7 +29,7 @@ function exec(cmd) {
             var name = cmd.msg.author.username;
             var g = yield gamer.findById(cmd.msg.author.id);
             if (!g) {
-                return message.send(msg, "Sorry, could not find **" + md.escape(name) + "**", cmd.pm, 10000);
+                return message.send(msg, "Sorry " + msg.author + ", I could not find your gamer details", cmd.pm, 10000);
             }
 
             var toSend = ["```" + cmd.format];

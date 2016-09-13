@@ -39,7 +39,7 @@ function exec(cmd) {
         }
 
         if (!g) {
-            return message.send(msg, "Sorry, could not find **" + md.escape(name) + "**", cmd.pm, 10000);
+            return message.send(msg, "Sorry " + msg.author +", I could not find `" + name + "`", cmd.pm, 10000);
         }
 
         var toSend = ["```" + cmd.format];
