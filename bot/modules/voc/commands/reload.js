@@ -17,12 +17,12 @@ function exec(cmd) {
    return co(function* () {
         var msg = cmd.msg;
 
-        var server = msg.server || app.defaultServer;
+        var server = msg.guild || app.defaultServer;
 
         var busyMsg = yield message.send(msg, ":stopwatch: Parsing #" + config.modules.voc.psnChannel, cmd.pm);
 
         // get the channel details
-        var channel = server.channels.get("name", config.modules.voc.psnChannel);
+        var channel = server.channels.find("name", config.modules.voc.psnChannel);
 
         if(!channel) {
             return message.update(busyMsg, "cannot find channel #"+config.modules.voc.psnChannel, 10000);
@@ -33,20 +33,21 @@ function exec(cmd) {
         // scan through the list of Users
         var missing = [];
         var g;
-        var members = server.members;
-        for(var m = 0; m < members.length ; m++) {
-            if(members[m].bot) continue;
-            g = yield gamer.findById(members[m].id); 
-
+        var members = server.members.array();
+        var userCount = members.length;
+        var m;
+        while(m = members.shift()) {
+            if(m.bot) continue;
+            g = yield gamer.findById(m.id); 
             if(!g) {
-                missing.push(members[m].username);
+                missing.push(m.user.username);
             } 
         }
 
         var toSend = [];
 
         toSend.push("Parsed #"+ config.modules.voc.psnChannel);
-        toSend.push("Users: **"+ bot.users.length +
+        toSend.push("Users: **"+ userCount +
                 "** | Errors: **"+parse.errors.length+
                 "** | Warnings: **"+parse.warnings.length+
                 "** | Missing: **"+missing.length+"**");

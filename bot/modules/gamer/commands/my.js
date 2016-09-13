@@ -26,7 +26,7 @@ function exec(cmd) {
                 if(!args.length) return message.send(msg, "missing xbl gamertag", cmd.pm, 10000);
                 yield db.collection(config.modules.gamer.collection).updateOne(
                     { "discord.id": msg.author.id },
-                    { $set: { xbl: args[0], "discord.name" : msg.author.name, modified: true } },
+                    { $set: { xbl: args[0], "discord.name" : msg.author.username, modified: true } },
                     { upsert: true }
                 );
                 return message.send(msg, "Updated XBL Tag to: "+args[0]);
@@ -35,7 +35,7 @@ function exec(cmd) {
                 if(!args.length) return message.send(msg, "missing psn id", cmd.pm, 10000);
                 yield db.collection(config.modules.gamer.collection).updateOne(
                     { "discord.id": msg.author.id },
-                    { $set: { psn: args[0], "discord.name" : msg.author.name, modified: true } },
+                    { $set: { psn: args[0], "discord.name" : msg.author.username, modified: true } },
                     { upsert: true }
                 );
                 return message.send(msg, "Updated PSN Tag to: "+args[0]);

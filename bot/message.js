@@ -30,25 +30,25 @@ function update(prevMsg, content, expire) {
     return co(function* () {
         var m;
 
-        var pm = prevMsg.channel.isPrivate;
+        var pm = prevMsg.channel.type === 'dm';
 
         // build up the message
         if (Array.isArray(content)) {
             // replace with as much as we can
             var text = build(content);
-            logger.debug("updating message to [%s], length: %s", pm ? prevMsg.channel.recipient.name : prevMsg.channel.name, text.length);
-            m = yield bot.updateMessage(prevMsg, text);
+            logger.debug("updating message to [%s/%s], length: %s", prevMsg.channel.constructor.name, pm ? prevMsg.channel.recipient.username : prevMsg.channel.name, text.length);
+            m = yield prevMsg.edit(text);
 
             if(content.length) {
-                yield _send(prevMsg, content, expire);
+                yield _send(prevMsg.channel, content, expire);
             }
         } else {
-            logger.debug("updating message to [%s], length: %s", pm ? prevMsg.channel.recipient.name : prevMsg.channel.name, content.length);
-            m = yield bot.updateMessage(prevMsg, content);
+            logger.debug("updating message to [%s/%s], length: %s", prevMsg.channel.constructor.name, pm ? prevMsg.channel.recipient.username : prevMsg.channel.name, content.length);
+            m = yield prevMsg.edit(content);
 
         }
 
-        if(expire && !pm) bot.deleteMessage(m, {"wait": expire});
+        if(expire && !pm) m.delete(expire);
         return m;
     });
 
@@ -58,7 +58,7 @@ function update(prevMsg, content, expire) {
 function send(msg, content, pm, expire) {
     
     // check if we should respond privately
-    return _send(pm ? msg.author : msg, content, expire);
+    return _send(pm ? msg.author : msg.channel, content, expire);
 
 }
 
@@ -74,13 +74,13 @@ function _send(dest, content, expire) {
 
         if(dest.constructor.name === "User") {
             pm = true;
-            recipient = dest.name;
-        } else if(dest.channel.isPrivate) {
-            pm = true;
-            recipient = dest.channel.recipient.name;
-        } else {
+            recipient = dest.username;
+        } else if(dest.type === "text") {
             pm = false;
-            recipient = dest.channel.name;
+            recipient = dest.name;
+        } else {
+            pm = true;
+            recipient = dest.recipient.username;
         }
 
         // build up the message
@@ -89,15 +89,15 @@ function _send(dest, content, expire) {
 
             while(content.length) {
                 var text = build(content);
-                logger.debug("Sending message to [%s], length: %s", recipient, text.length);
-                m = yield bot.sendMessage(dest, text);
-                if(expire && !pm) bot.deleteMessage(m, {"wait": expire});
+                logger.debug("Sending message to [%s/%s], length: %s", dest.constructor.name, recipient , text.length);
+                m = yield dest.sendMessage(text);
+                if(expire && !pm) m.delete(expire);
             }
 
         } else {
-            logger.debug("Sending message to [%s], length: %s", recipient, content.length);
-            m = yield bot.sendMessage(dest, content);
-            if(expire && !pm) bot.deleteMessage(m, {"wait": expire});
+            logger.debug("Sending message to [%s/%s], length: %s", dest.constructor.name, recipient, content.length);
+            m = yield dest.sendMessage(content);
+            if(expire && !pm) m.delete(expire);
         }
 
         return m;

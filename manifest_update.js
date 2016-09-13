@@ -24,7 +24,7 @@ var api = require('./bot/modules/destiny/api');
 
 var sdb;  // sqlite3 handle
 var mdb;  // mongodb handle
-var lang;  // global lang 
+var lang;  // global lang
 
 function processTable(table) {
 
@@ -84,7 +84,7 @@ function update() {
         if (res.statusCode !== 200) {
             logger.error("failed to download mobileWorldContent: %s\n", res.statusCode);
             throw new Error("download failure: " + res.statusMessage);
-        } 
+        }
         logger.debug("Unzipping manifest file...");
         var zip = new JSZip();
         yield zip.loadAsync(res.body);

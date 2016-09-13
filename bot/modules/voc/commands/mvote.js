@@ -19,7 +19,7 @@ function exec(cmd) {
    return co(function* () {
         var msg = cmd.msg;
         var args = cmd.args;
-        var server = msg.server || app.defaultServer;
+        var server = msg.guild || app.defaultServer;
 
         var collection = db.collection(config.modules.voc.mvote.collection);
         var vote = yield collection.findOne({ type : "details" });
@@ -34,7 +34,7 @@ function exec(cmd) {
                 // save the hash
                 _id = 'voter.'+msg.author.id;
                 yield collection.update({ _id : _id, type: "voter", "id" : msg.author.id},
-                    {$set : { token : token, createdAt : now, name : msg.author.name, sort : msg.author.name.toUpperCase() }, 
+                    {$set : { token : token, createdAt : now, name : msg.author.username, sort : msg.author.username.toUpperCase() }, 
                       $inc: { tokens: 1} }, {upsert : true});
 
                 // create a URL for the message author
@@ -60,9 +60,10 @@ function exec(cmd) {
                 yield collection.update({ _id: _id, type: _id },
                     { $set: { token: token, createdAt: now } }, { upsert: true });
 
-                var url = "http://" + config.modules.voc.mvote.host + ":" + config.modules.voc.mvote.port + "/mvote/loadtest/" + token;
-                return message.send(msg, "Please use this link to loadtest: " + url, false);
+                var url = "http://" + config.modules.voc.mvote.host + ":" + config.modules.voc.mvote.port + "/mvote " + token;
+                return message.send(msg, "Please use this link and token to loadtest: `" + url + "`", false);
             case 'review':
+            case 'status':
                 if(!vote) {
                     return message.send(msg, "no vote created");
                 }
@@ -118,15 +119,11 @@ function exec(cmd) {
                     return message.send(msg, "vote already started", false);
                 }
 
-                var roleName = args.shift();
+                var role = args.shift();
                 var date = args.shift();
                 if(!roleName || !date) {
                     return message.send(msg, "you need to specify a role and joined date", false);
                 }
-
-                // find the role
-                var role = server.roles.get("name", roleName);
-                if(!role) return message.send(msg, "unable to find role: `"+roleName+"`", false);
 
                 // try and parse the date
                 var day = moment(date);
@@ -136,13 +133,12 @@ function exec(cmd) {
                 var member;
                 var joinedAt;
                 var count = 0;
-                for(var c = 0; c < server.members.length; c++) {
-                    member = server.members[c];
-                    if(!member.hasRole(role)) continue;
-                    joinedAt = server.detailsOfUser(member).joinedAt;
-                    if (joinedAt < day.valueOf()) {
+                var members = server.members.array();
+                while(member = members.shift()) {
+                    if(!member.roles.exists("name", role)) continue;
+                    if(member.joined < day.valueOf()) {
                         count++;
-                        yield addCandidate(member, joinedAt, 1);
+                        yield addCandidate(member, 1);
                     }
                 }
                 return message.send(msg, "seeded "+count+" candidates", false);
@@ -181,12 +177,11 @@ function exec(cmd) {
                     return message.send(msg, "no user specified", false);
                 }
 
-                var member = server.members.get("name", args[0]);
+                var member = server.members.find("name", args[0]);
                 if(!member) {
                     return message.send(msg, "unable to find member `"+args[0]+"` on this server", false);
                 }
-                var joinedAt = server.detailsOfUser(member).joinedAt;
-                addCandidate(member, joinedAt, args[1]);
+                addCandidate(member, args[1]);
                 return message.send(msg, "added candidate `"+args[0]+"`", false);
 
             case 'rm':
@@ -203,7 +198,7 @@ function exec(cmd) {
                     return message.send(msg, "no user specified", false);
                 }
 
-                var member = server.members.get("name", args[0]);
+                var member = server.members.find("name", args[0]);
                 
                 if(!member) {
                     return message.send(msg, "unable to find member `"+args[0]+"` on this server", false);
@@ -219,26 +214,26 @@ function exec(cmd) {
    });
 }
 
-function addCandidate(member, joinedAt, round) {
+function addCandidate(member, round) {
     var collection = db.collection(config.modules.voc.mvote.collection);
     var _id = 'candidate.'+member.id;
     return collection.update({ _id : _id, type : "candidate", id : member.id},
-        {$set : { joinedAt : joinedAt, name : member.name, sort : member.name.toUpperCase(), round: round }}, 
+        {$set : { joinedAt : member.joined, name : member.user.username, sort : member.user.username.toUpperCase(), round: round }}, 
         {upsert : true});
 }
 
 function isEligible(msg) {
-    var server = msg.server || app.defaultServer;
-    var role = server.roles.get("name", config.modules.voc.mvote.voteRole);
-    if(!role) return false;
-    return msg.author.hasRole(role);
+    var server = msg.guild || app.defaultServer;
+    var member = server.members.find("id", msg.author.id);
+    if(!member) return false;
+    return member.roles.exists("name", config.modules.voc.mvote.voteRole);
 }
 
 function isAdmin(msg) {
-    var server = msg.server || app.defaultServer;
-    var role = server.roles.get("name", config.modules.voc.mvote.adminRole);
-    if(!role) return false;
-    return msg.author.hasRole(role);
+    var server = msg.guild || app.defaultServer;
+    var member = server.members.find("id", msg.author.id);
+    if(!member) return false;
+    return member.roles.exists("name", config.modules.voc.mvote.adminRole);
 }
 
 module.exports = {

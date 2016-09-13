@@ -80,9 +80,10 @@ function exec(cmd) {
             var g;
 
             // figure out the username
-            if (msg.mentions.length > 0) {
-                name = msg.mentions[0].username;
-                g = yield gamer.findById(msg.mentions[0].id);
+            if (msg.mentions.users.size > 0) {
+                var fm = msg.mentions.users.first();
+                name = fm.username;
+                g = yield gamer.findById(fm.id);
             } else if(cmd.args[0]) {
                 name = cmd.args[0].replace(/^@/, '');
                 g = yield gamer.findOneByName(name);

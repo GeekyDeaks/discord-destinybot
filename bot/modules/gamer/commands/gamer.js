@@ -22,14 +22,14 @@ function exec(cmd) {
         var now = moment();
         var joinedAt = 'Unknown';
 
-        var server = msg.server || app.defaultServer;
-
+        var server = msg.guild || app.defaultServer;
         var g;
 
         // figure out the username
-        if (msg.mentions.length > 0) {
-            name = msg.mentions[0].username;
-            g = yield gamer.findById(msg.mentions[0].id);
+        if (msg.mentions.users.size > 0) {
+            var fm = msg.mentions.users.first();
+            name = fm.username;
+            g = yield gamer.findById(fm.id);
         } else if(cmd.args[0]) {
             name = cmd.args[0].replace(/^@/, '');
             g = yield gamer.findOneByName(name);
@@ -51,11 +51,9 @@ function exec(cmd) {
         if(g.games)
             toSend.push("     Games: " + g.games.join(", "));
         // get joined at timestamp
-        var user = bot.users.get("id", g.discord.id);
+        var user = server.members.find("id", g.discord.id);
         if (user) {
-            var detailsOf = server.detailsOfUser(user);
-            joinedAt = new Date(detailsOf.joinedAt).toISOString();
-            toSend.push(" Joined At: " + joinedAt);
+            toSend.push(" Joined At: " + user.joinDate.toISOString());
         }
         
         if(g.tz && moment.tz.zone(g.tz)) {
