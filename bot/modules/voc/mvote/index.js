@@ -273,7 +273,7 @@ router.get('/mvote/loadtest/:token/voters/:role', function *(next) {
 
 router.get('/mvote/loadtest/:token/token/:id', function *(next) {
 
-    logger.info('received mvote/loadtest//token GET with token: '+this.params.token);
+    logger.info('received mvote/loadtest/token GET with token: '+this.params.token);
     var collection = db.collection(config.modules.voc.mvote.collection);
     var server = app.defaultServer;
     var now = new Date().getTime();

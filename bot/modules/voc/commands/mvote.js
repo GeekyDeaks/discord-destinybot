@@ -121,7 +121,7 @@ function exec(cmd) {
 
                 var role = args.shift();
                 var date = args.shift();
-                if(!roleName || !date) {
+                if(!role || !date) {
                     return message.send(msg, "you need to specify a role and joined date", false);
                 }
 
@@ -136,7 +136,7 @@ function exec(cmd) {
                 var members = server.members.array();
                 while(member = members.shift()) {
                     if(!member.roles.exists("name", role)) continue;
-                    if(member.joined < day.valueOf()) {
+                    if(member.joinDate < day.valueOf()) {
                         count++;
                         yield addCandidate(member, 1);
                     }
@@ -218,7 +218,7 @@ function addCandidate(member, round) {
     var collection = db.collection(config.modules.voc.mvote.collection);
     var _id = 'candidate.'+member.id;
     return collection.update({ _id : _id, type : "candidate", id : member.id},
-        {$set : { joinedAt : member.joined, name : member.user.username, sort : member.user.username.toUpperCase(), round: round }}, 
+        {$set : { joinedAt : member.joinDate, name : member.user.username, sort : member.user.username.toUpperCase(), round: round }}, 
         {upsert : true});
 }
 
