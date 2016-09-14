@@ -123,7 +123,7 @@ function closestCommand(cmd, isAdmin) {
 // only start listening for commands once we are all fired up
 bot.once("ready", function () {
 
-    bot.on("messageUpdated", function (msg0, msg1) {
+    bot.on("messageUpdate", function (msg0, msg1) {
         parseMessage(msg1);
     });
 
@@ -208,7 +208,7 @@ function parseMessage(msg) {
 function isAdmin(msg) {
 
     var server = msg.guild || app.defaultServer;
-    var member = server.members.find("id", msg.author.id);
+    var member = server.members.get(msg.author.id);
     if(!member) return false;
     return member.roles.exists("name", config.discord.adminRole);
 

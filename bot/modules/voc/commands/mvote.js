@@ -224,14 +224,14 @@ function addCandidate(member, round) {
 
 function isEligible(msg) {
     var server = msg.guild || app.defaultServer;
-    var member = server.members.find("id", msg.author.id);
+    var member = server.members.get(msg.author.id);
     if(!member) return false;
     return member.roles.exists("name", config.modules.voc.mvote.voteRole);
 }
 
 function isAdmin(msg) {
     var server = msg.guild || app.defaultServer;
-    var member = server.members.find("id", msg.author.id);
+    var member = server.members.get(msg.author.id);
     if(!member) return false;
     return member.roles.exists("name", config.modules.voc.mvote.adminRole);
 }

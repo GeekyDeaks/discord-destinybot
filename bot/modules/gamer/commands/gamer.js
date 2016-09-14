@@ -51,7 +51,7 @@ function exec(cmd) {
         if(g.games)
             toSend.push("     Games: " + g.games.join(", "));
         // get joined at timestamp
-        var user = server.members.find("id", g.discord.id);
+        var user = server.members.get(g.discord.id);
         if (user) {
             toSend.push(" Joined At: " + user.joinDate.toISOString());
         }

@@ -48,9 +48,9 @@ bot.on("guildMemberAdd", function(server, member) {
 
         var channel = server.channels.find("name", welcome.channel);
         if (!channel) {
-            return logger.error("unable to welcome %s: channel %s not found", user.name, welcome.channel);
+            return logger.error("unable to welcome %s: channel %s not found", member.user.username, welcome.channel);
         }
-        channel.sendMessage(welcome.msg.replace(/:USER:/g, "<@" + user.id + ">"));
+        channel.sendMessage(welcome.msg.replace(/:USER:/g, "<@" + member.user.id + ">"));
 
     });
 });

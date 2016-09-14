@@ -55,7 +55,7 @@ function parse(channel, text) {
         // yep, looks like a discord id, figure out who
         name = name.replace(/[\<\>]/g, "");
 
-        discord = server.members.find("id", name);
+        discord = server.members.get(name);
         if(!discord) {
             // ok, so it was a discord ID, but we
             // have no record of the user, so

@@ -216,11 +216,11 @@ router.get('/mvote/review/:token', function *(next) {
     var vsend = {
         title : vote.title,
         state: vote.state,
-        createdBy : server.members.find("id", vote.createdBy).user.username,
+        createdBy : server.members.get(vote.createdBy).user.username,
         createdAt : moment(vote.createdAt).format("YYYY-MM-DD HH:mm:ss"),
-        startedBy : (vote.startedBy ? server.members.find("id", vote.startedBy).user.username : ""),
+        startedBy : (vote.startedBy ? server.members.get(vote.startedBy).user.username : ""),
         startedAt : (vote.startedAt ? moment(vote.startedAt).format("YYYY-MM-DD HH:mm:ss") : ""),
-        endedBy : (vote.endedBy ? server.members.find("id", vote.endedBy).user.username : ""),
+        endedBy : (vote.endedBy ? server.members.get(vote.endedBy).user.username : ""),
         endedAt : (vote.endedAt ? moment(vote.endedAt).format("YYYY-MM-DD HH:mm:ss") : "")
     }
 
@@ -277,7 +277,7 @@ router.get('/mvote/loadtest/:token/token/:id', function *(next) {
     var collection = db.collection(config.modules.voc.mvote.collection);
     var server = app.defaultServer;
     var now = new Date().getTime();
-    var m = server.members.find("id", this.params.id);
+    var m = server.members.get(this.params.id);
     var token = crypto.createHash('md5').update(m.id + "@" + now).digest('hex');
     
     // save the hash
