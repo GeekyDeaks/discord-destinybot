@@ -74,7 +74,7 @@ function parse(channel, text) {
         }
     }
     gamer.discord = {
-        name : discord.username,
+        name : discord.user.username,
         id : discord.id
     };
 
