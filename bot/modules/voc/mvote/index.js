@@ -92,6 +92,7 @@ function getCandidates() {
             rounds[candidate.round].candidates.push({
                 cnum: ++cnum,
                 name: candidate.name,
+                nickname: candidate.nickname,
                 results: (yield getResults(candidate.id)),
                 joined: moment(candidate.joinedAt).format("YYYY-MM-DD"),
                 id: candidate.id
@@ -265,6 +266,7 @@ router.get('/mvote/loadtest/:token/voters/:role', function *(next) {
         voters[m.id] = {
             id: m.id,
             name: m.user.username,
+            nickname: m.nickname,
             sort: m.user.username.toUpperCase()
         };
     });
@@ -284,7 +286,8 @@ router.get('/mvote/loadtest/:token/token/:id', function *(next) {
     var _id = 'voter.' + m.id;
     yield collection.update({ _id: _id, type: "voter", "id": m.id },
         {
-            $set: { token: token, createdAt: now, name: m.user.username, sort: m.user.username.toUpperCase() },
+            $set: { token: token, createdAt: now, nickname : m.nickname,
+                name: m.user.username, sort: m.user.username.toUpperCase() },
             $inc: { tokens: 1 }
         }, { upsert: true });
 

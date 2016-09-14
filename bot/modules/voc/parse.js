@@ -67,7 +67,7 @@ function parse(channel, text) {
 
 
     } else {
-        discord = server.members.find("name", name);
+        discord = server.members.find(m => m.user.username === name);
         if(!discord) {
             errors.push("`"+ text + "` | unknown user name");
             return;

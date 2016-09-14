@@ -177,7 +177,7 @@ function exec(cmd) {
                     return message.send(msg, "no user specified", false);
                 }
 
-                var member = server.members.find("name", args[0]);
+                var member = server.members.find(m => m.user.username === args[0]);
                 if(!member) {
                     return message.send(msg, "unable to find member `"+args[0]+"` on this server", false);
                 }
@@ -198,7 +198,7 @@ function exec(cmd) {
                     return message.send(msg, "no user specified", false);
                 }
 
-                var member = server.members.find("name", args[0]);
+                var member = server.members.find(m => m.user.username === args[0]);
                 
                 if(!member) {
                     return message.send(msg, "unable to find member `"+args[0]+"` on this server", false);
@@ -218,7 +218,8 @@ function addCandidate(member, round) {
     var collection = db.collection(config.modules.voc.mvote.collection);
     var _id = 'candidate.'+member.id;
     return collection.update({ _id : _id, type : "candidate", id : member.id},
-        {$set : { joinedAt : member.joinDate, name : member.user.username, sort : member.user.username.toUpperCase(), round: round }}, 
+        {$set : { joinedAt : member.joinDate, name : member.user.username, 
+            nickname : member.nickname, sort : member.user.username.toUpperCase(), round: round }}, 
         {upsert : true});
 }
 
