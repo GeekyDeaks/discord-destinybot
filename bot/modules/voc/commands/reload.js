@@ -37,7 +37,7 @@ function exec(cmd) {
         var userCount = members.length;
         var m;
         while(m = members.shift()) {
-            if(m.bot) continue;
+            if(m.user.bot) continue;
             g = yield gamer.findById(m.id); 
             if(!g) {
                 missing.push(m.user.username);
