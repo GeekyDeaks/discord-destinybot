@@ -41,9 +41,12 @@ function exec(cmd) {
             if (g.games)
                 toSend.push("     Games: " + g.games.join(", "));
             // get joined at timestamp
-            var user = server.members.get(g.discord.id);
+            var user = yield bot.fetchUser(g.discord.id);
             if (user) {
-                toSend.push(" Joined At: " + user.joinDate.toISOString());
+                var member = server.member(user);
+                if (member) {
+                    toSend.push(" Joined At: " + member.joinDate.toISOString());
+                }
             }
 
             if (g.tz && moment.tz.zone(g.tz)) {

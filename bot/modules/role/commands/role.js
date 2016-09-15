@@ -46,7 +46,7 @@ function exec(cmd) {
         }
 
         // 
-        var member = server.members.get(msg.author.id);
+        var member = server.member(msg.author);
         if(!member) {
             return message.send(msg, "oops, something is not right.  Could not find user:  "+ msg.author);
         }

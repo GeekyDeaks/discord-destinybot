@@ -208,7 +208,7 @@ function parseMessage(msg) {
 function isAdmin(msg) {
 
     var server = msg.guild || app.defaultServer;
-    var member = server.members.get(msg.author.id);
+    var member = server.member(msg.author);
     if(!member) return false;
     return member.roles.exists("name", config.discord.adminRole);
 
