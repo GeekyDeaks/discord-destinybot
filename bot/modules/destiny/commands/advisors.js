@@ -35,6 +35,7 @@ function trials(format, activities, definitions, destinations) {
     return co(function* () {
 
         var activity = activities.trials;
+        if(!activity) return;
         logger.verbose('reporting ' + activity.display.advisorTypeCategory);
 
         var toSend = ["```" + format];

@@ -13,7 +13,7 @@ function build(content) {
     // keep poping stuff off content until we have nothing left
 
     var msg = '';
-    while(content.length) {
+    while(content.length && content[0]) {
         if(content[0].length + msg.length > maxMessageSize) {
             // return what we have
             return msg;
@@ -89,15 +89,20 @@ function _send(dest, content, expire) {
 
             while(content.length) {
                 var text = build(content);
-                logger.debug("Sending message to [%s/%s], length: %s", dest.constructor.name, recipient , text.length);
-                m = yield dest.sendMessage(text);
-                if(expire && !pm) m.delete(expire);
+                if(text.length) {
+                    logger.debug("Sending message to [%s/%s], length: %s", dest.constructor.name, recipient , text.length);
+                    m = yield dest.sendMessage(text);
+                    if(expire && !pm) m.delete(expire);
+                }
             }
 
         } else {
-            logger.debug("Sending message to [%s/%s], length: %s", dest.constructor.name, recipient, content.length);
-            m = yield dest.sendMessage(content);
-            if(expire && !pm) m.delete(expire);
+            
+            if (content.length) {
+                logger.debug("Sending message to [%s/%s], length: %s", dest.constructor.name, recipient, content.length);
+                m = yield dest.sendMessage(content);
+                if (expire && !pm) m.delete(expire);
+            } 
         }
 
         return m;
