@@ -42,19 +42,25 @@ function exec(cmd) {
 
         var role = yield db.collection(config.modules.role.collection).findOne({ alias : regex});
         if(!role) {
-            return message.send(msg, "role `" + alias + "` not found", cmd.pm, 10000 );
+            return message.send(msg, "Sorry "+msg.author+", I could not find the role `" + alias + "`", cmd.pm, 10000 );
+        }
+
+        // make sure the user is not cached
+        var user = yield bot.fetchUser(msg.author.id);
+        if (!user) {
+            return message.send(msg, "Sorry "+msg.author+", I could not find you on discord", cmd.pm, 10000 );
         }
 
         // 
-        var member = server.member(msg.author);
+        var member = server.member(user);
         if(!member) {
-            return message.send(msg, "oops, something is not right.  Could not find user:  "+ msg.author);
+            return message.send(msg, "Sorry "+msg.author+", I could not find you on the server", cmd.pm, 10000);
         }
 
         var serverRole = server.roles.find("name", role.name);
 
         if(!serverRole) {
-            return message.send(msg, "oops, something is not right.  Could not find role `"+role.name+"`", cmd.pm, 10000 );
+            return message.send(msg, "Sorry "+msg.author+", I could not find role `"+role.name+"`", cmd.pm, 10000 );
         }
 
         var roles = member.roles;
@@ -62,11 +68,11 @@ function exec(cmd) {
         if (roles.exists("id", serverRole.id)) {
             roles.delete(serverRole.id);
             yield member.setRoles(roles);
-            return message.send(msg, "you are no longer subscribed to `" + role.alias + "`", cmd.pm);
+            return message.send(msg, msg.author+", you are no longer subscribed to `" + role.alias + "`", cmd.pm);
         } else {
             roles.set(serverRole.id, serverRole);
             yield member.setRoles(roles);
-            return message.send(msg, "you are now subscribed to `" + role.alias + "`", cmd.pm);
+            return message.send(msg, msg.author+", you are now subscribed to `" + role.alias + "`", cmd.pm);
         }
 
     });
