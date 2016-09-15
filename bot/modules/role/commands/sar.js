@@ -72,7 +72,7 @@ function exec(cmd) {
 
                 var alias = args[0];
 
-                if(yield db.collection(config.modules.role.collection.deleteOne({ alias : alias }))) {
+                if(yield db.collection(config.modules.role.collection).deleteOne({ alias : alias })) {
                     return message.send(msg, "SAR `" + alias + "` deleted", cmd.pm);
                 } else {
                     return message.send(msg, "Cannot find alias `" + alias + "`", cmd.pm);
