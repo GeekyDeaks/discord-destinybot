@@ -39,6 +39,7 @@ function numberSuffix(i) {
 function getResults(candidate) {
     return co(function* (){
         var collection = db.collection(config.modules.voc.mvote.collection);
+        var minApprove = config.modules.voc.mvote.minApprove || 3;
 
         var cast;
         var results = {
@@ -56,7 +57,7 @@ function getResults(candidate) {
 
         if(results.disapprove) {
             results.outcome = 'disapprove';
-        } else if(!results.approve) {
+        } else if(results.approve < minApprove) {
             results.outcome = 'neutral';
         } else {
             results.outcome = 'approve';
