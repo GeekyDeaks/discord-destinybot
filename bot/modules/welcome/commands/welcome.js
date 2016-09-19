@@ -85,7 +85,7 @@ function exec(cmd) {
 
                 welcome.auto = role;
                 yield db.collection('settings').updateOne( { "name" : "welcome" }, { $set: welcome }, { upsert : true});
-                return bot.sendMessage(msg, "changed auto-upgrade role to: `"+role+"`", cmd.pm);
+                return message.send(msg, "changed auto-upgrade role to: `"+role+"`", cmd.pm);
         }
 
     });

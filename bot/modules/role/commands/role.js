@@ -18,7 +18,7 @@ function exec(cmd) {
         var msg = cmd.msg;
         var args = cmd.args;
 
-        var server = msg.server || app.defaultServer;
+        var server = msg.guild || app.defaultServer;
 
         if(args.length === 0) {
             // send a list of roles:
@@ -42,21 +42,37 @@ function exec(cmd) {
 
         var role = yield db.collection(config.modules.role.collection).findOne({ alias : regex});
         if(!role) {
-            return message.send(msg, "role `" + alias + "` not found", cmd.pm, 10000 );
+            return message.send(msg, "Sorry "+msg.author+", I could not find the role `" + alias + "`", cmd.pm, 10000 );
+        }
+
+        // make sure the user is not cached
+        var user = yield bot.fetchUser(msg.author.id);
+        if (!user) {
+            return message.send(msg, "Sorry "+msg.author+", I could not find you on discord", cmd.pm, 10000 );
         }
 
         // 
-        var serverRole = server.roles.get("name", role.name);
-        if(!serverRole) {
-            return message.send(msg, "oops, something is not right.  Could not find role `"+role.name+"`", cmd.pm, 10000 );
+        var member = server.member(user);
+        if(!member) {
+            return message.send(msg, "Sorry "+msg.author+", I could not find you on the server", cmd.pm, 10000);
         }
 
-        if (msg.author.hasRole(serverRole)) {
-            yield msg.author.removeFrom(serverRole);
-            return message.send(msg, "you are no longer subscribed to `" + role.alias + "`", cmd.pm);
+        var serverRole = server.roles.find("name", role.name);
+
+        if(!serverRole) {
+            return message.send(msg, "Sorry "+msg.author+", I could not find role `"+role.name+"`", cmd.pm, 10000 );
+        }
+
+        var roles = member.roles;
+
+        if (roles.exists("id", serverRole.id)) {
+            roles.delete(serverRole.id);
+            yield member.setRoles(roles);
+            return message.send(msg, msg.author+", you are no longer subscribed to `" + role.alias + "`", cmd.pm);
         } else {
-            yield msg.author.addTo(serverRole);
-            return message.send(msg, "you are now subscribed to `" + role.alias + "`", cmd.pm);
+            roles.set(serverRole.id, serverRole);
+            yield member.setRoles(roles);
+            return message.send(msg, msg.author+", you are now subscribed to `" + role.alias + "`", cmd.pm);
         }
 
     });

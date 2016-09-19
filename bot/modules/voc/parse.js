@@ -13,9 +13,10 @@ var db = app.db;
 var errors = [];
 var warnings = [];
 
-function parse(text) {
+function parse(channel, text) {
 
     var gamer = {}; 
+    var server = channel.guild;
     logger.debug("parsing %s", text);
     var tokens = text.split("|");
   
@@ -54,7 +55,7 @@ function parse(text) {
         // yep, looks like a discord id, figure out who
         name = name.replace(/[\<\>]/g, "");
 
-        discord = bot.users.get("id", name);
+        discord = server.members.get(name);
         if(!discord) {
             // ok, so it was a discord ID, but we
             // have no record of the user, so
@@ -66,14 +67,14 @@ function parse(text) {
 
 
     } else {
-        discord = bot.users.get("name", name);
+        discord = server.members.find(m => m.user.username === name);
         if(!discord) {
             errors.push("`"+ text + "` | unknown user name");
             return;
         }
     }
     gamer.discord = {
-        name : discord.username,
+        name : discord.user.username,
         id : discord.id
     };
 
@@ -116,7 +117,7 @@ function update(msg) {
         // message, so we just loop around each one
         var m;
         while (m = match.shift()) {
-            vgamer = parse(m);
+            vgamer = parse(msg.channel, m);
             if (vgamer) {
                 // try and find our gamer
                 var g = yield gamer.findById(vgamer.discord.id);
@@ -143,13 +144,14 @@ function scrape(channel) {
         warnings.length = 0;
         errors.length = 0;
 
-        logger.info("scraping PSN tags from %s/%s", channel.server.name, channel.name);
-        var logs = yield channel.getLogs(100);
+        logger.info("scraping PSN tags from %s/%s", channel.guild.name, channel.name);
+        var msgCol = yield channel.fetchMessages({limit: 100});
+        var logs = msgCol.array();
         var msg;
         // the logs appear in reverse order, so we need to 
         // process them in reverse (popped) to get them chronologically
         while (msg = logs.pop()) {
-            update(msg);
+            yield update(msg);
         }
 
     });

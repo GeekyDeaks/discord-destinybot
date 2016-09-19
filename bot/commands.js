@@ -120,11 +120,16 @@ function closestCommand(cmd, isAdmin) {
 
 }
 
-bot.on("messageUpdated", function (msg0, msg1) {
-    parseMessage(msg1);
-});
+// only start listening for commands once we are all fired up
+bot.once("ready", function () {
 
-bot.on("message", parseMessage);
+    bot.on("messageUpdate", function (msg0, msg1) {
+        parseMessage(msg1);
+    });
+
+    bot.on("message", parseMessage);
+    
+});
 
 function parseMessage(msg) {
     
@@ -166,13 +171,13 @@ function parseMessage(msg) {
 
         // check if the last argument was public
         if(args.length && (args[args.length - 1].toLowerCase() === 'public')) {
-            cmd.pm = msg.channel.isPrivate;
+            cmd.pm = msg.channel.type === 'dm';
             args.length--;
         }
 
         // yep, ok then see if we have that command loaded
         if(!commands[cmdName] || !commands[cmdName].exec) {
-            return message.send(msg, "Sorry " + msg.author.mention() + ", I am not sure what to do with `"+
+            return message.send(msg, "Sorry " + msg.author + ", I am not sure what to do with `"+
             cmdName + "`.  Did you mean `"+closestCommand(cmdName, isAdmin(msg))+"`?", cmd.pm, 10000);
         }
 
@@ -189,7 +194,7 @@ function parseMessage(msg) {
         yield commands[cmdName].exec(cmd);
 
     }).catch(function (err) {
-        logger.error("Error when parsing msg '"+msg+"':"+err);
+        logger.error("Error when parsing msg '"+msg.content+"':", err);
         message.send(msg, 
            ["Oops, something went unexpectedly wrong and I saw this error:", 
             "```"+err+"```", 
@@ -201,11 +206,12 @@ function parseMessage(msg) {
 }
 
 function isAdmin(msg) {
-    var server = msg.server || app.defaultServer;
-    var role = server.roles.get("name", config.discord.adminRole);
-    if(!role) return false;
 
-    return msg.author.hasRole(role);
+    var server = msg.guild || app.defaultServer;
+    var member = server.member(msg.author);
+    if(!member) return false;
+    return member.roles.exists("name", config.discord.adminRole);
+
 }
 
 module.exports.load = load;

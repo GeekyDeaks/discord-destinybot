@@ -30,12 +30,12 @@ bot.on("debug", function (msg) {
 });
 
 bot.once("ready", function () {
-    bot.setPlayingGame("Global Thermonuclear War with WOPR");
-    logger.info("%s is ready!", bot.internal.user.username);
-    logger.verbose("Listening to %s channels on %s servers", bot.channels.length, bot.servers.length);
+    bot.user.setStatus("online", "Global Thermonuclear War with WOPR");
+    logger.info("%s is ready!", bot.user.username);
+    logger.verbose("Listening to %s channels on %s servers", bot.channels.array().length, bot.guilds.array().length);
 
     // configure the default servers
-    if(app.defaultServer = bot.servers.get("name", config.discord.defaultServer)) {
+    if(app.defaultServer = bot.guilds.find("name", config.discord.defaultServer)) {
         logger.info("setting default server to: %s [%s]", app.defaultServer.name, app.defaultServer.id);
     } else {
         logger.warn("unable to find default server: %s", config.discord.defaultServer);
@@ -64,19 +64,11 @@ function init() {
     });
 }
 
-// workaround for authorisation issues
-bot.internal.sendWS = function sendWS(object) {
-    if (this.websocket) {
-        if (object.d.token) object.d.token = config.discord.token;
-        this.websocket.send(JSON.stringify(object));
-    }
-};
-
 function login() {
 
     return co(function* () {
 
-        var token = yield bot.loginWithToken("Bot "+config.discord.token);
+        var token = yield bot.login(config.discord.token);
         if (!token) {
             throw new Error("Failed to acquire token");
         }

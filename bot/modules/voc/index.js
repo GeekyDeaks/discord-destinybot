@@ -26,12 +26,16 @@ function init(bot) {
     return Promise.resolve();
 }
 
-bot.on("messageUpdated", function (msg0, msg1) {
-    parseMessage(msg1);
-})
+// only start listening for commands once we are all fired up
+bot.once("ready", function () {
 
-bot.on("message", parseMessage);
+    bot.on("messageUpdated", function (msg0, msg1) {
+        parseMessage(msg1);
+    })
 
+    bot.on("message", parseMessage);
+
+});
 
 function parseMessage(msg) {
     return co(function* () {

@@ -103,7 +103,7 @@ td.disapprove {
 
     {{#voters}}
     <tr>
-      <td>{{name}}</td>
+      <td>{{name}}{{#if nickname}} ({{nickname}}){{/if}}</td>
       <td>{{lastTokenAt}}</td>
       <td>{{tokens}}</td>
       <td>{{submitted}}</td>
@@ -129,7 +129,7 @@ td.disapprove {
       {{#candidates}}
       <tr id="{{id}}">
         <td>{{cnum}}</td>
-        <td>{{name}}</td>
+        <td>{{name}}{{#if nickname}} ({{nickname}}){{/if}}</td>
         <td>{{joined}}</td>
         <td class="{{results.outcome}}">{{results.outcome}}</td>
         <td>{{results.approve}}</td>

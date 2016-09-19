@@ -19,7 +19,7 @@ function exec(cmd) {
         var args = cmd.args;
 
         var role;
-        var server = msg.server || app.defaultServer;
+        var server = msg.guild || app.defaultServer;
 
         if(args.length === 0) {
             // send a list of SARs
@@ -53,7 +53,7 @@ function exec(cmd) {
                 }
 
                 // check if the role exists
-                if (!server.roles.get("name", role.name)) {
+                if (!server.roles.exists("name", role.name)) {
                     return message.send(msg, "role `" + role.name + "` not found on server: `"+server.name+"`", cmd.pm, 10000);
                 }
 
@@ -72,7 +72,7 @@ function exec(cmd) {
 
                 var alias = args[0];
 
-                if(yield db.collection(config.modules.role.collection.deleteOne({ alias : alias }))) {
+                if(yield db.collection(config.modules.role.collection).deleteOne({ alias : alias })) {
                     return message.send(msg, "SAR `" + alias + "` deleted", cmd.pm);
                 } else {
                     return message.send(msg, "Cannot find alias `" + alias + "`", cmd.pm);

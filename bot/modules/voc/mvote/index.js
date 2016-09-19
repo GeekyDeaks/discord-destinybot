@@ -92,6 +92,7 @@ function getCandidates() {
             rounds[candidate.round].candidates.push({
                 cnum: ++cnum,
                 name: candidate.name,
+                nickname: candidate.nickname,
                 results: (yield getResults(candidate.id)),
                 joined: moment(candidate.joinedAt).format("YYYY-MM-DD"),
                 id: candidate.id
@@ -129,7 +130,6 @@ function getVoters() {
 router.get('/mvote/cast/:token', function *(next) {
     logger.info('received mvote/cast GET with token: '+this.params.token);
 
-    var server = app.defaultServer;
     var collection = db.collection(config.modules.voc.mvote.collection);
 
     // make sure the token is still valid
@@ -154,7 +154,6 @@ router.get('/mvote/cast/:token', function *(next) {
 router.post('/mvote/cast/:token', koaBody, function *(next) {
     logger.info('received mvote/cast POST with token: '+this.params.token);
 
-    var server = app.defaultServer;
     var collection = db.collection(config.modules.voc.mvote.collection);
 
     // make sure the token is still valid
@@ -218,11 +217,11 @@ router.get('/mvote/review/:token', function *(next) {
     var vsend = {
         title : vote.title,
         state: vote.state,
-        createdBy : server.members.get("id", vote.createdBy).name,
+        createdBy : server.members.get(vote.createdBy).user.username,
         createdAt : moment(vote.createdAt).format("YYYY-MM-DD HH:mm:ss"),
-        startedBy : (vote.startedBy ? server.members.get("id", vote.startedBy).name : ""),
+        startedBy : (vote.startedBy ? server.members.get(vote.startedBy).user.username : ""),
         startedAt : (vote.startedAt ? moment(vote.startedAt).format("YYYY-MM-DD HH:mm:ss") : ""),
-        endedBy : (vote.endedBy ? server.members.get("id", vote.endedBy).name : ""),
+        endedBy : (vote.endedBy ? server.members.get(vote.endedBy).user.username : ""),
         endedAt : (vote.endedAt ? moment(vote.endedAt).format("YYYY-MM-DD HH:mm:ss") : "")
     }
 
@@ -259,19 +258,16 @@ router.get('/mvote/loadtest/:token/candidates', function *(next) {
 router.get('/mvote/loadtest/:token/voters/:role', function *(next) {
     logger.info('received mvote/loadtest//voters GET with token: '+this.params.token);
     var server = app.defaultServer;
-    var role = server.roles.get("name", this.params.role);
-    if(!role) {
-        this.body = 'role not found';
-        return;
-    }
     var voters = {};
-    server.members.forEach(function(m) {
-        if(!m.hasRole(role)) return;
-
+    var role = this.params.role; // we lose scope of this below
+    server.members.array().forEach(function(m) {
+        //
+        if(!m.roles.exists("name", role)) return;
         voters[m.id] = {
             id: m.id,
-            name: m.name,
-            sort: m.name.toUpperCase()
+            name: m.user.username,
+            nickname: m.nickname,
+            sort: m.user.username.toUpperCase()
         };
     });
     this.body = voters;
@@ -279,18 +275,19 @@ router.get('/mvote/loadtest/:token/voters/:role', function *(next) {
 
 router.get('/mvote/loadtest/:token/token/:id', function *(next) {
 
-    logger.info('received mvote/loadtest//token GET with token: '+this.params.token);
+    logger.info('received mvote/loadtest/token GET with token: '+this.params.token);
     var collection = db.collection(config.modules.voc.mvote.collection);
     var server = app.defaultServer;
     var now = new Date().getTime();
-    var m = server.members.get("id", this.params.id);
+    var m = server.members.get(this.params.id);
     var token = crypto.createHash('md5').update(m.id + "@" + now).digest('hex');
     
     // save the hash
     var _id = 'voter.' + m.id;
     yield collection.update({ _id: _id, type: "voter", "id": m.id },
         {
-            $set: { token: token, createdAt: now, name: m.name, sort: m.name.toUpperCase() },
+            $set: { token: token, createdAt: now, nickname : m.nickname,
+                name: m.user.username, sort: m.user.username.toUpperCase() },
             $inc: { tokens: 1 }
         }, { upsert: true });
 

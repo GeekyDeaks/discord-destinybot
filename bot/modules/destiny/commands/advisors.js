@@ -35,6 +35,9 @@ function trials(format, activities, definitions, destinations) {
     return co(function* () {
 
         var activity = activities.trials;
+        if(!activity) {
+            return "```" + format + "\nTrials of Osiris is not currently active```";    
+        };
         logger.verbose('reporting ' + activity.display.advisorTypeCategory);
 
         var toSend = ["```" + format];
