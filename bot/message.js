@@ -13,8 +13,8 @@ function build(content) {
     // keep poping stuff off content until we have nothing left
 
     var msg = '';
-    while(content.length && content[0]) {
-        if(content[0].length + msg.length > maxMessageSize) {
+    while(content.length) {
+        if(content[0] && (content[0].length + msg.length > maxMessageSize)) {
             // return what we have
             return msg;
         }
