@@ -55,7 +55,7 @@ function update(prevMsg, content, expire) {
     
 }
 
-function send(msg, content, pm, expire) {
+function send(msg, content, pm = true, expire) {
     
     // check if we should respond privately
     return _send(pm ? msg.author : msg.channel, content, expire);
