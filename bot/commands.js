@@ -150,7 +150,7 @@ function parseMessage(msg) {
             msg.author.username, (msg.channel.name || "PM"), msg.content);
 
         //strip off the prefix and split into args
-        var args = msg.content.substring(config.commandPrefix.length).trim().match(/[^\s]+|"(?:\\"|[^"])+"/g);
+        var args = msg.content.substring(config.commandPrefix.length).trim().match(/[^"\s]+|"(?:\\"|[^"])+"/g);
 
         // check if the last argument/command was or ends with a format request
         var match = args[args.length - 1].match(/^(.*)\!([^\!]*)$/);

@@ -40,7 +40,7 @@ function parseMsg(msg) {
     return co(function *parseMsg_co() {
         // check if the vote invites are active
         var response = msg.content.toLowerCase();
-        if(response !== 'y' && response !== 'yes' && response !== 'no' && response !== 'no' ) return;
+        if(response !== 'y' && response !== 'yes' && response !== 'no' && response !== 'n' ) return;
 
         var collection = db.collection(config.modules.voc.mvote.collection);
         var vote = yield collection.findOne({ type : "details" });
