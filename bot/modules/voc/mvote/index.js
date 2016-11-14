@@ -8,6 +8,7 @@ var hbs = require('koa-hbs');
 var moment = require('moment');
 var co = require('co');
 var crypto = require('crypto');
+var message = require('../../../message');
 
 var app = require.main.exports;
 var bot = app.bot;
@@ -33,6 +34,63 @@ function numberSuffix(i) {
         return "rd";
     }
     return "th";
+}
+
+function parseMsg(msg) {
+    return co(function *parseMsg_co() {
+        // check if the vote invites are active
+        var response = msg.content.toLowerCase();
+        if(response !== 'y' && response !== 'yes' && response !== 'no' && response !== 'n' ) return;
+
+        var collection = db.collection(config.modules.voc.mvote.collection);
+        var vote = yield collection.findOne({ type : "details" });
+        if(!vote || vote.state !== "created") return;
+
+        var server = app.defaultServer;
+
+        var user = yield bot.fetchUser(msg.author.id);
+        if (!user) {
+            return message.send(msg, "Sorry "+msg.author+", I could not find you on discord");
+        }
+        // 
+        var member = server.member(user);
+        if(!member) {
+            return message.send(msg, "Sorry "+msg.author+", I could not find you on the server");
+        }
+
+        var _id = 'invite.' + user.id;
+        var m = yield collection.findOne({ _id: _id});
+        if (!m) return; // no invite 
+        if(m.ack) return; //already ack'd
+
+        var now = new Date().getTime();
+
+        switch(response) {
+            case 'y':
+            case 'yes':
+                // 
+                yield collection.update({ _id: _id }, 
+                    { $set: { ackAt: now, ack: true, ackResult: msg.content, accept: true } }
+                );
+                yield collection.update({ _id: 'candidate.'+member.user.id, type: "candidate", id: user.id },
+                    {
+                        $set: {
+                            joinedAt: member.joinDate, name: member.user.username,
+                            nickname: member.nickname, sort: member.user.username.toUpperCase(), round: 1
+                        }
+                    },
+                    { upsert: true });
+                return member.user.sendMessage(config.modules.voc.mvote.acceptMsg.replace(/:USER:/g, user));
+            case 'n':
+            case 'no':
+                yield collection.update({ _id: _id },
+                    { $set: { ackAt: now, ack: true, ackResult: msg.content, accept: false } }
+                );
+                return member.user.sendMessage(config.modules.voc.mvote.rejectMsg.replace(/:USER:/g, user));
+            
+        }
+
+    });
 }
 
 
@@ -110,6 +168,23 @@ function getCandidates() {
     });
 
 
+}
+
+function getInvites() {
+    return co(function* () {
+        var collection = db.collection(config.modules.voc.mvote.collection);
+        var ic = collection.find({ type: "invite" }).sort({ sort: 1 });
+        var invite;
+        var invites = [];
+        while (yield ic.hasNext()) {
+            invite = yield ic.next();
+            invite.invitedAt = moment(invite.invitedAt).format("YYYY-MM-DD HH:mm:ss");
+            invite.ackAt = moment(invite.ackAt).format("YYYY-MM-DD HH:mm:ss");
+            invites.push(invite);
+        }
+        return invites;
+
+    });
 }
 
 function getVoters() {
@@ -227,6 +302,7 @@ router.get('/mvote/review/:token', function *(next) {
     }
 
     var voters = yield getVoters();
+    var invites = yield getInvites();
     var totalSubmitted = 0;
     var lastTokenAt = 0;
     voters.forEach(function(v) {
@@ -238,8 +314,9 @@ router.get('/mvote/review/:token', function *(next) {
         title: vote.title,
         vote: vsend,
         voters: voters,
-        lastTokenAt: moment(lastTokenAt).format("YYYY-MM-DD HH:mm:ss"),
-        idleTime: moment(lastTokenAt).fromNow(),
+        invites: invites,
+        lastTokenAt: (lastTokenAt ? moment(lastTokenAt).format("YYYY-MM-DD HH:mm:ss") : ""),
+        idleTime: (lastTokenAt ? moment(lastTokenAt).fromNow() : ""),
         totalSubmitted: totalSubmitted,
         rounds: (yield getCandidates())
     });
@@ -301,3 +378,5 @@ koa
   .use(router.allowedMethods());
 
 koa.listen(config.modules.voc.mvote.port);
+
+module.exports.parseMsg = parseMsg;

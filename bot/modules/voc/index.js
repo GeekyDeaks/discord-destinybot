@@ -7,6 +7,7 @@ var app = require.main.exports;
 var commands = app.commands;
 var bot = app.bot;
 var config = app.config;
+var mvote;
 
 function init(bot) {
     logger.debug("init voc module");
@@ -20,7 +21,7 @@ function init(bot) {
 
     // see if we have mvote enabled
     if(config.modules.voc.mvote) {
-        var mvote = require('./mvote');
+        mvote = require('./mvote');
     }
 
     return Promise.resolve();
@@ -45,6 +46,11 @@ function parseMessage(msg) {
         if(msg.channel.name === config.modules.voc.psnChannel) {
             logger.debug("got message in channel %s: ",msg.channel.name, msg.content);
             return parse.update(msg);
+        }
+
+        if(msg.channel.type === 'dm' && mvote) {
+            // look for the yes response
+            return mvote.parseMsg(msg);
         }
     });
 
