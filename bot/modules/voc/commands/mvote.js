@@ -5,7 +5,7 @@ var crypto = require('crypto');
 var logger = require('winston');
 var md = require('../../../markdown');
 var message = require('../../../message');
-var moment = require('moment');
+var moment = require('moment-timezone');
 
 var app = require.main.exports;
 var bot = app.bot;
@@ -131,10 +131,12 @@ function exec(cmd) {
                 var ddate = args.shift();
                 if(!ddate) return message.send(msg, "no deadline specified");
 
+                var timeZone = config.timeZone || "Etc/GMT";
+
                 // try and parse the joined date
-                var jday = moment(jdate);
+                var jday = moment.tz(jdate, timeZone);
                 if(!jday) return message.send(msg, "unable to parse joined date: `"+jdate+"`");
-                var dday = moment(ddate);
+                var dday = moment.tz(ddate, timeZone);
                 if(!dday) return message.send(msg, "unable to parse expiry date: `"+ddate+"`");
 
                 var busyMsg = yield message.send(msg, ":hourglass: sending invites");
@@ -144,14 +146,26 @@ function exec(cmd) {
                 var count = 0;
                 var _id;
                 var members = server.members.array();
+                var failed = [];
+                logger.debug("mvote invite: checking %d members", members.length);
                 while(member = members.shift()) {
+                    logger.debug("checking [%s]", member.user.username);
                     if(!member.roles.exists("name", role)) continue;
                     if(member.joinDate < jday.valueOf()) {
-                        count += (yield sendInvite(member, dday));
+                        if(yield sendInvite(member, dday)) {
+                            count ++;
+                        } else {
+                            failed.push(member);
+                        }
                         //yield wait(1000); // wait 1 second to prevent throttling
                     }
                 }               
-                return message.update(busyMsg, "sent "+count+" invites");
+                var statusMsg = ["sent "+count+" invites"];
+                if(failed.length) {
+                    statusMsg.push(failed.length+ " invites failed to send:");
+                    failed.forEach(function(m) { statusMsg.push(m.user.username)});
+                }
+                return message.update(busyMsg, statusMsg);
             case 'seed':
                 if (!vote) {
                     return message.send(msg, "no vote created");
@@ -166,8 +180,10 @@ function exec(cmd) {
                     return message.send(msg, "you need to specify a role and joined date");
                 }
 
+                var timeZone = config.timeZone || "Etc/GMT";
+
                 // try and parse the date
-                var day = moment(date);
+                var day = moment.tz(date, timeZone);
                 if(!day) return message.send(msg, "unable to parse date: `"+date+"`");
 
                 // loop though all the members
@@ -287,12 +303,19 @@ function sendInvite(member, deadline) {
         // now send a message to the invitee
         logger.info("sending invite to: "+member.user.username);
         // moment(lastTokenAt).fromNow()
+        var timeZone = config.timeZone || "Etc/GMT";
         var response = config.modules.voc.mvote.inviteMsg.
             replace(/:USER:/g, member.user).
-            replace(/:DEADLINE:/g, deadline.format("YYYY-MM-DD HH:mm")).
+            replace(/:DEADLINE:/g, deadline.tz(timeZone).format("YYYY-MM-DD HH:mm z")).
             replace(/:REMAINING:/g, deadline.fromNow());
-        yield member.user.sendMessage(response);
-        return 1;
+        try {
+            yield member.user.sendMessage(response);
+        } catch (err) {
+            logger.error("Error when sending invite to: '"+member.user.username+"':", err);
+            return false;
+        } 
+        
+        return true;
         
     });
 
