@@ -144,6 +144,7 @@ function exec(cmd) {
                 var member;
                 var joinedAt;
                 var count = 0;
+                var skipped = 0;
                 var _id;
                 var members = server.members.array();
                 var failed = [];
@@ -152,15 +153,21 @@ function exec(cmd) {
                     logger.debug("checking [%s]", member.user.username);
                     if(!member.roles.exists("name", role)) continue;
                     if(member.joinDate < jday.valueOf()) {
-                        if(yield sendInvite(member, dday)) {
-                            count ++;
-                        } else {
-                            failed.push(member);
+                        switch(yield sendInvite(member, dday)) {
+                            case 'ack':
+                                skipped++;
+                                break;
+                            case 'sent':
+                                count++;
+                                break;
+                            default :
+                                failed.push(member);
                         }
                         //yield wait(1000); // wait 1 second to prevent throttling
                     }
                 }               
                 var statusMsg = ["sent "+count+" invites"];
+                if(skipped) statusMsg.push("skipped "+skipped+" candidates who previously accepted");
                 if(failed.length) {
                     statusMsg.push(failed.length+ " invites failed to send:");
                     failed.forEach(function(m) { statusMsg.push(m.user.username)});
@@ -257,9 +264,6 @@ function exec(cmd) {
 
                 var member = server.members.find(m => m.user.username === args[0]);
                 
-                if(!member) {
-                    return message.send(msg, "unable to find member `"+args[0]+"` on this server");
-                }
                 yield collection.remove({ type: "candidate", id : member.user.id});
                 return message.send(msg, "deleted candidate `"+args[0]+"`");
             default:
@@ -286,7 +290,7 @@ function sendInvite(member, deadline) {
         var _id = 'invite.' + member.user.id;
         
         var m = yield collection.findOne({ _id: _id, ack : true });
-        if (m) return 0; // invite already acknowledged 
+        if (m) return 'ack'; // invite already acknowledged 
         // upsert the invite
         yield collection.update({ _id: _id, type: "invite", id: member.user.id },
             {
@@ -312,10 +316,10 @@ function sendInvite(member, deadline) {
             yield member.user.sendMessage(response);
         } catch (err) {
             logger.error("Error when sending invite to: '"+member.user.username+"':", err);
-            return false;
+            return 'fail';
         } 
         
-        return true;
+        return 'sent';
         
     });
 
