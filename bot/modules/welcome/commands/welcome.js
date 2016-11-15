@@ -51,8 +51,8 @@ function exec(cmd) {
                 var channel = args[0];
 
                 // check if the channel exists
-                if (!server.channels.get("name", channel)) {
-                    return message.send(msg, "channel `" + channel + "` not found on the server", cmd.pm, 10000);
+                if (!server.channels.find("name", channel)) {
+                    return message.send(msg, "channel `" + channel + "` not found on server `"+ server.name +"`", cmd.pm, 10000);
                 }
 
                 // update the channel
@@ -79,7 +79,7 @@ function exec(cmd) {
 
                 var role = args[0];
 
-                if (!server.roles.get("name", role)) {
+                if (!server.roles.find("name", role)) {
                     return message.send(msg, "role `" + role + "` not found on server `"+ server.name +"`", cmd.pm, 10000);
                 }
 
