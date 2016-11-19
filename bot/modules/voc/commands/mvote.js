@@ -146,6 +146,8 @@ function exec(cmd) {
                 var count = 0;
                 var skipped = 0;
                 var _id;
+                // make sure we have all the members
+                yield server.fetchMembers();
                 var members = server.members.array();
                 var failed = [];
                 logger.debug("mvote invite: checking %d members", members.length);

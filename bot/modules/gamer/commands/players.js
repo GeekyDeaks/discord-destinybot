@@ -50,9 +50,11 @@ function exec(cmd) {
             if(all) {
                 // bunch of checks to see if the user is subscribed to the server
                 if(!g.discord.id) continue;
-                var user = yield bot.fetchUser(g.discord.id);
-                if(!user) continue;
-                var member = server.member(user);
+                //var user = yield bot.fetchUser(g.discord.id);
+                //if(!user) continue;
+                // make sure we have all the members
+                yield server.fetchMembers();
+                var member = server.members.find('id', g.discord.id);
                 if(!member) continue;
                 // do we need to check if they are in a specific role?
                 if(config.modules.gamer.memberRole && 
