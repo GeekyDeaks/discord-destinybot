@@ -26,6 +26,8 @@ function exec(cmd) {
             return message.send(msg, "did you forget something " + msg.author +"?", cmd.pm, 10000);
         }
 
+        var busyMsg = yield message.send(msg, ":mag: Looking up players for **"+md.escape(game)+"**", cmd.pm);
+
         var regex;
         var all = (game.toUpperCase() === 'ANY' || game.toUpperCase() === 'ALL');
         if(all) {
@@ -37,7 +39,7 @@ function exec(cmd) {
         var p = yield db.collection(config.modules.gamer.collection).find({ games : regex}).sort({"discord.name" : 1}).toArray();
 
         if (!p || p.length === 0) {
-            return message.send(msg, "Sorry " + msg.author + ", I could not find any players for **" + game + "**", cmd.pm, 10000);
+            return message.update(busyMsg, "Sorry " + msg.author + ", I could not find any players for **" + game + "**", 10000);
         }
 
         var toSend = ["```" + cmd.format + "\n━━ "+game+" players ━━━━━━━━━━━━━━━━━━━━━```"];
@@ -76,7 +78,7 @@ function exec(cmd) {
 
         }
 
-        return message.send(msg, toSend, cmd.pm);
+        return message.update(busyMsg, toSend);
     });
 
 }
