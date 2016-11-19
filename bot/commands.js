@@ -166,7 +166,6 @@ function parseMessage(msg) {
             cmd.format = 'ruby';
         }
 
-        cmd.args = args;
         var cmdName = cmd.cmdName = args.shift().toLowerCase();
 
         // check if the last argument was public
@@ -188,6 +187,11 @@ function parseMessage(msg) {
             // see if we have the admin role
             return message.send(msg, "You are not authorised to run `"+cmdName+"`", cmd.pm, 10000);
         }
+
+        cmd.args = args.map(function(arg) {
+            // strip off surrounding quotes
+            return arg.replace(/^"(.+(?="$))"$/, '$1');
+        });
 
         logger.debug("executing command [%s] with args [%s]", cmdName, args.join(","));
         // all looks good, so let's run the command
