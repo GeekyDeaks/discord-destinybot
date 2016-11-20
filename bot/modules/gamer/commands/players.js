@@ -28,6 +28,9 @@ function exec(cmd) {
 
         var busyMsg = yield message.send(msg, ":mag: Looking up players for **"+md.escape(game)+"**", cmd.pm);
 
+        // make sure we have all the members
+        yield server.fetchMembers();
+
         var regex;
         var all = (game.toUpperCase() === 'ANY' || game.toUpperCase() === 'ALL');
         if(all) {
@@ -47,22 +50,23 @@ function exec(cmd) {
         var line = [];
         while (g = p.shift()) {
 
+            var member = g.discord.id ? server.members.find('id', g.discord.id) : null;
+ 
             if(all) {
                 // bunch of checks to see if the user is subscribed to the server
-                if(!g.discord.id) continue;
-                //var user = yield bot.fetchUser(g.discord.id);
-                //if(!user) continue;
-                // make sure we have all the members
-                yield server.fetchMembers();
-                var member = server.members.find('id', g.discord.id);
                 if(!member) continue;
                 // do we need to check if they are in a specific role?
                 if(config.modules.gamer.memberRole && 
                     !member.roles.exists("name", config.modules.gamer.memberRole)) continue;
-            }
+            } 
 
             line = ["```" + cmd.format];
-            line.push("Discord ID: @" + g.discord.name);
+            if(member && member.nickname) {
+                line.push("Discord ID: @" + g.discord.name + " (" + member.nickname + ")");
+            } else {
+                line.push("Discord ID: @" + g.discord.name);
+            }
+            
             if (g.psn)
                 line.push("       PSN: " + g.psn);
             if (g.xbl)

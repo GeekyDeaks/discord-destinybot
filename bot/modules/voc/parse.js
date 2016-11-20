@@ -51,9 +51,9 @@ function parse(channel, text) {
     var discord;
 
     // check if it looks like a mention
-    if(name.match(/^\<\d+\>$/)) {
+    if(name.match(/^\<!{0,1}\d+\>$/)) {
         // yep, looks like a discord id, figure out who
-        name = name.replace(/[\<\>]/g, "");
+        name = name.replace(/[\<\>\!]/g, "");
 
         discord = server.members.get(name);
         if(!discord) {

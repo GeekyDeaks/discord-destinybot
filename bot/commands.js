@@ -153,7 +153,7 @@ function parseMessage(msg) {
         var args = msg.content.substring(config.commandPrefix.length).trim().match(/[^"\s]+|"(?:\\"|[^"])+"/g);
 
         // check if the last argument/command was or ends with a format request
-        var match = args[args.length - 1].match(/^(.*)\!([^\!]*)$/);
+        var match = args[args.length - 1].match(/^(.*)\!([^\!\d]*)$/);
         if(match) {
             cmd.format = match[2];
             // if there was anything prior to the !, save it
