@@ -65,7 +65,7 @@ function exec(cmd) {
 
         var roles = member.roles;
 
-        if (roles.exists("id", serverRole.id)) {
+        if (roles.has(serverRole.id)) {
             roles.delete(serverRole.id);
             yield member.setRoles(roles);
             return message.send(msg, msg.author+", you are no longer subscribed to `" + role.alias + "`", cmd.pm);

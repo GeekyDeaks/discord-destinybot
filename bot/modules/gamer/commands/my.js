@@ -33,40 +33,40 @@ function exec(cmd) {
             }
 
             var toSend = ["```" + cmd.format];
-            toSend.push("Discord ID: @" + g.discord.name);
+            toSend.push("         Discord ID: @" + g.discord.name);
             if (g.psn)
-                toSend.push("       PSN: " + g.psn);
+                toSend.push("                PSN: " + g.psn);
             if (g.xbl)
-                toSend.push("       XBL: " + g.xbl);
+                toSend.push("                XBL: " + g.xbl);
             if (g.fc)
-                toSend.push("       3DS Friend Code: " + g.fc);
+                toSend.push("    3DS Friend Code: " + g.fc);
             if (g.nnid)
-                toSend.push("       Nintendo Network ID: " + g.nnid);
+                toSend.push("Nintendo Network ID: " + g.nnid);
             if (g.steam)
-                toSend.push("       Steam: " + g.steam);
+                toSend.push("              Steam: " + g.steam);
             if (g.uplay)
-                toSend.push("       Uplay: " + g.uplay);
+                toSend.push("              Uplay: " + g.uplay);
             if (g.origin)
-                toSend.push("       Origin: " + g.origin);
+                toSend.push("             Origin: " + g.origin);
             if (g.blizzard)
-                toSend.push("       Blizzard: " + g.blizzard);
+                toSend.push("           Blizzard: " + g.blizzard);
             if (g.lol)
-                toSend.push("       LoL: " + g.lol);
+                toSend.push("                LoL: " + g.lol);
             if (g.games)
-                toSend.push("     Games: " + g.games.join(", "));
+                toSend.push("              Games: " + g.games.join(", "));
             // get joined at timestamp
             var user = yield bot.fetchUser(g.discord.id);
             if (user) {
                 var member = server.member(user);
                 if (member) {
-                    toSend.push(" Joined At: " + member.joinDate.toISOString());
+                    toSend.push("          Joined At: " + member.joinedAt.toISOString());
                 }
             }
 
             if (g.tz && moment.tz.zone(g.tz)) {
-                toSend.push(" Localtime: " + now.tz(g.tz).format("HH:mm (Z z)"));
+                toSend.push("          Localtime: " + now.tz(g.tz).format("HH:mm (Z z)"));
             } else if (g.tz) {
-                toSend.push("  Timezone: " + g.tz);
+                toSend.push("           Timezone: " + g.tz);
             }
             toSend.push("```");
 
@@ -200,11 +200,51 @@ function exec(cmd) {
             case 'game':
             case 'games':
                 if(!args.length) return message.send(msg, "Sorry "+ msg.author + ", there are no games specified", cmd.pm, 10000);
-                break;
+                var game;
+                var line = [];
+                while(game = args.shift()) {
+                    var mod;
+                    var gname;
+                    [ , mod, gname] = game.match(/^([-+])?(.*)$/);
+                    if(mod && game && mod === '-') {
+                        // remove the game
+                        yield db.collection(config.modules.gamer.collection).updateOne(
+                            { "discord.id": msg.author.id },
+                            { $pull: { games: gname } }
+                        );
+                        line.push("Removed game: `"+gname+"`");
+                    } else if(game) {
+                        // assume it was add
+                        yield db.collection(config.modules.gamer.collection).updateOne(
+                            { "discord.id": msg.author.id },
+                            { $addToSet: { games: gname } }
+                        );
+                        line.push("Added game: `"+gname+"`");
+                    } else {
+                        line.push("Sorry, did not know how to handle: `" + game + "`");
+                    }
+
+                }
+                return message.send(msg, line);
             case 'tz':
             case 'timezone':
                 if(!args.length) return message.send(msg, "Sorry "+ msg.author + ", the `timezone` is missing", cmd.pm, 10000);
-                break;
+                if (!moment.tz.zone(args[0])) {
+                    return message.send(
+                        msg, 
+                        [ 
+                            "Sorry "+ msg.author + ", the timezone `" + args[0] +"` is not recgonised.",
+                            "Please see the **TZ** column at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for a list"
+                        ], 
+                        cmd.pm, 10000
+                    );
+                }
+                yield db.collection(config.modules.gamer.collection).updateOne(
+                    { "discord.id": msg.author.id },
+                    { $set: { tz: args[0], "discord.name": msg.author.username, modified: true } },
+                    { upsert: true }
+                );
+                return message.send(msg, "Updated TZ to: " + args[0]);
             default:
                 return message.send(msg, "sorry " + msg.author + ", I don't understand `"+option+"`", cmd.pm, 10000);
 
@@ -231,5 +271,5 @@ module.exports = {
             "\t\t`game [+game]|[-game]` - add or remove a game"],
     alias: [],
     exec: exec,
-    admin: true
+    admin: false
 };

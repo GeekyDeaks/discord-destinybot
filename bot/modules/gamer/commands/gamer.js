@@ -55,7 +55,7 @@ function exec(cmd) {
         if (user) {
             var member = server.member(user);
             if (member) {
-                toSend.push(" Joined At: " + member.joinDate.toISOString());
+                toSend.push(" Joined At: " + member.joinedAt.toISOString());
             }
         }
         
