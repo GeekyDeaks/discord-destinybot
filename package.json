@@ -1,6 +1,6 @@
 {
   "name": "discord-destinybot",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Discord Destiny Bot",
   "main": "destinybot.js",
   "scripts": {
@@ -17,7 +17,8 @@
   ],
   "author": [
     "sdeaks@gmail.com",
-    "unisys12@gmail.com"
+    "unisys12@gmail.com",
+    "Lastminuteguy"
   ],
   "license": "MIT",
   "bugs": {
@@ -27,17 +28,16 @@
   "dependencies": {
     "cli-table2": "^0.2.0",
     "co": "^4.6.0",
-    "discord.js": "^9.0.0",
+    "discord.js": "^11.0.0",
     "fast-levenshtein": "^2.0.3",
     "jszip": "^3.1.1",
     "koa": "^1.2.1",
     "koa-body": "^1.5.0",
-    "koa-hbs": "^0.8.2",
+    "koa-hbs": "^0.9.0",
     "koa-router": "^5.4.0",
     "mkdirp": "^0.5.1",
     "moment-timezone": "^0.5.5",
     "mongodb": "^2.2.6",
-    "node-persist": "0.0.12",
     "promise-streams": "^1.0.1",
     "promisify-node": "^0.4.0",
     "request": "^2.74.0",

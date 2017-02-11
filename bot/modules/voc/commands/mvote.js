@@ -154,7 +154,7 @@ function exec(cmd) {
                 while(member = members.shift()) {
                     logger.debug("checking [%s]", member.user.username);
                     if(!member.roles.exists("name", role)) continue;
-                    if(member.joinDate < jday.valueOf()) {
+                    if(member.joinedAt < jday.valueOf()) {
                         switch(yield sendInvite(member, dday)) {
                             case 'ack':
                                 skipped++;
@@ -202,7 +202,7 @@ function exec(cmd) {
                 var members = server.members.array();
                 while(member = members.shift()) {
                     if(!member.roles.exists("name", role)) continue;
-                    if(member.joinDate < day.valueOf()) {
+                    if(member.joinedAt < day.valueOf()) {
                         count++;
                         yield addCandidate(member, 1);
                     }
@@ -281,7 +281,7 @@ function addCandidate(member, round) {
     var collection = db.collection(config.modules.voc.mvote.collection);
     var _id = 'candidate.'+member.user.id;
     return collection.update({ _id : _id, type : "candidate", id : member.user.id},
-        {$set : { joinedAt : member.joinDate, name : member.user.username, 
+        {$set : { joinedAt : member.joinedAt, name : member.user.username, 
             nickname : member.nickname, sort : member.user.username.toUpperCase(), round: round }}, 
         {upsert : true});
 }

@@ -75,7 +75,7 @@ function parseMsg(msg) {
                 yield collection.update({ _id: 'candidate.'+member.user.id, type: "candidate", id: user.id },
                     {
                         $set: {
-                            joinedAt: member.joinDate, name: member.user.username,
+                            joinedAt: member.joinedAt, name: member.user.username,
                             nickname: member.nickname, sort: member.user.username.toUpperCase(), round: 1
                         }
                     },

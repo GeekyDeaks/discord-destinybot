@@ -21,9 +21,11 @@ function init(bot) {
     return Promise.resolve();
 }
 
-bot.on("guildMemberAdd", function(server, member) {
+bot.on("guildMemberAdd", function(member) {
 
     return co(function* () {
+
+        var server = member.guild;
 
         logger.info("New User: %s", member.user.username);
 
@@ -55,10 +57,10 @@ bot.on("guildMemberAdd", function(server, member) {
     });
 });
 
-bot.on("guildMemberRemove", function(server, member) {
+bot.on("guildMemberRemove", function(member) {
 
     return co(function* () {
-
+        var server = member.guild;
         logger.info("User: %s has left", member.user.username);
         var welcome = yield db.collection('settings').findOne({ "name": "welcome" });
 

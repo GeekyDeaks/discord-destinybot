@@ -31,16 +31,20 @@ function exec(cmd) {
         // make sure we have all the members
         yield server.fetchMembers();
 
-        var regex;
         var all = (game.toUpperCase() === 'ANY' || game.toUpperCase() === 'ALL');
+        var p;
         if(all) {
-            regex = { $regex: '.*' };
+            p = yield db.collection(config.modules.gamer.collection).
+                find().
+                sort({"discord.name" : 1}).
+                toArray();
         } else {
-            regex = { $regex: '^'+game+'$', $options : 'i' };
+            p = yield db.collection(config.modules.gamer.collection).
+                find({ games : { $regex: '^'+game+'$', $options : 'i' }}).
+                sort({"discord.name" : 1}).
+                toArray();
         }   
         
-        var p = yield db.collection(config.modules.gamer.collection).find({ games : regex}).sort({"discord.name" : 1}).toArray();
-
         if (!p || p.length === 0) {
             return message.update(busyMsg, "Sorry " + msg.author + ", I could not find any players for **" + game + "**", 10000);
         }
@@ -50,7 +54,7 @@ function exec(cmd) {
         var line = [];
         while (g = p.shift()) {
 
-            var member = g.discord.id ? server.members.find('id', g.discord.id) : null;
+            var member = g.discord.id ? server.members.get(g.discord.id) : null;
  
             if(all) {
                 // bunch of checks to see if the user is subscribed to the server
