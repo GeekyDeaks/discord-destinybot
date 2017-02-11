@@ -40,8 +40,8 @@ function exec(cmd) {
                 toSend.push("                XBL: " + g.xbl);
             if (g.fc)
                 toSend.push("    3DS Friend Code: " + g.fc);
-            if (g.nnid)
-                toSend.push("Nintendo Network ID: " + g.nnid);
+            if (g.mn)
+                toSend.push("        My Nintendo: " + g.mn);
             if (g.steam)
                 toSend.push("              Steam: " + g.steam);
             if (g.uplay)
@@ -115,17 +115,17 @@ function exec(cmd) {
                     return message.send(msg, "Removed 3DS Friend Code ");
                 }
 
-            case 'nnid':
+            case 'mn':
             case 'nintendo':
                 yield db.collection(config.modules.gamer.collection).updateOne(
                     { "discord.id": msg.author.id },
-                    { $set: { nnid: args[0], "discord.name" : msg.author.username, modified: true } },
+                    { $set: { mn: args[0], "discord.name" : msg.author.username, modified: true } },
                     { upsert: true }
                 );
                 if(args[0]) {
-                    return message.send(msg, "Updated Nintendo Network ID to: "+args[0]);
+                    return message.send(msg, "Updated My Nintendo username to: "+args[0]);
                 } else {
-                    return message.send(msg, "Removed Nintendo Network ID");
+                    return message.send(msg, "Removed My Nintendo username");
                 }
 
             case 'steam':
@@ -231,11 +231,11 @@ function exec(cmd) {
                 if(!args.length) return message.send(msg, "Sorry "+ msg.author + ", the `timezone` is missing", cmd.pm, 10000);
                 if (!moment.tz.zone(args[0])) {
                     return message.send(
-                        msg, 
-                        [ 
+                        msg,
+                        [
                             "Sorry "+ msg.author + ", the timezone `" + args[0] +"` is not recgonised.",
                             "Please see the **TZ** column at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for a list"
-                        ], 
+                        ],
                         cmd.pm, 10000
                     );
                 }
@@ -261,7 +261,7 @@ module.exports = {
             "\t\t`xbl <xbl gamertag>` - set your xbl gamertag",
             "\t\t`psn <psn id>` - set your psn id",
             "\t\t`fc <3ds fc>` - set your 3ds friendcode",
-            "\t\t`nnid <nnid>` - set your nintendo network id",
+            "\t\t`mn <mn>` - set your my nintendo username",
             "\t\t`steam <steam username>` - set your steam username",
             "\t\t`uplay <uplay username>` - set your uplay username",
             "\t\t`origin <origin username>` - set your origin username",

@@ -4,16 +4,16 @@ module.exports = {
 
     discord: {
         token: "DISCORD_TOKEN",
-        adminRole: "Modteam",
+        adminRole: "Mod team",
         defaultServer: "",
         pm: false
     },
     modules: {
         db : {
-            // Update url with actual mongo connection string. 
+            // Update url with actual mongo connection string.
             url: "mongodb://localhost:27017/des",
             // all options are optional
-            /*options: { 
+            /*options: {
                 uri_decode_auth: ""
                 db: "",
                 server: "",
