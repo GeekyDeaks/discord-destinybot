@@ -48,8 +48,8 @@ function exec(cmd) {
                 toSend.push("              Uplay: " + g.uplay);
             if (g.origin)
                 toSend.push("             Origin: " + g.origin);
-            if (g.blizzard)
-                toSend.push("           Blizzard: " + g.blizzard);
+            if (g.bn)
+                toSend.push("           battle.net: " + g.bn);
             if (g.lol)
                 toSend.push("                LoL: " + g.lol);
             if (g.games)
@@ -169,17 +169,17 @@ function exec(cmd) {
                 }
 
 
-            case 'blizzard':
-            case 'blizzard':
+            case 'bn':
+            case 'battlenet':
                 yield db.collection(config.modules.gamer.collection).updateOne(
                     { "discord.id": msg.author.id },
-                    { $set: { blizzard: args[0], "discord.name" : msg.author.username, modified: true } },
+                    { $set: { bn: args[0], "discord.name" : msg.author.username, modified: true } },
                     { upsert: true }
                 );
                 if(args[0]) {
-                    return message.send(msg, "Updated Blizzard username to: "+args[0]);
+                    return message.send(msg, "Updated battle.net username to: "+args[0]);
                 } else {
-                    return message.send(msg, "Removed Blizzard username");
+                    return message.send(msg, "Removed battle.net username");
                 }
 
             case 'lol':
@@ -265,7 +265,7 @@ module.exports = {
             "\t\t`steam <steam username>` - set your steam username",
             "\t\t`uplay <uplay username>` - set your uplay username",
             "\t\t`origin <origin username>` - set your origin username",
-            "\t\t`blizzard <blizzard username>` - set your blizzard username",
+            "\t\t`bn <battle.net username>` - set your battle.net username",
             "\t\t`lol <LoL username>` - set your league of legends username",
             "\t\t`tz <timezone>` - set your timezone",
             "\t\t`game [+game]|[-game]` - add or remove a game"],
