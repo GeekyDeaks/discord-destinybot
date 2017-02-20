@@ -213,7 +213,7 @@ function exec(cmd) {
                             { $pull: { games: gname } }
                         );
                         line.push("Removed game: `"+gname+"`");
-                    } else if(game) {
+                    } else if(gname) {
                         // assume it was add
                         yield db.collection(config.modules.gamer.collection).updateOne(
                             { "discord.id": msg.author.id },
