@@ -83,9 +83,9 @@ function exec(cmd) {
                     { upsert: true }
                 );
                 if(args[0]) {
-                    return message.send(msg, "Updated XBL Tag to: "+args[0]);
+                    return message.send(msg, "Updated XBL Tag to: "+args[0], cmd.pm);
                 } else {
-                    return message.send(msg, "Removed XBL Tag");
+                    return message.send(msg, "Removed XBL Tag", cmd.pm);
                 }
 
 
@@ -97,9 +97,9 @@ function exec(cmd) {
                     { upsert: true }
                 );
                 if(args[0]) {
-                    return message.send(msg, "Updated PSN ID to: "+args[0]);
+                    return message.send(msg, "Updated PSN ID to: "+args[0], cmd.pm);
                 } else {
-                    return message.send(msg, "Removed PSN ID");
+                    return message.send(msg, "Removed PSN ID", cmd.pm);
                 }
 
             case 'fc':
@@ -110,9 +110,9 @@ function exec(cmd) {
                     { upsert: true }
                 );
                 if(args[0]) {
-                    return message.send(msg, "Updated 3DS Friend Code to: "+args[0]);
+                    return message.send(msg, "Updated 3DS Friend Code to: "+args[0], cmd.pm);
                 } else {
-                    return message.send(msg, "Removed 3DS Friend Code ");
+                    return message.send(msg, "Removed 3DS Friend Code ", cmd.pm);
                 }
 
             case 'mn':
@@ -123,9 +123,9 @@ function exec(cmd) {
                     { upsert: true }
                 );
                 if(args[0]) {
-                    return message.send(msg, "Updated My Nintendo username to: "+args[0]);
+                    return message.send(msg, "Updated My Nintendo username to: "+args[0], cmd.pm);
                 } else {
-                    return message.send(msg, "Removed My Nintendo username");
+                    return message.send(msg, "Removed My Nintendo username", cmd.pm);
                 }
 
             case 'steam':
@@ -136,9 +136,9 @@ function exec(cmd) {
                     { upsert: true }
                 );
                 if(args[0]) {
-                    return message.send(msg, "Updated Steam username to: "+args[0]);
+                    return message.send(msg, "Updated Steam username to: "+args[0], cmd.pm);
                 } else {
-                    return message.send(msg, "Removed Steam username");
+                    return message.send(msg, "Removed Steam username", cmd.pm);
                 }
 
             case 'uplay':
@@ -149,9 +149,9 @@ function exec(cmd) {
                     { upsert: true }
                 );
                 if(args[0]) {
-                    return message.send(msg, "Updated Uplay username to: "+args[0]);
+                    return message.send(msg, "Updated Uplay username to: "+args[0], cmd.pm);
                 } else {
-                    return message.send(msg, "Removed Uplay username");
+                    return message.send(msg, "Removed Uplay username", cmd.pm);
                 }
 
 
@@ -163,9 +163,9 @@ function exec(cmd) {
                     { upsert: true }
                 );
                 if(args[0]) {
-                    return message.send(msg, "Updated Origin username to: "+args[0]);
+                    return message.send(msg, "Updated Origin username to: "+args[0], cmd.pm);
                 } else {
-                    return message.send(msg, "Removed Origin username");
+                    return message.send(msg, "Removed Origin username", cmd.pm);
                 }
 
 
@@ -177,9 +177,9 @@ function exec(cmd) {
                     { upsert: true }
                 );
                 if(args[0]) {
-                    return message.send(msg, "Updated battle.net username to: "+args[0]);
+                    return message.send(msg, "Updated battle.net username to: "+args[0], cmd.pm);
                 } else {
-                    return message.send(msg, "Removed battle.net username");
+                    return message.send(msg, "Removed battle.net username", cmd.pm);
                 }
 
             case 'lol':
@@ -190,9 +190,9 @@ function exec(cmd) {
                     { upsert: true }
                 );
                 if(args[0]) {
-                    return message.send(msg, "Updated League of Legends username to: "+args[0]);
+                    return message.send(msg, "Updated League of Legends username to: "+args[0], cmd.pm);
                 } else {
-                    return message.send(msg, "Removed League of Legends username");
+                    return message.send(msg, "Removed League of Legends username", cmd.pm);
                 }
 
 
@@ -225,7 +225,7 @@ function exec(cmd) {
                     }
 
                 }
-                return message.send(msg, line);
+                return message.send(msg, line, cmd.pm);
             case 'tz':
             case 'timezone':
                 if(!args.length) return message.send(msg, "Sorry "+ msg.author + ", the `timezone` is missing", cmd.pm, 10000);
@@ -244,7 +244,7 @@ function exec(cmd) {
                     { $set: { tz: args[0], "discord.name": msg.author.username, modified: true } },
                     { upsert: true }
                 );
-                return message.send(msg, "Updated TZ to: " + args[0]);
+                return message.send(msg, "Updated TZ to: " + args[0], cmd.pm);
             default:
                 return message.send(msg, "sorry " + msg.author + ", I don't understand `"+option+"`", cmd.pm, 10000);
 
