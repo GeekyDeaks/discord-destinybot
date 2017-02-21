@@ -15,14 +15,15 @@ function exec(cmd) {
         var msg = cmd.msg;
         var args = cmd.args;
         var server = msg.server || app.defaultServer;
-        var welcome = { name : 'welcome', enabled : false };
+        var welcome = yield db.collection('settings').findOne({ "name" : "welcome" });
+        if(!welcome) {
+            // default welcome settings
+            welcome = { name : 'welcome', enabled : false };
+            yield message.send(msg, "No welcome settings defined, creating defaults", cmd.pm);
+            yield db.collection('settings').updateOne( { "name" : "welcome" }, { $set: welcome }, { upsert : true});
+        }
 
         if(args.length === 0) {
-
-            welcome = yield db.collection('settings').findOne({ "name" : "welcome" });
-            if(!welcome) {
-                return message.send(msg, "No welcome settings defined", cmd.pm);
-            }
 
             return message.send(msg, 
                 "```" + cmd.format +"\n"+

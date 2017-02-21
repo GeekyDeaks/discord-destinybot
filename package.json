@@ -1,6 +1,6 @@
 {
   "name": "discord-destinybot",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Discord Destiny Bot",
   "main": "destinybot.js",
   "scripts": {
