@@ -31,6 +31,8 @@ function exec(cmd) {
         // make sure we have all the members
         yield server.fetchMembers();
 
+        // perhaps change this to 'if contains X' kinda deal in conjunction with the role check further below
+        // so that we capture all aliases (e.g. OW, OW(PS4), OW (PS4/PC))?  ~LMG
         var all = (game.toUpperCase() === 'ANY' || game.toUpperCase() === 'ALL');
         var p;
         if(all) {
@@ -43,8 +45,8 @@ function exec(cmd) {
                 find({ games : { $regex: '^'+game+'$', $options : 'i' }}).
                 sort({"discord.name" : 1}).
                 toArray();
-        }   
-        
+        }
+
         if (!p || p.length === 0) {
             return message.update(busyMsg, "Sorry " + msg.author + ", I could not find any players for **" + game + "**", 10000);
         }
@@ -55,14 +57,15 @@ function exec(cmd) {
         while (g = p.shift()) {
 
             var member = g.discord.id ? server.members.get(g.discord.id) : null;
- 
+
             if(all) {
                 // bunch of checks to see if the user is subscribed to the server
                 if(!member) continue;
                 // do we need to check if they are in a specific role?
-                if(config.modules.gamer.memberRole && 
+                // perhaps do a check against users own role so we only show players on same platform? ~LMG
+                if(config.modules.gamer.memberRole &&
                     !member.roles.exists("name", config.modules.gamer.memberRole)) continue;
-            } 
+            }
 
             line = ["```" + cmd.format];
             if(member && member.nickname) {
@@ -70,13 +73,27 @@ function exec(cmd) {
             } else {
                 line.push("Discord ID: @" + g.discord.name);
             }
-            
+
             if (g.psn)
-                line.push("       PSN: " + g.psn);
+            line.push("                  PSN: " + g.psn);
             if (g.xbl)
-                line.push("       XBL: " + g.xbl);
-            if (all) 
-                line.push("     GAMES: " + g.games.join(", "));
+            line.push("                  XBL: " + g.xbl);
+            if (g.fc)
+            line.push("       3DS Friend Code: " + g.fc);
+            if (g.mn)
+            line.push("           My Nintendo: " + g.mn);
+            if (g.steam)
+            line.push("              Steam: " + g.steam);
+            if (g.uplay)
+            line.push("              Uplay: " + g.uplay);
+            if (g.origin)
+            line.push("            Origin: " + g.origin);
+            if (g.bn)
+            line.push("            battle.net: " + g.bn);
+            if (g.lol)
+            line.push("                  LoL: " + g.lol);
+            if (all)
+            line.push("     GAMES: " + g.games.join(", "));
             if (g.tz && moment.tz.zone(g.tz)) {
                 line.push(" Localtime: " + now.tz(g.tz).format("HH:mm (Z z)"));
             } else if (g.tz) {
