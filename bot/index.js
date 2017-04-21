@@ -4,6 +4,7 @@ var logger = require('winston');
 var fs = require('fs');
 var path = require('path');
 var co = require('co');
+var util = require('util');
 
 var app = require.main.exports;
 var config = app.config;
@@ -42,8 +43,12 @@ bot.once("ready", function () {
     }
 });
 
-bot.on("disconnected", function () {
-    logger.info("Disconnected from discord");
+bot.on("disconnect", function (e) {
+    logger.debug("Disconnected from discord: " + util.inspect(e));
+    // workaround discord.js not re-connecting after a clean disconnect
+    if(e.code === 1000) {
+        bot.destroy().then(bot.login.bind(bot)); 
+    }
 });
 
 function init() {
