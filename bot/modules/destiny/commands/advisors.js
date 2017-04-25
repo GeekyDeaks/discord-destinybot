@@ -93,7 +93,10 @@ function trials(format, activities, definitions, destinations) {
                 // lookup the reward
                 // item.itemDescription
                 var item = yield manifest.getDestinyInventoryItemDefinition(rewards[reward], 'en');
-                rewardTable.push([item.itemTypeName, item.itemName]);
+                if(item) {
+                    rewardTable.push([item.itemTypeName, item.itemName]);
+                }
+                
             }
 
             toSend.push(rewardTable.toString().replace(/ +\n/g, "\n"));
