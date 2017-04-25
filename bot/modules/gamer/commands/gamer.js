@@ -39,17 +39,31 @@ function exec(cmd) {
         }
 
         if (!g) {
-            return message.send(msg, "Sorry " + msg.author +", I could not find `" + name + "`", cmd.pm, 10000);
+            return message.send(msg, "Sorry " + msg.author +", I could not find `" + name + "`. Are you sure that they've set a nickname or username for one of the platforms?", cmd.pm, 10000);
         }
 
         var toSend = ["```" + cmd.format];
             toSend.push("Discord ID: @" + g.discord.name);
-        if(g.psn)
-            toSend.push("       PSN: " + g.psn);
-        if(g.xbl)
-            toSend.push("       XBL: " + g.xbl);
-        if(g.games)
-            toSend.push("     Games: " + g.games.join(", "));
+            if (g.psn)
+                toSend.push("                PSN: " + g.psn);
+            if (g.xbl)
+                toSend.push("                XBL: " + g.xbl);
+            if (g.fc)
+                toSend.push("    3DS Friend Code: " + g.fc);
+            if (g.mn)
+                toSend.push("        My Nintendo: " + g.mn);
+            if (g.steam)
+                toSend.push("              Steam: " + g.steam);
+            if (g.uplay)
+                toSend.push("              Uplay: " + g.uplay);
+            if (g.origin)
+                toSend.push("             Origin: " + g.origin);
+            if (g.bn)
+                toSend.push("         battle.net: " + g.bn);
+            if (g.lol)
+                toSend.push("                LoL: " + g.lol);
+            if (g.games)
+                toSend.push("              Games: " + g.games.join(", "));
         // get joined at timestamp
         var user = yield bot.fetchUser(g.discord.id);
         if (user) {
@@ -58,7 +72,7 @@ function exec(cmd) {
                 toSend.push(" Joined At: " + member.joinedAt.toISOString());
             }
         }
-        
+
         if(g.tz && moment.tz.zone(g.tz)) {
             toSend.push(" Localtime: " + now.tz(g.tz).format("HH:mm (Z z)"));
         } else if(g.tz) {
@@ -76,6 +90,6 @@ module.exports = {
     desc: 'Lookup g details for a discord account',
     name: 'gamer',
     usage: '`gamer <@discord-id>`',
-    alias: ['psn', 'xbl'],
+    alias: ['psn', 'xbl', 'fc', 'mn', 'steam', 'uplay', 'origin', 'bn', 'lol'],
     exec: exec
 };

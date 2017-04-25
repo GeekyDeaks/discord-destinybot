@@ -29,7 +29,7 @@ function exec(cmd) {
             var name = cmd.msg.author.username;
             var g = yield gamer.findById(cmd.msg.author.id);
             if (!g) {
-                return message.send(msg, "Sorry " + msg.author + ", I could not find your gamer details", cmd.pm, 10000);
+                return message.send(msg, "Sorry " + msg.author + ", I could not find your gamer details. Are you sure that you've set a nickname or username for one of the platforms?", cmd.pm, 10000);
             }
 
             var toSend = ["```" + cmd.format];
@@ -40,16 +40,16 @@ function exec(cmd) {
                 toSend.push("                XBL: " + g.xbl);
             if (g.fc)
                 toSend.push("    3DS Friend Code: " + g.fc);
-            if (g.nnid)
-                toSend.push("Nintendo Network ID: " + g.nnid);
+            if (g.mn)
+                toSend.push("        My Nintendo: " + g.mn);
             if (g.steam)
                 toSend.push("              Steam: " + g.steam);
             if (g.uplay)
                 toSend.push("              Uplay: " + g.uplay);
             if (g.origin)
                 toSend.push("             Origin: " + g.origin);
-            if (g.blizzard)
-                toSend.push("           Blizzard: " + g.blizzard);
+            if (g.bn)
+                toSend.push("         battle.net: " + g.bn);
             if (g.lol)
                 toSend.push("                LoL: " + g.lol);
             if (g.games)
@@ -83,9 +83,9 @@ function exec(cmd) {
                     { upsert: true }
                 );
                 if(args[0]) {
-                    return message.send(msg, "Updated XBL Tag to: "+args[0]);
+                    return message.send(msg, "Updated XBL Tag to: "+args[0], cmd.pm);
                 } else {
-                    return message.send(msg, "Removed XBL Tag");
+                    return message.send(msg, "Removed XBL Tag", cmd.pm);
                 }
 
 
@@ -97,9 +97,9 @@ function exec(cmd) {
                     { upsert: true }
                 );
                 if(args[0]) {
-                    return message.send(msg, "Updated PSN ID to: "+args[0]);
+                    return message.send(msg, "Updated PSN ID to: "+args[0], cmd.pm);
                 } else {
-                    return message.send(msg, "Removed PSN ID");
+                    return message.send(msg, "Removed PSN ID", cmd.pm);
                 }
 
             case 'fc':
@@ -110,22 +110,22 @@ function exec(cmd) {
                     { upsert: true }
                 );
                 if(args[0]) {
-                    return message.send(msg, "Updated 3DS Friend Code to: "+args[0]);
+                    return message.send(msg, "Updated 3DS Friend Code to: "+args[0], cmd.pm);
                 } else {
-                    return message.send(msg, "Removed 3DS Friend Code ");
+                    return message.send(msg, "Removed 3DS Friend Code ", cmd.pm);
                 }
 
-            case 'nnid':
+            case 'mn':
             case 'nintendo':
                 yield db.collection(config.modules.gamer.collection).updateOne(
                     { "discord.id": msg.author.id },
-                    { $set: { nnid: args[0], "discord.name" : msg.author.username, modified: true } },
+                    { $set: { mn: args[0], "discord.name" : msg.author.username, modified: true } },
                     { upsert: true }
                 );
                 if(args[0]) {
-                    return message.send(msg, "Updated Nintendo Network ID to: "+args[0]);
+                    return message.send(msg, "Updated My Nintendo username to: "+args[0], cmd.pm);
                 } else {
-                    return message.send(msg, "Removed Nintendo Network ID");
+                    return message.send(msg, "Removed My Nintendo username", cmd.pm);
                 }
 
             case 'steam':
@@ -136,9 +136,9 @@ function exec(cmd) {
                     { upsert: true }
                 );
                 if(args[0]) {
-                    return message.send(msg, "Updated Steam username to: "+args[0]);
+                    return message.send(msg, "Updated Steam username to: "+args[0], cmd.pm);
                 } else {
-                    return message.send(msg, "Removed Steam username");
+                    return message.send(msg, "Removed Steam username", cmd.pm);
                 }
 
             case 'uplay':
@@ -149,9 +149,9 @@ function exec(cmd) {
                     { upsert: true }
                 );
                 if(args[0]) {
-                    return message.send(msg, "Updated Uplay username to: "+args[0]);
+                    return message.send(msg, "Updated Uplay username to: "+args[0], cmd.pm);
                 } else {
-                    return message.send(msg, "Removed Uplay username");
+                    return message.send(msg, "Removed Uplay username", cmd.pm);
                 }
 
 
@@ -163,23 +163,23 @@ function exec(cmd) {
                     { upsert: true }
                 );
                 if(args[0]) {
-                    return message.send(msg, "Updated Origin username to: "+args[0]);
+                    return message.send(msg, "Updated Origin username to: "+args[0], cmd.pm);
                 } else {
-                    return message.send(msg, "Removed Origin username");
+                    return message.send(msg, "Removed Origin username", cmd.pm);
                 }
 
 
-            case 'blizzard':
-            case 'blizzard':
+            case 'bn':
+            case 'battlenet':
                 yield db.collection(config.modules.gamer.collection).updateOne(
                     { "discord.id": msg.author.id },
-                    { $set: { blizzard: args[0], "discord.name" : msg.author.username, modified: true } },
+                    { $set: { bn: args[0], "discord.name" : msg.author.username, modified: true } },
                     { upsert: true }
                 );
                 if(args[0]) {
-                    return message.send(msg, "Updated Blizzard username to: "+args[0]);
+                    return message.send(msg, "Updated battle.net username to: "+args[0], cmd.pm);
                 } else {
-                    return message.send(msg, "Removed Blizzard username");
+                    return message.send(msg, "Removed battle.net username", cmd.pm);
                 }
 
             case 'lol':
@@ -190,9 +190,9 @@ function exec(cmd) {
                     { upsert: true }
                 );
                 if(args[0]) {
-                    return message.send(msg, "Updated League of Legends username to: "+args[0]);
+                    return message.send(msg, "Updated League of Legends username to: "+args[0], cmd.pm);
                 } else {
-                    return message.send(msg, "Removed League of Legends username");
+                    return message.send(msg, "Removed League of Legends username", cmd.pm);
                 }
 
 
@@ -213,7 +213,7 @@ function exec(cmd) {
                             { $pull: { games: gname } }
                         );
                         line.push("Removed game: `"+gname+"`");
-                    } else if(game) {
+                    } else if(gname) {
                         // assume it was add
                         yield db.collection(config.modules.gamer.collection).updateOne(
                             { "discord.id": msg.author.id },
@@ -225,17 +225,17 @@ function exec(cmd) {
                     }
 
                 }
-                return message.send(msg, line);
+                return message.send(msg, line, cmd.pm);
             case 'tz':
             case 'timezone':
                 if(!args.length) return message.send(msg, "Sorry "+ msg.author + ", the `timezone` is missing", cmd.pm, 10000);
                 if (!moment.tz.zone(args[0])) {
                     return message.send(
-                        msg, 
-                        [ 
+                        msg,
+                        [
                             "Sorry "+ msg.author + ", the timezone `" + args[0] +"` is not recgonised.",
                             "Please see the **TZ** column at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for a list"
-                        ], 
+                        ],
                         cmd.pm, 10000
                     );
                 }
@@ -244,7 +244,7 @@ function exec(cmd) {
                     { $set: { tz: args[0], "discord.name": msg.author.username, modified: true } },
                     { upsert: true }
                 );
-                return message.send(msg, "Updated TZ to: " + args[0]);
+                return message.send(msg, "Updated TZ to: " + args[0], cmd.pm);
             default:
                 return message.send(msg, "sorry " + msg.author + ", I don't understand `"+option+"`", cmd.pm, 10000);
 
@@ -261,11 +261,11 @@ module.exports = {
             "\t\t`xbl <xbl gamertag>` - set your xbl gamertag",
             "\t\t`psn <psn id>` - set your psn id",
             "\t\t`fc <3ds fc>` - set your 3ds friendcode",
-            "\t\t`nnid <nnid>` - set your nintendo network id",
+            "\t\t`mn <mn>` - set your my nintendo username",
             "\t\t`steam <steam username>` - set your steam username",
             "\t\t`uplay <uplay username>` - set your uplay username",
             "\t\t`origin <origin username>` - set your origin username",
-            "\t\t`blizzard <blizzard username>` - set your blizzard username",
+            "\t\t`bn <battle.net username>` - set your battle.net username",
             "\t\t`lol <LoL username>` - set your league of legends username",
             "\t\t`tz <timezone>` - set your timezone",
             "\t\t`game [+game]|[-game]` - add or remove a game"],
