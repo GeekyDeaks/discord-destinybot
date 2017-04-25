@@ -111,7 +111,7 @@ function trials(format, activities, definitions, destinations) {
 // 
 function singleTier(format, activity, definitions, destinations) {
 
-    logger.verbose('reporting ' + activity.display.advisorTypeCategory);
+    // logger.verbose('reporting ' + activity.display.advisorTypeCategory);
 
     var activityHash = activity.display.activityHash;
     var activityInfo = definitions.activities[activityHash];
@@ -309,7 +309,6 @@ function exec(cmd) {
              */
             var destinations = definitions.destinations;
 
-
             var toSend = [];
             switch (input.toLowerCase()) {
                 case 'trials':
@@ -319,17 +318,15 @@ function exec(cmd) {
                 case 'daily':
                 case 'dailystory':
                 case 'story':  
-                    toSend.push(singleTier(cmd.format, activities['dailychapter'], definitions, destinations));
+                    toSend.push(singleTier(cmd.format, activities['weeklystory'], definitions, destinations));
                     break;
-                case 'weekly':
+                case 'weeklystrike':
                 case 'strike':
                     toSend.push(singleTier(cmd.format, activities['heroicstrike'], definitions, destinations));
                     toSend.push(singleTier(cmd.format, activities['nightfall'], definitions, destinations));
                     break;            
                 case 'all':
-                    //toSend.push(dailyChapter(cmd.format, activities, definitions, destinations));
-                    //toSend.push(heroicStrike(cmd.format, activities, definitions, destinations));
-                    toSend.push(singleTier(cmd.format, activities['dailychapter'], definitions, destinations));
+                    toSend.push(singleTier(cmd.format, activities['weeklystory'], definitions, destinations));
                     toSend.push(singleTier(cmd.format, activities['heroicstrike'], definitions, destinations));
                     toSend.push(singleTier(cmd.format, activities['nightfall'], definitions, destinations));
                     toSend.push(yield trials(cmd.format, activities, definitions, destinations));
