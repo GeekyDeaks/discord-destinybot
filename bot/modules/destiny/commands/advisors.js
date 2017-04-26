@@ -52,7 +52,7 @@ function trials(format, activities, definitions, destinations) {
 
         var detailTable = new Table({
             chars: detailBorders,
-            style: { 'padding-left': 0, 'padding-right': 0 },
+            style: { 'padding-left': 0, 'padding-right': 0, 'border': 'blue' },
             colWidths: [10, lineLength - 10 - 3],
             colAligns: [ 'right', 'left'],
             wordWrap: true
@@ -83,7 +83,7 @@ function trials(format, activities, definitions, destinations) {
 
             var rewardTable = new Table({
                 chars: detailBorders,
-                style: { 'padding-left': 0, 'padding-right': 0 },
+                style: { 'padding-left': 0, 'padding-right': 0, 'border': 'blue' },
                 //colWidths: [10, lineLength - 10 - 3],
                 colAligns: [ 'right', 'left'],
                 wordWrap: true
@@ -124,7 +124,7 @@ function singleTier(format, activity, definitions, destinations) {
 
     var detailTable = new Table({
         chars: detailBorders,
-        style: { 'padding-left': 0, 'padding-right': 0 },
+        style: { 'padding-left': 0, 'padding-right': 0, 'border': 'blue' },
         colWidths: [10, lineLength - 10 - 3],
         wordWrap: true
     });
@@ -138,7 +138,7 @@ function singleTier(format, activity, definitions, destinations) {
 
     var skullsTable = new Table({
         chars: detailBorders,
-        style: { 'padding-left': 0, 'padding-right': 0 },
+        style: { 'padding-left': 0, 'padding-right': 0, 'border': 'blue' },
         colWidths: [10, lineLength - 10 - 3],
         wordWrap: true
     });
