@@ -52,7 +52,7 @@ function trials(format, activities, definitions, destinations) {
 
         var detailTable = new Table({
             chars: detailBorders,
-            style: { 'padding-left': 0, 'padding-right': 0 },
+            style: { 'padding-left': 0, 'padding-right': 0, 'border': 'blue' },
             colWidths: [10, lineLength - 10 - 3],
             colAligns: [ 'right', 'left'],
             wordWrap: true
@@ -83,7 +83,7 @@ function trials(format, activities, definitions, destinations) {
 
             var rewardTable = new Table({
                 chars: detailBorders,
-                style: { 'padding-left': 0, 'padding-right': 0 },
+                style: { 'padding-left': 0, 'padding-right': 0, 'border': 'blue' },
                 //colWidths: [10, lineLength - 10 - 3],
                 colAligns: [ 'right', 'left'],
                 wordWrap: true
@@ -93,7 +93,10 @@ function trials(format, activities, definitions, destinations) {
                 // lookup the reward
                 // item.itemDescription
                 var item = yield manifest.getDestinyInventoryItemDefinition(rewards[reward], 'en');
-                rewardTable.push([item.itemTypeName, item.itemName]);
+                if(item) {
+                    rewardTable.push([item.itemTypeName, item.itemName]);
+                }
+                
             }
 
             toSend.push(rewardTable.toString().replace(/ +\n/g, "\n"));
@@ -111,7 +114,7 @@ function trials(format, activities, definitions, destinations) {
 // 
 function singleTier(format, activity, definitions, destinations) {
 
-    logger.verbose('reporting ' + activity.display.advisorTypeCategory);
+    // logger.verbose('reporting ' + activity.display.advisorTypeCategory);
 
     var activityHash = activity.display.activityHash;
     var activityInfo = definitions.activities[activityHash];
@@ -121,7 +124,7 @@ function singleTier(format, activity, definitions, destinations) {
 
     var detailTable = new Table({
         chars: detailBorders,
-        style: { 'padding-left': 0, 'padding-right': 0 },
+        style: { 'padding-left': 0, 'padding-right': 0, 'border': 'blue' },
         colWidths: [10, lineLength - 10 - 3],
         wordWrap: true
     });
@@ -135,7 +138,7 @@ function singleTier(format, activity, definitions, destinations) {
 
     var skullsTable = new Table({
         chars: detailBorders,
-        style: { 'padding-left': 0, 'padding-right': 0 },
+        style: { 'padding-left': 0, 'padding-right': 0, 'border': 'blue' },
         colWidths: [10, lineLength - 10 - 3],
         wordWrap: true
     });
@@ -309,7 +312,6 @@ function exec(cmd) {
              */
             var destinations = definitions.destinations;
 
-
             var toSend = [];
             switch (input.toLowerCase()) {
                 case 'trials':
@@ -319,17 +321,15 @@ function exec(cmd) {
                 case 'daily':
                 case 'dailystory':
                 case 'story':  
-                    toSend.push(singleTier(cmd.format, activities['dailychapter'], definitions, destinations));
+                    toSend.push(singleTier(cmd.format, activities['weeklystory'], definitions, destinations));
                     break;
-                case 'weekly':
+                case 'weeklystrike':
                 case 'strike':
                     toSend.push(singleTier(cmd.format, activities['heroicstrike'], definitions, destinations));
                     toSend.push(singleTier(cmd.format, activities['nightfall'], definitions, destinations));
                     break;            
                 case 'all':
-                    //toSend.push(dailyChapter(cmd.format, activities, definitions, destinations));
-                    //toSend.push(heroicStrike(cmd.format, activities, definitions, destinations));
-                    toSend.push(singleTier(cmd.format, activities['dailychapter'], definitions, destinations));
+                    toSend.push(singleTier(cmd.format, activities['weeklystory'], definitions, destinations));
                     toSend.push(singleTier(cmd.format, activities['heroicstrike'], definitions, destinations));
                     toSend.push(singleTier(cmd.format, activities['nightfall'], definitions, destinations));
                     toSend.push(yield trials(cmd.format, activities, definitions, destinations));
