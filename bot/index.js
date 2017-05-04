@@ -4,6 +4,7 @@ var logger = require('winston');
 var fs = require('fs');
 var path = require('path');
 var co = require('co');
+var util = require('util');
 
 var app = require.main.exports;
 var config = app.config;
@@ -32,18 +33,30 @@ bot.on("debug", function (msg) {
 bot.once("ready", function () {
     bot.user.setStatus("online", "Global Thermonuclear War with WOPR");
     logger.info("%s is ready!", bot.user.username);
-    logger.verbose("Listening to %s channels on %s servers", bot.channels.array().length, bot.guilds.array().length);
+    logger.verbose("Listening to %s channels on %s servers", bot.channels.size, bot.guilds.size);
 
     // configure the default servers
-    if(app.defaultServer = bot.guilds.find("name", config.discord.defaultServer)) {
-        logger.info("setting default server to: %s [%s]", app.defaultServer.name, app.defaultServer.id);
-    } else {
-        logger.warn("unable to find default server: %s", config.discord.defaultServer);
+    if(bot.guilds.size === 1) {
+        // only one server - ezpz
+        app.defaultServer = bot.guilds.first();
+    } else if(config.discord.defaultServer) {
+        app.defaultServer = bot.guilds.find("name", config.discord.defaultServer)
     }
+
+    if(!app.defaultServer) {
+        logger.warn("unable to determine default server");
+    } else {
+        logger.info("setting default server to: [%s]", app.defaultServer.name);
+    }
+
 });
 
-bot.on("disconnected", function () {
-    logger.info("Disconnected from discord");
+bot.on("disconnect", function (e) {
+    logger.debug("Disconnected from discord: " + util.inspect(e));
+    // workaround discord.js not re-connecting after a clean disconnect
+    if(e.code === 1000) {
+        bot.destroy().then(bot.login.bind(bot)); 
+    }
 });
 
 function init() {

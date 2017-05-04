@@ -49,7 +49,7 @@ function exec(cmd) {
             if (g.origin)
                 toSend.push("             Origin: " + g.origin);
             if (g.bn)
-                toSend.push("           battle.net: " + g.bn);
+                toSend.push("         battle.net: " + g.bn);
             if (g.lol)
                 toSend.push("                LoL: " + g.lol);
             if (g.games)
