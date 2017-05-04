@@ -50,8 +50,8 @@ function exec(cmd) {
                 toSend.push("                XBL: " + g.xbl);
             if (g.fc)
                 toSend.push("    3DS Friend Code: " + g.fc);
-            if (g.mn)
-                toSend.push("        My Nintendo: " + g.mn);
+            if (g.nsfc)
+                toSend.push(" Switch Friend Code: " + g.nsfc);
             if (g.steam)
                 toSend.push("              Steam: " + g.steam);
             if (g.uplay)
@@ -90,6 +90,6 @@ module.exports = {
     desc: 'Lookup g details for a discord account',
     name: 'gamer',
     usage: '`gamer <@discord-id>`',
-    alias: ['psn', 'xbl', 'fc', 'mn', 'steam', 'uplay', 'origin', 'bn', 'lol'],
+    alias: ['psn', 'xbl', 'fc', 'nsfc', 'steam', 'uplay', 'origin', 'bn', 'lol'],
     exec: exec
 };
