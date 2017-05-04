@@ -40,8 +40,8 @@ function exec(cmd) {
                 toSend.push("                XBL: " + g.xbl);
             if (g.fc)
                 toSend.push("    3DS Friend Code: " + g.fc);
-            if (g.mn)
-                toSend.push("        My Nintendo: " + g.mn);
+            if (g.nsfc)
+                toSend.push(" Switch Friend Code: " + g.nsfc);
             if (g.steam)
                 toSend.push("              Steam: " + g.steam);
             if (g.uplay)
@@ -115,17 +115,17 @@ function exec(cmd) {
                     return message.send(msg, "Removed 3DS Friend Code ", cmd.pm);
                 }
 
-            case 'mn':
-            case 'nintendo':
+            case 'nsfc':
+            case 'switch':
                 yield db.collection(config.modules.gamer.collection).updateOne(
                     { "discord.id": msg.author.id },
-                    { $set: { mn: args[0], "discord.name" : msg.author.username, modified: true } },
+                    { $set: { nsfc: args[0], "discord.name" : msg.author.username, modified: true } },
                     { upsert: true }
                 );
                 if(args[0]) {
-                    return message.send(msg, "Updated My Nintendo username to: "+args[0], cmd.pm);
+                    return message.send(msg, "Updated Switch Friend code to: "+args[0], cmd.pm);
                 } else {
-                    return message.send(msg, "Removed My Nintendo username", cmd.pm);
+                    return message.send(msg, "Removed Switch Friend code", cmd.pm);
                 }
 
             case 'steam':
@@ -261,7 +261,7 @@ module.exports = {
             "\t\t`xbl <xbl gamertag>` - set your xbl gamertag",
             "\t\t`psn <psn id>` - set your psn id",
             "\t\t`fc <3ds fc>` - set your 3ds friendcode",
-            "\t\t`mn <mn>` - set your my nintendo username",
+            "\t\t`nsfc <nsfc>` - set your switch friendcode",
             "\t\t`steam <steam username>` - set your steam username",
             "\t\t`uplay <uplay username>` - set your uplay username",
             "\t\t`origin <origin username>` - set your origin username",
