@@ -80,8 +80,8 @@ function exec(cmd) {
             line.push("                  XBL: " + g.xbl);
             if (g.fc)
             line.push("       3DS Friend Code: " + g.fc);
-            if (g.mn)
-            line.push("           My Nintendo: " + g.mn);
+            if (g.nsfc)
+            line.push("    Switch Friend Code: " + g.nsfc);
             if (g.steam)
             line.push("              Steam: " + g.steam);
             if (g.uplay)
